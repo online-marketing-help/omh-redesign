@@ -17,8 +17,8 @@ export async function getSearchIndex(): Promise<SearchEntry[]> {
 
   return [
     ...readyPages.map((page) => ({ title: page.label, href: page.href, group: "Page" as const })),
-    // Funnel pages are deliberately out of `readyPages` (they shouldn't pad the
-    // coming-soon list), but someone searching "quote" should still find them.
+    // Funnel pages are deliberately out of `readyPages`, but someone searching
+    // "quote" should still find them.
     ...quoteFormPages.map((page) => ({
       title: page.seo.title,
       href: `/${page.slug}`,

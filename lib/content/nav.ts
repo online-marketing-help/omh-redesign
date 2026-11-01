@@ -145,7 +145,7 @@ export const primaryNav: NavItem[] = [
   },
 ];
 
-// Pages designed in this preview. The coming-soon page points visitors here.
+// Pages designed in this preview. The sitemap, site search and breadcrumbs read this list.
 export const readyPages: NavLink[] = [
   { label: "Home", href: "/", ready: true },
   { label: "WordPress Development", href: "/wordpress-development", ready: true },

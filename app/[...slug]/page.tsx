@@ -1,13 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { Eyebrow } from "@/components/ui/Proof";
-import { company, navLabels, readyPages } from "@/lib/content/nav";
-import { AccentTitle } from "@/components/services/ServicePrimitives";
+import { navLabels } from "@/lib/content/nav";
 
 // One catch-all for every route that isn't designed yet. Explicit routes
 // (/, three explicit service routes, /contact, /design-system) take precedence, so this
-// only ever renders for planned-but-unbuilt pages — no 404s during the demo.
+// only ever renders for planned-but-unbuilt pages. Same layout as app/not-found.tsx.
 // Future Elementor equivalent: a shared "Coming soon" template.
 
 function titleFor(slug: string[]): string {
@@ -26,47 +23,16 @@ export async function generateMetadata({
 
 export default async function ComingSoon({ params }: { params: Promise<{ slug: string[] }> }) {
   const { slug } = await params;
-  const title = titleFor(slug);
 
   return (
     <section className="hero-grid overflow-x-clip border-b border-line bg-warm">
-      <div className="container-omh section-md">
-        <div className="mx-auto max-w-[640px] text-center">
-          <Eyebrow>Coming soon</Eyebrow>
-          <h1 className="mb-5 mt-6 font-sans text-display font-semibold text-balance">
-            <AccentTitle text={title} />
-          </h1>
-          <p className="text-lead leading-relaxed text-ink/75">
-            This page is part of the Online Marketing Help redesign and is being built next.
-            The navigation shows the full planned site so you can see where everything will
-            live. The pages below are already designed.
-          </p>
-
-          <ul className="mx-auto mt-9 grid max-w-[420px] gap-2.5 text-left">
-            {readyPages.map((page) => (
-              <li key={page.href}>
-                <Link
-                  href={page.href}
-                  className="flex items-center justify-between gap-4 rounded-card border border-line bg-warm px-5 py-4 transition-colors hover:border-teal/40 hover:bg-soft/50"
-                >
-                  <span className="font-sans text-body font-semibold">{page.label}</span>
-                  <span className="text-[14px] font-semibold uppercase tracking-[0.08em] text-amber-deep">
-                    View
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-3.5">
-            <Button href="/contact" arrow>
-              Book a Growth Consultation
-            </Button>
-            <a href={company.phoneHref} className="text-body font-medium text-muted hover:text-ink">
-              {company.phoneDisplay}
-            </a>
-          </div>
-        </div>
+      <div className="container-omh section-md text-center">
+        <p className="font-sans text-[clamp(48px,24px+6.5vw,120px)] font-semibold leading-none text-amber-deep">Coming soon</p>
+        <h1 className="mt-6 font-sans text-h2 font-semibold">{titleFor(slug)}</h1>
+        <p className="mb-9 mt-4 text-body text-ink/75">We&rsquo;re still working on this page. Please check back soon.</p>
+        <Button href="/" arrow>
+          Back to home
+        </Button>
       </div>
     </section>
   );
