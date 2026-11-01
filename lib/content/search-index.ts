@@ -25,6 +25,7 @@ export async function getSearchIndex(): Promise<SearchEntry[]> {
       group: "Page" as const,
     })),
     { title: freeConsultation.seo.title, href: `/${freeConsultation.slug}`, group: "Page" as const },
+    { title: "Free Growth Review", href: "/get-more-leads", group: "Page" as const },
     ...caseStudies.map((study) => ({
       title: study.shortTitle,
       href: `/case-studies/${study.slug}`,
