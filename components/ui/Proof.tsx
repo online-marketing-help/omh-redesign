@@ -2,7 +2,6 @@ import Image from "@/components/ui/SiteImage";
 import Link from "next/link";
 import { BadgeCheck, Quote, Star, TrendingUp } from "lucide-react";
 import type { ReactNode } from "react";
-import { about } from "@/lib/content/about";
 import { caseStudies } from "@/lib/content/case-studies";
 import { siteTestimonials } from "@/lib/content/testimonials";
 
@@ -37,7 +36,7 @@ export const REVIEW_PROOF = "47 Reviews Across Trustpilot & Google";
 const serviceProof = {
   seo: { study: ["fine-dining", "Organic-traffic increase"], review: ["Paige Dalby", "It’s given me some great direction"] },
   "google-ads": { study: ["car-showroom", "Conversion-value increase"], review: ["Tania Smyths", "Really grateful for the support with our ads on google"] },
-  amazon: { fact: `${about.team.members.length} specialists in one UK team`, review: ["Gary Smart", "Good listeners and certainly in my case delivering exactly what I wanted"] },
+  amazon: { fact: "36 specialists in one UK team", review: ["Gary Smart", "Good listeners and certainly in my case delivering exactly what I wanted"] },
   wordpress: { study: ["bar", "Reservation increase"], review: ["Natasha Kendle", "The process was so easy and Sarah was fantastic in presenting me with ideas"] },
   maintenance: { fact: "Est. 2019 · Companies House no. 12328533", review: ["Ricky Catt", "didn’t try to over exaggerate the work that needed done"] },
   shopify: { study: ["clothing-business", "Purchase-conversion increase"], review: ["Kiera Taylor-Elton", "Great to work with a company that aren’t so pushy on the sales front"] },

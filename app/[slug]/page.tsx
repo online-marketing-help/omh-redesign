@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const { isEnabled: preview } = await draftMode();
   const post = await getInsight(slug, preview);
-  if (!post) return {};
+  if (!post) return { title: "Page not found" };
   return {
     // Draft preview is never indexed (client, 21 Oct 2026). Only an editor with the draft-mode cookie sees it.
     ...(preview && { robots: { index: false, follow: false, nocache: true } }),

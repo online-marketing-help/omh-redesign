@@ -1,6 +1,5 @@
 import type { CaseMeta } from "@/components/ui/Case";
 import { caseStudies } from "@/lib/content/case-studies";
-import { about } from "@/lib/content/about";
 
 // Homepage SEO brief (Oct 2026): focus "full service digital marketing agency",
 // co-primary "digital marketing agency uk".
@@ -56,7 +55,8 @@ export const programs = [
 // [CONFIRM COMPANY INFORMATION] — restore a spend or client-count figure only
 // with a real number the client will put their name to.
 export const stats = [
-  { value: `${about.team.members.length}`, label: "Specialists in the team" },
+  // Client's figure (1 Nov 2026), not a count of the profiles on the About page. Also in components/ui/Proof.tsx.
+  { value: "36", label: "Specialists in the team" },
   { value: "13", label: "Services under one roof" },
   { value: "Est. 2019", label: "Companies House no. 12328533" },
   { value: "100%", label: "UK business focus" },
