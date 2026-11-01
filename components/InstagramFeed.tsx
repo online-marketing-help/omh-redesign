@@ -5,11 +5,9 @@ import { company } from "@/lib/content/nav";
 const profileUrl = company.socials.find((s) => s.label === "Instagram")!.href;
 const handle = new URL(profileUrl).pathname.replaceAll("/", "");
 
-// Drop <InstagramFeed /> on any page. It renders nothing when there are no reels to show, so a page never has an
-// empty band if Instagram is down or the token has expired.
+// Drop <InstagramFeed /> on any page. It always has reels to show: see the snapshot in lib/instagram.ts.
 export async function InstagramFeed() {
   const reels = await getInstagramReels();
-  if (!reels.length) return null;
 
   return (
     <section className="section-md bg-inverse text-oninverse">
