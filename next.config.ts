@@ -21,6 +21,9 @@ const nextConfig: NextConfig = {
       },
       // Blog images uploaded through Sanity Studio.
       { protocol: "https", hostname: "cdn.sanity.io", pathname: "/images/**" },
+      // Reel thumbnails from the Instagram API (lib/instagram.ts).
+      { protocol: "https", hostname: "**.cdninstagram.com" },
+      { protocol: "https", hostname: "**.fbcdn.net" },
     ],
   },
   async redirects() {

@@ -25,6 +25,7 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react";
+import { InstagramFeed } from "@/components/InstagramFeed";
 import { Reveal } from "@/components/Reveal";
 import { Pointer } from "@/components/Pointer";
 import { ArrowRight, Button } from "@/components/ui/Button";
@@ -482,6 +483,8 @@ export default async function Home() {
           </Reveal>
         </div>
       </section>
+
+      <InstagramFeed />
 
       <section className="recognition-field overflow-hidden border-y border-line bg-warm py-[clamp(72px,8vw,128px)]">
         <div className="container-omh">
