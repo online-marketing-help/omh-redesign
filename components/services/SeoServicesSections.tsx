@@ -115,16 +115,17 @@ export function SeoMedia() {
   return (
     <Band label="Search landscape" tone="mist">
       <Reveal>
-        <div className="grid grid-cols-12 items-end gap-x-12 gap-y-10 max-lg:block">
-          <div className="col-span-5 max-lg:mb-9">
-            <h2 className="font-sans text-h2 font-semibold text-balance">Make the route from search to useful page visible.</h2>
-            <p className="mt-6 text-body leading-relaxed text-ink/70">How a site is crawled, how it performs in search, and how its content is structured.</p>
-          </div>
-          <MediaFrame kind="screen" theme="seo" ratio="16/10" title="Organic search performance view" note="" source="/images/Services/Images on the pages/Organic search performance view SEO.png" alt="Illustrative organic search performance report showing clicks, impressions, average position and top queries." className="col-span-7" />
+        <h2 className="font-sans text-h2 font-semibold text-balance">Make the route from search to useful page visible.</h2>
+        <p className="mt-6 text-body leading-relaxed text-ink/70">How a site is crawled, how it performs in search, and how its content is structured.</p>
+        {/* Every image at its own proportions, never cropped (client, 3 Nov 2026): the reports have lettering in them.
+            Each row's columns are sized by the two images' width/height ratios, so both end on the same line. */}
+        <div className="mt-11 grid gap-6 md:grid-cols-[1.416fr_1.329fr]">
+          <MediaFrame kind="screen" theme="seo" ratio="1492/1054" title="Organic search performance view" note="" source="/images/Services/Images on the pages/Organic search performance view SEO.png" alt="Illustrative organic search performance report showing clicks, impressions, average position and top queries." className="min-h-0!" />
+          <MediaFrame kind="image" theme="seo" ratio="1446/1088" title="Crawl and architecture map" note="" source="/images/Services/Images on the pages/Crawl and architecture map.png" alt="Illustrative site crawl and architecture map showing page hierarchy and internal linking depth." className="min-h-0!" />
         </div>
-        <div className="mt-6 grid grid-cols-12 gap-6">
-          <MediaFrame kind="image" theme="seo" ratio="5/4" title="Crawl and architecture map" note="" source="/images/Services/Images on the pages/Crawl and architecture map.png" alt="Illustrative site crawl and architecture map showing page hierarchy and internal linking depth." className="col-span-5 max-md:col-span-12" />
-          <MediaFrame kind="image" theme="seo" ratio="16/9" title="SEO review walkthrough" note="" className="col-span-7 max-md:col-span-12" source="/images/Services/SEO 1.jpg" alt="Search engine optimisation review" />
+        <div className="mt-6 grid gap-6 md:grid-cols-[1.498fr_1.654fr]">
+          <MediaFrame kind="image" theme="seo" ratio="5000/3337" title="Searching on a tablet" note="" source="/images/Services/SEO 2.jpg" alt="A search results page open on a tablet, the view a customer sees before they choose a page." className="min-h-0!" />
+          <MediaFrame kind="image" theme="seo" ratio="1920/1161" title="SEO review walkthrough" note="" source="/images/Services/SEO 1.jpg" alt="Search engine optimisation review" className="min-h-0!" />
         </div>
       </Reveal>
     </Band>

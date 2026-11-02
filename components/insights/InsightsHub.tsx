@@ -55,23 +55,29 @@ function FeaturedStories({ posts }: { posts: InsightIndexEntry[] }) {
             </span>
           </Link>
 
-          <div className="mt-12 grid grid-cols-2 border-y border-line max-md:grid-cols-1 max-md:divide-y max-md:divide-line md:divide-x md:divide-line">
-            {picks.map((post, index) => (
+          {/* Three cards with their lead images (client, 3 Nov 2026): the old two-column list left the third pick
+              alone with an empty half beside it. Each image keeps its own proportions, as on the home page. */}
+          <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {picks.map((post) => (
               <Link
                 key={post.slug}
                 href={insightHref(post)}
-                className={`insight-row group flex min-h-[270px] flex-col justify-between py-8 ${index === 0 ? "md:pr-10" : "md:pl-10"}`}
+                className="surface-card group flex flex-col overflow-hidden rounded-card border border-line bg-warm"
               >
-                <span>
+                <span className="relative block aspect-[16/10] overflow-hidden border-b border-line bg-soft" style={imageRatio(post)}>
+                  <InsightImage post={post} />
+                </span>
+                <span className="flex flex-1 flex-col p-7">
                   <InsightMeta post={post} />
-                  <span className="mt-5 block font-sans text-[clamp(25px,22px+0.65vw,31px)] font-semibold leading-tight">
+                  <span className="mt-4 block font-sans text-[clamp(21px,19px+0.45vw,25px)] font-semibold leading-snug">
                     {post.title}
                   </span>
-                </span>
-                <span className="mt-8 flex items-end justify-between gap-6">
-                  <span className="text-body leading-relaxed text-ink/68">{post.summary}</span>
-                  <span className="flex size-11 shrink-0 items-center justify-center rounded-full border border-line bg-warm text-amber-deep transition-colors group-hover:border-teal group-hover:bg-teal group-hover:text-white">
-                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                  <span className="mt-4 block text-body leading-relaxed text-ink/68">{post.summary}</span>
+                  <span className="mt-auto flex items-center justify-between gap-6 pt-7 font-semibold text-amber-deep">
+                    Read the insight
+                    <span className="flex size-11 shrink-0 items-center justify-center rounded-full border border-line bg-surface transition-colors group-hover:border-teal group-hover:bg-teal group-hover:text-white">
+                      <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                    </span>
                   </span>
                 </span>
               </Link>
