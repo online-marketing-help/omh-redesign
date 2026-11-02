@@ -2,6 +2,7 @@ import { Reveal } from "@/components/Reveal";
 import { MediaFrame } from "@/components/ServiceMedia";
 import { ServiceBand } from "@/components/services/ServiceBand";
 import { Button } from "@/components/ui/Button";
+import { BookDemo } from "@/components/BookDemo";
 import { FinalCta } from "@/components/ui/FinalCta";
 import { Eyebrow } from "@/components/ui/Proof";
 import { warranty } from "@/lib/content/warranty";
@@ -188,12 +189,15 @@ export function WarrantyGuarantee() {
 
 export function WarrantyFinalCta() {
   return (
-    <FinalCta
-      title="Need help with one of our services?"
-      titleAccent="one of our services?"
-      body="Book a call at a time convenient for you and we will talk through which warranty term fits how you use your website."
-      primary={{ label: "Book a Call", href: "/contact", event: "warranty_final_cta_click" }}
-      contactEvents={{ phone: "warranty_phone_click", email: "warranty_email_click" }}
-    />
+    <>
+      <FinalCta
+        title="Need help with one of our services?"
+        titleAccent="one of our services?"
+        body="Book a call at a time convenient for you and we will talk through which warranty term fits how you use your website."
+        primary={{ label: "Book a Call", href: "/contact", event: "warranty_final_cta_click" }}
+        contactEvents={{ phone: "warranty_phone_click", email: "warranty_email_click" }}
+      />
+      <BookDemo />
+    </>
   );
 }

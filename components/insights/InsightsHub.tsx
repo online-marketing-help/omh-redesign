@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Reveal } from "@/components/Reveal";
 import { ArrowRight } from "@/components/ui/Button";
+import { BookDemo } from "@/components/BookDemo";
 import { FinalCta } from "@/components/ui/FinalCta";
 import { Eyebrow } from "@/components/ui/Proof";
 import { InsightMeta } from "@/components/insights/InsightMeta";
@@ -191,6 +192,7 @@ export async function InsightsHub({ topic = "", query = "", page = 1 }: { topic?
         primary={{ label: "Book a Growth Consultation", event: "insights_hub_cta_click" }}
         contactEvents={{ phone: "insights_hub_phone_click", email: "insights_hub_email_click" }}
       />
+      <BookDemo />
     </>
   );
 }

@@ -3,6 +3,7 @@ import { Leaf, HandHeart, Users, Trees } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { AboutTabs } from "@/components/about/AboutTabs";
 import { Button } from "@/components/ui/Button";
+import { BookDemo } from "@/components/BookDemo";
 import { FinalCta } from "@/components/ui/FinalCta";
 import { Eyebrow } from "@/components/ui/Proof";
 import { about } from "@/lib/content/about";
@@ -349,12 +350,15 @@ export function AboutTeam() {
 
 export function AboutFinalCTA() {
   return (
-    <FinalCta
-      title="Bring the right specialists into your next stage of growth."
-      titleAccent="next stage of growth."
-      body="Tell us what you are trying to achieve. We’ll recommend the services, people and next steps that fit."
-      primary={{ label: "Meet the Team", event: "about_final_cta_click" }}
-      contactEvents={{ phone: "about_phone_click", email: "about_email_click" }}
-    />
+    <>
+      <FinalCta
+        title="Bring the right specialists into your next stage of growth."
+        titleAccent="next stage of growth."
+        body="Tell us what you are trying to achieve. We’ll recommend the services, people and next steps that fit."
+        primary={{ label: "Meet the Team", event: "about_final_cta_click" }}
+        contactEvents={{ phone: "about_phone_click", email: "about_email_click" }}
+      />
+      <BookDemo />
+    </>
   );
 }

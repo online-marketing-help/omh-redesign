@@ -5,6 +5,7 @@ import { GrowthReviewForm } from "@/components/forms/GrowthReviewForm";
 import { Reveal } from "@/components/Reveal";
 import { ServiceBand } from "@/components/services/ServiceBand";
 import { ArrowRight } from "@/components/ui/Button";
+import { BookDemo } from "@/components/BookDemo";
 import { FinalCta } from "@/components/ui/FinalCta";
 import Image from "@/components/ui/SiteImage";
 import { caseStudies } from "@/lib/content/case-studies";
@@ -60,15 +61,22 @@ export default function GetMoreLeadsPage() {
   return (
     <>
       <ServiceBand label="Free growth review" labelStyle="none" className="hero-grid">
-        <div className="grid grid-cols-[minmax(0,0.92fr)_minmax(440px,0.78fr)] items-center gap-[clamp(48px,7vw,116px)] max-lg:grid-cols-1 max-lg:gap-10">
-          <div className="hero-in">
+        {/* Phones (client, 2 Nov 2026): title, then the form, then the rest of the copy. From lg the copy's two halves
+            stack in the left column and the form spans both rows on the right. */}
+        <div className="grid gap-y-10 lg:grid-cols-[minmax(0,0.92fr)_minmax(440px,0.78fr)] lg:gap-x-[clamp(48px,7vw,116px)] lg:gap-y-0">
+          <div className="hero-in lg:self-end">
             <p className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-body font-semibold text-ink shadow-[0_12px_28px_-24px_rgb(0_0_0/0.55)]">
               <span className="size-1.5 rounded-full bg-amber" aria-hidden />
               {hero.eyebrow}
             </p>
-            <h1 className="mb-7 mt-8 font-sans text-display font-semibold">
+            <h1 className="mt-8 font-sans text-display font-semibold">
               More enquiries for UK businesses, <span className="text-amber-deep">from one joined-up team.</span>
             </h1>
+          </div>
+          <div id="free-review" className="hero-in hero-in-2 scroll-mt-28 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-center">
+            <GrowthReviewForm />
+          </div>
+          <div className="hero-in lg:self-start lg:pt-7">
             <p className="text-body leading-relaxed text-ink/75">
               Leave your details while your car gets washed. We will review your current activity and recommend the
               clearest next step. Free, in plain English.
@@ -82,22 +90,19 @@ export default function GetMoreLeadsPage() {
               ))}
             </ul>
           </div>
-          <div id="free-review" className="hero-in hero-in-2 scroll-mt-28">
-            <GrowthReviewForm />
-          </div>
         </div>
       </ServiceBand>
 
       <section className="border-y border-line bg-surface text-ink">
-        <div className="stats-grid container-omh grid grid-cols-4 divide-x divide-line max-lg:grid-cols-2 max-lg:divide-x-0 max-sm:grid-cols-1">
+        <div className="stats-grid container-omh grid grid-cols-4 divide-x divide-line max-lg:grid-cols-2 max-lg:divide-x-0">
           {stats.map((stat, index) => {
             const StatIcon = statIcons[index];
             return (
-              <div key={stat.label} className="stat-item px-8 py-11 first:pl-0 max-lg:px-6 max-sm:px-0">
+              <div key={stat.label} className="stat-item px-8 py-11 first:pl-0 max-lg:px-6 max-lg:odd:pl-0 max-sm:py-8 max-sm:pr-3">
                 <span className="grid size-12 place-items-center rounded-[8px] bg-teal/15 text-amber-deep" aria-hidden>
                   <StatIcon className="size-6" strokeWidth={1.7} />
                 </span>
-                <p className="mt-5 whitespace-nowrap font-sans text-[clamp(38px,30px+1.6vw,54px)] font-semibold leading-none text-amber-deep">
+                <p className="mt-5 whitespace-nowrap font-sans text-[clamp(28px,22px+2.2vw,54px)] font-semibold leading-none text-amber-deep">
                   {stat.value}
                 </p>
                 <p className="mt-3 text-body font-semibold text-ink/65">{stat.label}</p>
@@ -166,6 +171,7 @@ export default function GetMoreLeadsPage() {
         steps={["Review your current activity", "Find the clearest next step", "Build a connected growth plan"]}
         contactEvents={{ phone: "get_more_leads_phone_click", email: "get_more_leads_email_click" }}
       />
+      <BookDemo />
     </>
   );
 }

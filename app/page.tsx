@@ -29,6 +29,7 @@ import { InstagramFeed } from "@/components/InstagramFeed";
 import { Reveal } from "@/components/Reveal";
 import { Pointer } from "@/components/Pointer";
 import { ArrowRight, Button } from "@/components/ui/Button";
+import { BookDemo } from "@/components/BookDemo";
 import { FinalCta } from "@/components/ui/FinalCta";
 import { Accordion } from "@/components/ui/Accordion";
 import { withLinks } from "@/components/services/ServicePrimitives";
@@ -235,15 +236,15 @@ export default async function Home() {
       </section>
 
       <section className="border-y border-line bg-surface text-ink">
-        <div className="stats-grid container-omh grid grid-cols-4 divide-x divide-line max-lg:grid-cols-2 max-lg:divide-x-0 max-sm:grid-cols-1">
+        <div className="stats-grid container-omh grid grid-cols-4 divide-x divide-line max-lg:grid-cols-2 max-lg:divide-x-0">
           {stats.map((stat, index) => {
             const StatIcon = statIcons[index] ?? Users;
             return (
-              <div key={stat.label} className="stat-item px-8 py-11 first:pl-0 max-lg:px-6 max-sm:px-0">
+              <div key={stat.label} className="stat-item px-8 py-11 first:pl-0 max-lg:px-6 max-lg:odd:pl-0 max-sm:py-8 max-sm:pr-3">
                 <span className="grid size-12 place-items-center rounded-[8px] bg-teal/15 text-amber-deep" aria-hidden>
                   <StatIcon className="size-6" strokeWidth={1.7} />
                 </span>
-                <p className="mt-5 font-sans text-[clamp(38px,30px+1.6vw,54px)] font-semibold leading-none text-amber-deep whitespace-nowrap">
+                <p className="mt-5 font-sans text-[clamp(28px,22px+2.2vw,54px)] font-semibold leading-none text-amber-deep whitespace-nowrap">
                   {stat.value}
                 </p>
                 <p className="mt-3 text-body font-semibold text-ink/65">{stat.label}</p>
@@ -663,6 +664,7 @@ export default async function Home() {
         ]}
         contactEvents={{ phone: "home_phone_click", email: "home_email_click" }}
       />
+      <BookDemo />
     </>
   );
 }

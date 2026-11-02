@@ -4,6 +4,7 @@ import { ServiceBand, type ServiceBandTone } from "@/components/services/Service
 import { withLinks } from "@/components/services/ServicePrimitives";
 import { Accordion } from "@/components/ui/Accordion";
 import { Button } from "@/components/ui/Button";
+import { BookDemo } from "@/components/BookDemo";
 import { FinalCta } from "@/components/ui/FinalCta";
 import { Eyebrow } from "@/components/ui/Proof";
 import { faqPage } from "@/lib/content/faq-page";
@@ -159,12 +160,15 @@ export function FaqPricingLink() {
 
 export function FaqFinalCta() {
   return (
-    <FinalCta
-      title="Still have a question we haven't answered?"
-      titleAccent="we haven't answered?"
-      body="Book a 30 minute consultation at a time convenient for you and we will talk it through."
-      primary={{ label: "Book a Call", href: "/contact", event: "faq_final_cta_click" }}
-      contactEvents={{ phone: "faq_phone_click", email: "faq_email_click" }}
-    />
+    <>
+      <FinalCta
+        title="Still have a question we haven't answered?"
+        titleAccent="we haven't answered?"
+        body="Book a 30 minute consultation at a time convenient for you and we will talk it through."
+        primary={{ label: "Book a Call", href: "/contact", event: "faq_final_cta_click" }}
+        contactEvents={{ phone: "faq_phone_click", email: "faq_email_click" }}
+      />
+      <BookDemo />
+    </>
   );
 }

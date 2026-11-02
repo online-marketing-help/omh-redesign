@@ -2,6 +2,7 @@ import Link from "next/link";
 import { MediaFrame } from "@/components/ServiceMedia";
 import { ServiceBand } from "@/components/services/ServiceBand";
 import { Button } from "@/components/ui/Button";
+import { BookDemo } from "@/components/BookDemo";
 import { FinalCta } from "@/components/ui/FinalCta";
 import { company } from "@/lib/content/nav";
 import { freeConsultation as page } from "@/lib/content/quote-forms";
@@ -108,6 +109,7 @@ export function FreeConsultationPage() {
         secondary={{ label: "See pricing", event: "consultation_final_pricing", href: "/pricing" }}
         contactEvents={{ phone: "consultation_phone_click", email: "consultation_email_click" }}
       />
+      <BookDemo />
     </main>
   );
 }

@@ -20,11 +20,12 @@ export function CaseStudyHero({ study }: { study: CaseStudy }) {
     : "Illustration and graphic design";
   return (
     <header className="hero-grid overflow-x-clip border-b border-line bg-warm">
-      <div className="container-omh section-md">
+      {/* Trail at the site-wide breadcrumb position; see the same note in InsightArticle. */}
+      <div className="container-omh section-md pt-4!">
         <Breadcrumbs
           items={[{ name: "Home", href: "/" }, { name: "Case Studies", href: "/case-studies" }, { name: study.client }]}
         />
-        <div className="mt-10 grid items-center gap-x-16 gap-y-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+        <div className="mt-[clamp(24px,7.4px+4.42vw,64px)] grid items-center gap-x-16 gap-y-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
           <div>
             <p className="text-[14px] font-semibold uppercase tracking-[0.14em] text-amber-deep">
               {study.category} · {study.sector}
