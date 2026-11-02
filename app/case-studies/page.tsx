@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   openGraph: { title, description, url, type: "website", locale: "en_GB", images: defaultOgImages },
 };
 
-// CollectionPage with an ItemList of the projects (brief). Items carry no URL: none has a page of its own yet.
+// CollectionPage with an ItemList of the projects (brief), each linking to its page.
 const collection = {
   "@context": "https://schema.org",
   "@type": "CollectionPage",
@@ -25,7 +25,12 @@ const collection = {
   mainEntity: {
     "@type": "ItemList",
     numberOfItems: hubStudies.length,
-    itemListElement: hubStudies.map((study, index) => ({ "@type": "ListItem", position: index + 1, name: study.title })),
+    itemListElement: hubStudies.map((study, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: study.title,
+      url: `${url}/${study.slug}`,
+    })),
   },
 };
 

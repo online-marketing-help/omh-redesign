@@ -116,6 +116,11 @@ function Featured() {
             ))}
           </dl>
           <p className="mt-6 text-[14px] text-oninverse/55">Website design and build by Online Marketing Help.</p>
+          <div className="mt-8">
+            <Button href="/case-studies/komfort-partitioning" variant="inverse" arrow data-event="case_studies_featured_click">
+              Read the case study
+            </Button>
+          </div>
         </div>
 
         <div className="flex flex-col gap-6 bg-oninverse/[0.04] p-[clamp(24px,3.5vw,48px)]">
@@ -160,7 +165,7 @@ function Featured() {
 
 function StudyCard({ study }: { study: HubStudy }) {
   return (
-    <article className="flex flex-col overflow-hidden rounded-card border border-line bg-surface">
+    <article className="relative flex flex-col overflow-hidden rounded-card border border-line bg-surface transition-colors hover:border-ink/40">
       <div className="relative aspect-[16/10] border-b border-line bg-warm">
         <Image
           src={study.screenshot ? `/images/clients/${study.slug}.webp` : `/images/case-studies/hub/${study.slug}.webp`}
@@ -172,7 +177,16 @@ function StudyCard({ study }: { study: HubStudy }) {
       </div>
       <div className="flex flex-1 flex-col p-6">
         <span className={`${lightPill} self-start`}>{study.tag}</span>
-        <h3 className="mt-4 font-sans text-[21px] font-semibold leading-snug">{study.title}</h3>
+        <h3 className="mt-4 font-sans text-[21px] font-semibold leading-snug">
+          {/* The ::after stretches the link over the whole card. */}
+          <Link
+            href={`/case-studies/${study.slug}`}
+            data-event="case_studies_card_click"
+            className="after:absolute after:inset-0 hover:text-amber-deep focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber"
+          >
+            {study.title}
+          </Link>
+        </h3>
         <p className="mt-3 text-[14px] text-muted">{study.meta}</p>
         <div className="mt-auto pt-6">
           <div className="border-t border-line pt-5">

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { readyPages } from "@/lib/content/nav";
-import { caseStudies } from "@/lib/content/case-studies";
+import { allCaseStudyPages } from "@/lib/content/case-study-pages";
 import { getInsightSlugs } from "@/lib/sanity/insights";
 import { funnelPaths } from "@/lib/content/quote-forms";
 import { SITE } from "@/lib/schema";
@@ -13,7 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const paths = [
     ...readyPages.map((p) => p.href),
-    ...caseStudies.map((c) => `/case-studies/${c.slug}`),
+    ...allCaseStudyPages.map((c) => `/case-studies/${c.slug}`),
     ...insightSlugs.map((slug) => `/${slug}`),
     ...funnelPaths,
   ];

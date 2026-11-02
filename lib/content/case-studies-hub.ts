@@ -1,6 +1,6 @@
 // The /case-studies hub (client brief "OMH Case Studies Page - Final", 2 Nov 2026). Copy is verbatim from the brief.
-// These eleven projects have no case-study pages of their own yet, so nothing here links to one; add `href` when a
-// page exists. The older studies in case-studies.ts keep their own pages and are no longer listed on the hub.
+// Each project has its page at /case-studies/<slug> (lib/content/case-study-pages.ts, same slugs).
+// The older studies in case-studies.ts keep their own pages and are no longer listed on the hub.
 
 export type HubService = "Website design" | "SEO" | "Google Ads";
 export type HubSector =
@@ -69,7 +69,7 @@ export const hubStudies: HubStudy[] = [
     source: "Source: Search Console, May to October 2026",
   },
   {
-    slug: "barbados-maritime",
+    slug: "barbados-maritime-ship-registry",
     client: "Barbados Maritime Ship Registry",
     title: "Barbados Maritime Ship Registry: a clearer site for an international ship registry",
     tag: "Website design · Maritime",
@@ -93,7 +93,7 @@ export const hubStudies: HubStudy[] = [
     servicesLine: "Services: website design, performance, SEO",
   },
   {
-    slug: "old-queen-street",
+    slug: "old-queen-street-cafe",
     screenshot: true,
     client: "Old Queen Street Café",
     title: "Old Queen Street Café: a Christmas enquiry page and menu rebuild",
@@ -156,7 +156,7 @@ export const hubStudies: HubStudy[] = [
     servicesLine: "Services: Google Ads",
   },
   {
-    slug: "wooden-pool-store",
+    slug: "the-wooden-pool-store",
     screenshot: true,
     client: "The Wooden Pool Store",
     title: "The Wooden Pool Store: Google Ads for premium garden pools",
@@ -172,7 +172,7 @@ export const hubStudies: HubStudy[] = [
     servicesLine: "Services: Google Ads",
   },
   {
-    slug: "deeks-vat",
+    slug: "deeks-vat-consultancy",
     client: "Deeks VAT Consultancy",
     title: "Deeks VAT Consultancy: SEO for a specialist VAT firm",
     tag: "SEO · VAT advice",
