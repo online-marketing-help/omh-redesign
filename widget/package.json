@@ -1,0 +1,28 @@
+{
+  "name": "ohm-site-assistant",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Chat + voice assistant for onlinemarketinghelp.co.uk. Convex backend, n8n orchestration, Retell voice.",
+  "scripts": {
+    "kb": "python3 kb/build.py",
+    "dev": "convex dev",
+    "deploy": "convex deploy",
+    "seed": "node scripts/seed-kb.mjs",
+    "embed": "node web/embed/build.mjs",
+    "embed:verify": "node web/embed/build.mjs && node web/embed/test/verify.mjs",
+    "embed:verify:safari": "node web/embed/build.mjs && node web/embed/test/verify.mjs webkit",
+    "smoke": "node scripts/smoke-test.mjs",
+    "audit": "node scripts/audit-strict.mjs"
+  },
+  "dependencies": {
+    "convex": "^1.17.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "esbuild": "^0.28.2",
+    "playwright": "^1.64.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  }
+}
