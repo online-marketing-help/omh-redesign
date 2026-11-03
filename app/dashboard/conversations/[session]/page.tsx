@@ -4,7 +4,7 @@ import { Card, Pill, Empty } from "@/components/dashboard/ui";
 import {
   IconBack, IconChat, IconMic, IconLead, IconCalendar, IconHandover, IconPhone, IconClock,
 } from "@/components/dashboard/icons";
-import { getThread } from "@/lib/dashboard/handover";
+import { getThread, getVisitorConversations } from "@/lib/dashboard/handover";
 import { getCalls, getCall, fmtDuration, fmtWhen } from "@/lib/dashboard/retell";
 import { fmtDate } from "@/lib/dashboard/convex";
 
@@ -157,6 +157,7 @@ export default async function Conversation({
 
           <div className="grid gap-3">
             <Outcome thread={thread} />
+            <OtherVisits sessionId={sessionId} visitorId={thread.visitorId} />
             <Details thread={thread} sessionId={sessionId} />
           </div>
         </div>
@@ -239,6 +240,59 @@ function Outcome({ thread }: { thread: NonNullable<Awaited<ReturnType<typeof get
           ))}
         </ul>
       )}
+    </Card>
+  );
+}
+
+/** The same person's earlier and later visits.
+ *
+ *  Without this a conversation reads as a one-off, and somebody ringing them
+ *  back has no idea this is the third time they have asked. Shown only when
+ *  there is more than this one, so a first-time visitor gains no empty card. */
+async function OtherVisits({
+  sessionId,
+  visitorId,
+}: {
+  sessionId: string;
+  visitorId: string | null;
+}) {
+  if (!visitorId) return null;
+  const all = await getVisitorConversations(visitorId);
+  const others = all.filter((s) => s.sessionId !== sessionId);
+  if (others.length === 0) return null;
+
+  return (
+    <Card
+      title="Their other visits"
+      note={`${all.length} conversations in total`}
+      pad={false}
+    >
+      <ul className="divide-y divide-line">
+        {others.map((s) => (
+          <li key={s.sessionId}>
+            <Link
+              href={`/dashboard/conversations/${encodeURIComponent(s.sessionId)}`}
+              className="flex gap-3 px-4 py-3 outline-none transition-colors duration-150 hover:bg-warm focus-visible:bg-warm sm:px-5"
+            >
+              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-warm text-muted">
+                {s.channel === "voice" ? (
+                  <IconMic className="h-[15px] w-[15px]" />
+                ) : (
+                  <IconChat className="h-[15px] w-[15px]" />
+                )}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-[13.5px] font-medium">
+                  {s.opened || "No message recorded"}
+                </span>
+                <span className="mt-0.5 block text-[12.5px] text-muted">
+                  {fmtDate(s.lastSeenAt)} · {s.messages} messages
+                </span>
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
     </Card>
   );
 }

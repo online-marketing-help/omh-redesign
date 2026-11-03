@@ -71,9 +71,15 @@ export default defineSchema({
     handover: v.optional(v.string()),
     handoverAt: v.optional(v.number()),
     handoverBy: v.optional(v.string()),
+    /* Who this conversation belongs to. A session is one visit; a visitor is
+       the person across visits, identified by an id the widget keeps in
+       localStorage. See visitors.ts. Optional: every session recorded before
+       this existed simply has no visitor. */
+    visitorId: v.optional(v.string()),
   })
     .index("by_session", ["sessionId"])
-    .index("by_channel", ["channel"]),
+    .index("by_channel", ["channel"])
+    .index("by_visitor", ["visitorId"]),
 
   messages: defineTable({
     sessionId: v.string(),
@@ -116,10 +122,31 @@ export default defineSchema({
     at: v.number(),
     status: v.string(),         // new | contacted | closed
     notified: v.optional(v.boolean()),
+
+    /* One row per person, not per visit.
+
+       Someone who chats today and comes back next week used to become a
+       second lead, because every capture inserted a row. These fields are
+       what let the second visit find the first.
+
+       `visitorIds` holds every browser this person has been recognised in, so
+       a laptop and a phone collapse into one person once they give the same
+       number. `phoneKey` and `emailKey` are the normalised forms actually
+       matched on: a number typed as "07700 900123" and "+447700900123" is the
+       same number and has to compare equal. */
+    visitorIds: v.optional(v.array(v.string())),
+    phoneKey: v.optional(v.string()),
+    emailKey: v.optional(v.string()),
+    /* When they first appeared, where `at` is the most recent time. */
+    firstAt: v.optional(v.number()),
+    /* How many separate conversations this person has had. */
+    visits: v.optional(v.number()),
   })
     .index("by_at", ["at"])
     .index("by_status", ["status"])
-    .index("by_session", ["sessionId"]),
+    .index("by_session", ["sessionId"])
+    .index("by_phone_key", ["phoneKey"])
+    .index("by_email_key", ["emailKey"]),
 
   /* Bookings are recorded here first. The Google Calendar write is a second
      step in n8n once Rafiul supplies the calendar credentials, so a booking is

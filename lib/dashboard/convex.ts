@@ -25,6 +25,13 @@ export type Lead = {
   channel: string;
   at: number;
   status: string;
+  /* One row is one person, not one visit. Someone who chats today and comes
+     back next week updates this row rather than creating a second, so these
+     say how long they have been around and how often. Optional: rows captured
+     before that existed carry neither. */
+  visits?: number;
+  firstAt?: number;
+  visitorIds?: string[];
 };
 
 export type Booking = {

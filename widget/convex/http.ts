@@ -409,6 +409,23 @@ http.route({
   ),
 });
 
+/* Called once per page load, before anything is typed. It ties this visit to
+   the person and says whether we have met them before, which is what stops a
+   returning visitor becoming a second lead. See visitors.ts. */
+http.route({ path: "/visitorHello", method: "OPTIONS", handler: preflight });
+http.route({
+  path: "/visitorHello",
+  method: "POST",
+  handler: publicRoute(async (ctx, b) =>
+    ctx.runMutation(api.visitors.hello, {
+      sessionId: String(b.sessionId ?? b.session_id),
+      visitorId: String(b.visitorId ?? b.visitor_id ?? ""),
+      channel: b.channel || undefined,
+      pageUrl: b.pageUrl || b.page_url || undefined,
+    }),
+  ),
+});
+
 http.route({ path: "/visitorSay", method: "OPTIONS", handler: preflight });
 http.route({
   path: "/visitorSay",
@@ -460,6 +477,26 @@ http.route({
   path: "/counts",
   method: "POST",
   handler: route(async (ctx) => ctx.runQuery(api.functions.counts, {})),
+});
+
+/* What the assistant should know about this person before it answers: their
+   name, what they wanted last time, how many times they have been here. */
+http.route({
+  path: "/profileForSession",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runQuery(api.visitors.profileForSession, { sessionId: String(b.sessionId ?? "") }),
+  ),
+});
+
+http.route({
+  path: "/visitorConversations",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runQuery(api.visitors.conversationsForVisitor, {
+      visitorId: String(b.visitorId ?? ""),
+    }),
+  ),
 });
 
 http.route({

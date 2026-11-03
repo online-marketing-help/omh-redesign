@@ -50,6 +50,7 @@ export type Thread = {
   takenBy: string | null;
   pageUrl: string | null;
   retellCallId: string | null;
+  visitorId: string | null;
   profile: {
     name: string | null;
     email: string | null;
@@ -146,6 +147,23 @@ export async function getInbox() {
 
 export async function getThread(sessionId: string) {
   return await call<Thread>("/handover/thread", { sessionId, limit: 300 });
+}
+
+export type VisitorSession = {
+  sessionId: string;
+  channel: string;
+  startedAt: number;
+  lastSeenAt: number;
+  handover: string | null;
+  messages: number;
+  opened: string | null;
+};
+
+/** Every conversation this person has had, newest first. Empty for a session
+    recorded before visitors existed, which is not an error. */
+export async function getVisitorConversations(visitorId: string) {
+  const d = await call<{ sessions: VisitorSession[] }>("/visitorConversations", { visitorId });
+  return d?.sessions ?? [];
 }
 
 export async function claim(sessionId: string, by: string) {

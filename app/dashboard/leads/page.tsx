@@ -15,7 +15,9 @@ export default async function Leads() {
   const warm = leads.filter((l) => temperature(l) === "warm").length;
   const cold = leads.length - hot - warm;
   const byVoice = leads.filter((l) => l.channel === "voice").length;
-  const contactable = leads.filter((l) => l.phone || l.email).length;
+  /* People who have been here more than once. One row is one person now, so
+     this is a count of humans who came back rather than of repeat rows. */
+  const returning = leads.filter((l) => (l.visits ?? 1) > 1).length;
 
   const rows: Row[] = sorted.map((l) => ({
     id: l._id,
@@ -26,6 +28,7 @@ export default async function Leads() {
       who: l.name || "",
       temp: temperature(l) === "hot" ? 0 : temperature(l) === "warm" ? 1 : 2,
       channel: l.channel,
+      visits: l.visits ?? 1,
       when: l.at,
     },
     cells: [
@@ -44,6 +47,23 @@ export default async function Leads() {
         sub: l.phone && l.email ? l.email : undefined,
       },
       { t: "text", v: l.service || "not said", sub: l.budget || undefined },
+      /* Somebody on their third visit is a different prospect from somebody
+         on their first, and that was invisible while each visit made its own
+         row. */
+      {
+        t: "text",
+        v: (l.visits ?? 1) === 1 ? "first time" : `${l.visits} visits`,
+        sub:
+          (l.visits ?? 1) > 1 && l.firstAt
+            ? `since ${new Date(l.firstAt).toLocaleDateString("en-GB", {
+                day: "numeric",
+                month: "short",
+                timeZone: "Europe/London",
+              })}`
+            : undefined,
+        strong: (l.visits ?? 1) > 1,
+        nowrap: true,
+      },
       { t: "pill", v: temperature(l) },
       { t: "pill", v: l.channel },
       { t: "text", v: fmtDate(l.at), nowrap: true },
@@ -73,10 +93,10 @@ export default async function Leads() {
                 icon={IconLead}
               />
               <Kpi
-                label="Reachable"
-                value={String(contactable)}
-                sub="left a phone or an email"
-                icon={IconPhone}
+                label="Came back"
+                value={String(returning)}
+                sub={returning === 0 ? "nobody has returned yet" : "more than one visit"}
+                icon={IconChat}
               />
             </div>
             <Card title="Mix" note={`${byVoice} by phone, ${leads.length - byVoice} by chat`}>
@@ -95,6 +115,7 @@ export default async function Leads() {
               { label: "Who", key: "who", width: "20%" },
               { label: "Contact", width: "20%" },
               { label: "What they wanted" },
+              { label: "Been here", key: "visits", width: "11%" },
               { label: "Temperature", key: "temp", width: "12%" },
               { label: "Channel", key: "channel", width: "10%" },
               { label: "When", key: "when", width: "14%" },

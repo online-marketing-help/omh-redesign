@@ -53,6 +53,7 @@
   var CONVEX_SITE = data.convexSite || "https://cool-ferret-103.convex.site";
   var POLL_URL = CONVEX_SITE + "/visitorPoll";
   var SAY_URL = CONVEX_SITE + "/visitorSay";
+  var HELLO_URL = CONVEX_SITE + "/visitorHello";
   var SIDE = data.position === "left" ? "left" : "right";
   /* The ESM build, not the UMD one. retell-client-js-sdk's UMD file leaves
      eventemitter3 and livekit-client as externals, so loading it from a CDN in
@@ -117,6 +118,31 @@
      line after it set it straight back to false. */
   var resumed = false;
   var sess = sessionId();
+  var visitor = visitorId();
+
+  /* The person, as opposed to the visit.
+
+     sessionStorage is wiped when the tab closes, so it can only ever say
+     "this visit". localStorage survives closing the tab, closing the browser
+     and rebooting, so the same machine next week is the same person. That is
+     what stops someone who chatted on Monday becoming a second lead on
+     Friday, and it needs no phone number, which matters because most people
+     who use a chat widget never give one.
+
+     If storage is blocked, a private window or a locked-down browser, we fall
+     back to the visit id. Then they are simply a new person each time, which
+     is the old behaviour rather than a broken one. */
+  function visitorId() {
+    try {
+      var found = localStorage.getItem("ohm_visitor");
+      if (found) return found;
+      var made = "p-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
+      localStorage.setItem("ohm_visitor", made);
+      return made;
+    } catch (e) {
+      return sess;
+    }
+  }
 
   function sessionId() {
     try {
@@ -537,7 +563,7 @@ button,input{font:inherit;color:inherit;margin:0}
       fetch(SAY_URL, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ sessionId: sess, text: clean, pageUrl: location.href }),
+        body: JSON.stringify({ sessionId: sess, visitorId: visitor, text: clean, pageUrl: location.href }),
       }).catch(function () {
         state.msgs.push({
           role: "system",
@@ -559,6 +585,7 @@ button,input{font:inherit;color:inherit;margin:0}
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         session_id: sess,
+        visitor_id: visitor,
         message: clean,
         page_url: location.href,
       }),
@@ -719,7 +746,7 @@ button,input{font:inherit;color:inherit;margin:0}
         return fetch(VOICE_TOKEN_URL, {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ session_id: sess, page_url: location.href }),
+          body: JSON.stringify({ session_id: sess, visitor_id: visitor, page_url: location.href }),
         }).then(function (r) {
           /* text(), not json(): when the token workflow fails upstream it
              answers 200 with an empty body, and r.json() then threw a parse
@@ -872,6 +899,43 @@ button,input{font:inherit;color:inherit;margin:0}
     /* A conversation that was already running when this page loaded may be
        with a person right now. Find out before the visitor types anything. */
     if (resumed) startPolling();
+    hello();
+  }
+
+  /* Tell the server which person this visit belongs to, and find out whether
+     they have been here before. One call, on every page load, before anything
+     is typed: it is what ties this conversation to the earlier ones so a
+     returning visitor is not captured as a second lead. */
+  function hello() {
+    fetch(HELLO_URL, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        sessionId: sess,
+        visitorId: visitor,
+        channel: "chat",
+        pageUrl: location.href,
+      }),
+    })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.returning) return;
+        /* Recognised, so say so once, in the thread, above the opener.
+
+           Deliberately not "Welcome back, Monzur". Being named by a website
+           you did not log into unsettles people, and it is the kind of thing
+           that gets screenshotted. The assistant still knows who they are and
+           will not ask for details it already holds. */
+        state.msgs.unshift({
+          role: "assistant",
+          text: "Welcome back. I still have your details, so we can pick up where we left off.",
+        });
+        render();
+      })
+      .catch(function () {
+        /* Not knowing them is the normal case, so a failure here changes
+           nothing the visitor can see. */
+      });
   }
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", mount);
@@ -889,5 +953,7 @@ button,input{font:inherit;color:inherit;margin:0}
     },
     close: function () { stopVoice(); state.open = false; render(); },
     sessionId: function () { return sess; },
+    /** The person, across visits. sessionId is only this visit. */
+    visitorId: function () { return visitor; },
   };
 })();

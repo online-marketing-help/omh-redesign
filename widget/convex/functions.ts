@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query, internalMutation, internalQuery } from "./_generated/server";
+import { findPerson, phoneKey, emailKey } from "./visitors";
 
 /* =========================================================================
    Everything the assistant can read or write. The HTTP layer in http.ts is
@@ -403,6 +404,92 @@ export const saveLead = mutation({
     channel: v.optional(v.string()),
   },
   handler: async (ctx, a) => {
+    /* One row per person, not per capture.
+
+       This used to be a bare insert, so somebody who chatted today and came
+       back next week became two leads, and the client counted one person
+       twice. Now the person is looked up first: by the browser they are in,
+       which works for everyone, and by phone or email, which is what merges
+       the same human across two devices. See visitors.ts. */
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_session", (i) => i.eq("sessionId", a.sessionId))
+      .first();
+    const visitorId = session?.visitorId;
+
+    const existing = await findPerson(ctx, {
+      visitorId,
+      phone: a.phone,
+      email: a.email,
+    });
+
+    const pk = phoneKey(a.phone);
+    const ek = emailKey(a.email);
+
+    if (existing) {
+      /* Merge rather than replace. A later visit that mentions no company
+         must not wipe the company they gave the first time, so only
+         non-empty values are written. */
+      const keep = <T>(next: T | undefined, old: T | undefined): T | undefined =>
+        next === undefined || next === null || (typeof next === "string" && !next.trim())
+          ? old
+          : next;
+
+      /* A return visit must never make the record less complete than it was.
+         The same person on their phone typed "Monzur" where the first visit
+         captured "Monzur Rahman", and a plain overwrite threw the surname
+         away. So a new name that is only a shortening of the one we hold is
+         not an update. */
+      const fullerName = (next?: string, old?: string): string | undefined => {
+        const a = (next ?? "").trim();
+        const b = (old ?? "").trim();
+        if (!a) return b || undefined;
+        if (!b) return a;
+        const inB = b.toLowerCase().split(/\s+/);
+        const isShortening = a
+          .toLowerCase()
+          .split(/\s+/)
+          .every((w) => inB.includes(w));
+        return isShortening && a.length < b.length ? b : a;
+      };
+
+      /* Same number, written differently: "+44 7700 900123" and
+         "07700 900123" are one phone, so there is nothing to update and no
+         reason to churn the form the client already reads. */
+      const sameNumber = pk !== undefined && pk === existing.phoneKey;
+      const sameAddress = ek !== undefined && ek === existing.emailKey;
+
+      const visitorIds = new Set<string>(existing.visitorIds ?? []);
+      if (visitorId) visitorIds.add(visitorId);
+
+      await ctx.db.patch(existing._id, {
+        name: fullerName(a.name, existing.name) ?? existing.name,
+        email: sameAddress ? existing.email : keep(a.email, existing.email),
+        phone: sameNumber ? existing.phone : keep(a.phone, existing.phone),
+        company: keep(a.company, existing.company),
+        website: keep(a.website, existing.website),
+        service: keep(a.service, existing.service),
+        budget: keep(a.budget, existing.budget),
+        message: keep(a.message, existing.message),
+        /* Hot is about now, not about who they once were: a person who came
+           back ready to buy is hot even if they were browsing in March. */
+        hot: a.hot ?? existing.hot,
+        channel: a.channel ?? existing.channel,
+        sessionId: a.sessionId,
+        at: now(),
+        firstAt: existing.firstAt ?? existing.at,
+        visits: (existing.visits ?? 1) + 1,
+        visitorIds: [...visitorIds],
+        phoneKey: pk ?? existing.phoneKey,
+        emailKey: ek ?? existing.emailKey,
+        /* A returning person is worth looking at again even if the first
+           visit was marked dealt with. */
+        status: existing.status === "closed" ? "new" : existing.status,
+        notified: false,
+      });
+      return { ok: true, leadId: existing._id, returning: true, visits: (existing.visits ?? 1) + 1 };
+    }
+
     const id = await ctx.db.insert("leads", {
       tenant: a.tenant ?? "omh",
       sessionId: a.sessionId,
@@ -417,9 +504,14 @@ export const saveLead = mutation({
       hot: a.hot ?? false,
       channel: a.channel ?? "chat",
       at: now(),
+      firstAt: now(),
+      visits: 1,
+      visitorIds: visitorId ? [visitorId] : [],
+      phoneKey: pk,
+      emailKey: ek,
       status: "new",
     });
-    return { ok: true, leadId: id };
+    return { ok: true, leadId: id, returning: false, visits: 1 };
   },
 });
 

@@ -11,6 +11,7 @@
 import type * as functions from "../functions.js";
 import type * as handover from "../handover.js";
 import type * as http from "../http.js";
+import type * as visitors from "../visitors.js";
 
 import type {
   ApiFromModules,
@@ -22,6 +23,7 @@ declare const fullApi: ApiFromModules<{
   functions: typeof functions;
   handover: typeof handover;
   http: typeof http;
+  visitors: typeof visitors;
 }>;
 
 /**

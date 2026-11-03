@@ -276,6 +276,9 @@ export const thread = query({
          recording and the spoken transcript from the phone platform, which is
          where those live; nothing of a call is copied into this database. */
       retellCallId: s?.retellCallId ?? null,
+      /* The person behind this visit, so the dashboard can show their other
+         conversations rather than this one in isolation. See visitors.ts. */
+      visitorId: s?.visitorId ?? null,
       profile: profile
         ? {
             name: profile.name ?? null,
