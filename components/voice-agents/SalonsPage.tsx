@@ -11,8 +11,8 @@ import { SITE, faqSchema } from "@/lib/schema";
   /ai-voice-agents/salons (October 2026): the /ai-voice-agents layout, section for section, with content written
   for hair, nail and beauty salons and medspas (lib/content/voice-salons/), from the brief "OMH AI Voice Agent for
   Salons & Beauty". Same layout as the other industry pages. Rendered by app/ai-voice-agents/[industry]/page.tsx.
-  The brief leaves out the sample-call recordings section and has no use-cases section; "Salons we cover" takes
-  their place.
+  The brief has no use-cases section; "Salons we cover" takes its place. Sample calls (client recordings,
+  3 Nov 2026) sit before the ROI calculator.
 */
 
 const path = "/ai-voice-agents/salons";
@@ -72,7 +72,7 @@ const runs: Runs = [
   [extras, ["day"]],
   [fresh, ["salons", "features"]],
   [v4, ["how"]],
-  [legacy, ["roi-calculator"]],
+  [legacy, ["feedback", "roi-calculator"]],
   [fresh, ["pricing"]],
   [v4, ["cities"]],
   [legacy, ["faq"]],

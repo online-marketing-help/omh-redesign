@@ -26,9 +26,23 @@ const clock = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2,
 const bars = [30, 55, 80, 45, 65, 90, 50, 35, 70, 85, 40, 60, 75, 30, 50, 65, 45, 80, 55, 35, 60, 40, 70, 90, 50, 65, 30, 75, 45, 85, 55, 40];
 const svg = (name: string, cls: string) => `<svg class="icon${cls ? " " + cls : ""}" aria-hidden="true" focusable="false"><use href="#i-${name}"/></svg>`;
 
+type Call = { file: string; seconds: number; icon: string; tint: number; name: string };
+
 /** A playable sample call card. `offset` shifts the waveform so neighbouring cards don't look identical. */
-export function sampleCard(key: SampleCall, { title, caption, offset = 0 }: { title: string; caption: string; offset?: number }) {
-  const c = sampleCalls[key];
+export const sampleCard = (key: SampleCall, opts: { title: string; caption: string; offset?: number }) => card(sampleCalls[key], opts);
+
+/**
+ * One industry's recordings by call type (client, 3 Nov 2026), titles verbatim from the client's script docs.
+ * Files live at public/audio/<folder>/<n>-<title>.mp3, with an em dash in the title written as "-".
+ */
+export const callTypeCards = (folder: string, name: string, calls: [n: number, title: string, seconds: number, icon: string, caption: string][]) =>
+  calls
+    .map(([n, title, seconds, icon, caption], i) =>
+      card({ file: `${folder}/${n}-${title.replace(/—/g, "-")}.mp3`, seconds, icon, tint: [1, 3, 2, 4][i % 4], name: `${name}: ${title}` }, { title, caption, offset: i * 4 }),
+    )
+    .join("\n");
+
+function card(c: Call, { title, caption, offset = 0 }: { title: string; caption: string; offset?: number }) {
   const wave = bars.map((_, i) => `<i style="--h:${bars[(i + offset) % bars.length]}%"></i>`).join("");
   return `      <figure class="flex flex-col rounded-[16px] border border-line bg-surface p-3 transition-colors hover:border-[var(--va-line-strong)]" data-audio-card>
         <div class="audio-panel relative aspect-video overflow-hidden rounded-[11px] bg-[var(--va-tint-${c.tint})]">

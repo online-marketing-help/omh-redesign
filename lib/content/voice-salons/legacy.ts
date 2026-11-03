@@ -1,7 +1,8 @@
-// Body of /ai-voice-agents/salons, part 2: ROI calculator, FAQ and sticky bar, written for salons. Same
-// structure, classes and data-* hooks as lib/content/ai-voice-agents-legacy.ts, as on the other industry
-// pages. The brief leaves out the "call recordings, on the way" section until a real salon recording exists.
+// Body of /ai-voice-agents/salons, part 2: sample calls (client recordings, 3 Nov 2026), ROI calculator, FAQ and
+// sticky bar, written for salons. Same structure, classes and data-* hooks as lib/content/ai-voice-agents-legacy.ts,
+// as on the other industry pages.
 import { roiCalculator } from "@/lib/content/roi-calculator";
+import { callTypeCards } from "@/lib/content/sample-calls";
 import { salonsFaqs as voiceFaqs } from "@/lib/content/voice-salons/markup";
 
 
@@ -19,6 +20,32 @@ const faqItem = ({ q, a, cat }: (typeof voiceFaqs)[number], i: number) => `     
       </details>`;
 
 export const salonsLegacyMarkup = String.raw`
+<section id="feedback" data-component="ClientFeedback" class="bg-surface">
+  <div class="container-omh py-14 lg:py-20">
+    <div>
+      <div>
+        <p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"><i></i><i></i><i></i></span>Sample calls</p>
+        <h2>Salon sample calls, <span class="hl">by call type</span></h2>
+      </div>
+      <p class="mt-5 text-muted">Hear how our AI voice agent handles six everyday salon calls, from a first booking to a complaint passed to the team. These are sample recordings with made-up salons and clients. We'll add client results here once we've checked them with each client.</p>
+    </div>
+
+
+    <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+${callTypeCards("AI Voice Agent for Salons & Beauty Businesses", "Salon", [
+  [1, "Appointment Booking", 87, "scissors", "Our AI voice agent booking a first haircut and blow-dry for Friday afternoon and sending a confirmation."],
+  [2, "Appointment Cancellation & Rescheduling", 73, "replay", "Our AI voice agent finding a facial booked for tomorrow and offering Saturday times instead."],
+  [3, "Service Enquiry & Pricing", 113, "tag", "Our AI voice agent giving the starting price for balayage and offering a free colour consultation."],
+  [4, "Last-Minute Appointment Availability", 80, "clock", "Our AI voice agent looking for a same-day gel manicure slot before the caller's party."],
+  [5, "Appointment Reminder & Confirmation", 61, "calendar", "Our AI voice agent calling a client about tomorrow's lash appointment and recording that they'll attend."],
+  [6, "Customer Complaint & Human Staff Handover", 107, "transfer", "Our AI voice agent taking a complaint about a colour result and passing it to the salon team."],
+])}
+    </div>
+  </div>
+</section>
+
+
+
 ${roiCalculator("any-business")}
 
 

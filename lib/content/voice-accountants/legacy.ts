@@ -1,8 +1,9 @@
-// Body of /ai-voice-agents/accountants-financial-advisers, part 2 (26 Oct 2026): ROI calculator, FAQ and sticky bar,
+// Body of /ai-voice-agents/accountants-financial-advisers, part 2 (26 Oct 2026): sample calls, ROI calculator, FAQ and sticky bar,
 // written for UK accountants, financial advisers, mortgage brokers and insurance brokers. Same structure, classes
-// and data-* hooks as lib/content/ai-voice-agents-legacy.ts (via lib/content/voice-law/legacy.ts). The brief leaves
-// out the "call recordings, on the way" section the other industry pages have; add one once a real recording is ready.
+// and data-* hooks as lib/content/ai-voice-agents-legacy.ts (via lib/content/voice-law/legacy.ts). Sample calls added
+// from the client's recordings (3 Nov 2026).
 import { roiCalculator } from "@/lib/content/roi-calculator";
+import { callTypeCards } from "@/lib/content/sample-calls";
 import { accountantsFaqs as voiceFaqs } from "@/lib/content/voice-accountants/markup";
 
 const faqItem = ({ q, a, cat }: (typeof voiceFaqs)[number], i: number) => `      <details class="group rounded-[14px] border border-line bg-paper transition-colors open:border-[var(--va-line-strong)] open:bg-surface open:shadow-[0_18px_40px_-30px_rgb(0_0_0/0.45)]" data-faq-item data-cat="${cat}"${i ? "" : " open"} data-track-name="${q}">
@@ -19,6 +20,32 @@ const faqItem = ({ q, a, cat }: (typeof voiceFaqs)[number], i: number) => `     
       </details>`;
 
 export const accountantsLegacyMarkup = String.raw`
+<section id="feedback" data-component="ClientFeedback" class="bg-surface">
+  <div class="container-omh py-14 lg:py-20">
+    <div>
+      <div>
+        <p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"><i></i><i></i><i></i></span>Sample calls</p>
+        <h2>Accountancy sample calls, <span class="hl">by call type</span></h2>
+      </div>
+      <p class="mt-5 text-muted">Hear how our AI voice agent handles six everyday calls for accountants and advisers, from a first consultation to a missed caller ringing back. These are sample recordings with made-up firms and clients. We'll add client results here once we've checked them with each client.</p>
+    </div>
+
+
+    <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+${callTypeCards("AI Voice Agent for Accountants & Financial Advisers", "Accountant", [
+  [1, "Appointment Booking", 118, "calendar", "Our AI voice agent booking a first consultation for a limited company owner and sending a confirmation."],
+  [2, "Tax Return Enquiry", 107, "clipboard", "Our AI voice agent arranging a call with the tax team for an employed caller who also earns from freelance work."],
+  [3, "Service Enquiry & Pricing", 139, "pound", "Our AI voice agent explaining what fees depend on and taking down the services a small limited company needs."],
+  [4, "Documents & Tax Return Status", 101, "book", "Our AI voice agent checking whether an existing client's documents for their annual accounts have been logged."],
+  [5, "Financial Adviser Enquiry", 120, "users", "Our AI voice agent recording a retirement planning enquiry so the adviser knows what the caller wants to discuss."],
+  [6, "Missed Call Follow-Up & Callback Request", 121, "phone-missed", "Our AI voice agent taking details from a new business owner who couldn't get through earlier and logging a callback."],
+])}
+    </div>
+  </div>
+</section>
+
+
+
 ${roiCalculator("any-business")}
 
 

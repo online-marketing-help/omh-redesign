@@ -70,15 +70,14 @@ const v4 = sectionsOf(accountantsLandingMarkup, "v4l");
 const extras = sectionsOf(accountantsExtrasMarkup, "va-page"); // a year at your firm, as a day of calls
 
 // The brief's order: hero, what-is, a year at your firm, firms we cover, regulated firms, what's included,
-// how it works, ROI calculator, pricing, local cover, FAQ. No sample-call cards: the brief leaves them out until a
-// real recording exists.
+// how it works, sample calls (client recordings, 3 Nov 2026), ROI calculator, pricing, local cover, FAQ.
 const runs: Runs = [
   [v4, ["top"]],
   [fresh, ["what-is"]],
   [extras, ["day"]],
   [fresh, ["firms", "regulated", "features"]],
   [v4, ["how"]],
-  [legacy, ["roi-calculator"]],
+  [legacy, ["feedback", "roi-calculator"]],
   [fresh, ["pricing"]],
   [v4, ["cities"]],
   [legacy, ["faq"]],
