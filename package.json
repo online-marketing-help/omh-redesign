@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "audit:images": "node scripts/audit-images.mjs"
+    "audit:images": "node scripts/audit-images.mjs",
+    "widget:build": "node widget/web/embed/build.mjs && cp widget/web/embed/dist/ohm-assistant.js public/ohm-assistant.js"
   },
   "dependencies": {
     "@portabletext/to-html": "^6.0.0",
