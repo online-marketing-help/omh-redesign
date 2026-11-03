@@ -848,9 +848,13 @@ button,input{font:inherit;color:inherit;margin:0}
     state.unread = 0;
     render();
     input.focus();
-    /* Opening the panel is also a reason to check: a person may have answered
-       while it was shut and before any slow tick came round. */
-    if (polling) pollNow();
+    /* Opening the panel is a reason to check, always. A person may have
+       answered while it was shut, or the conversation may have been handed
+       over somewhere else entirely, on a call. Deliberately not conditional
+       on the loop already running: before the visitor has typed anything
+       there is no loop, and that was exactly the case where a waiting reply
+       stayed invisible. One request, on a deliberate action. */
+    pollNow();
   });
 
   $(".x").addEventListener("click", function () {
@@ -919,7 +923,19 @@ button,input{font:inherit;color:inherit;margin:0}
     })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
-        if (!d || !d.returning) return;
+        if (!d) return;
+
+        /* This page may have loaded into the middle of a handover: they
+           refreshed while waiting, or the escalation came from a call. Start
+           listening now, or their next message goes to the assistant and it
+           answers over the person who is already on it. */
+        if (d.withPerson) {
+          state.handover = d.handover || "waiting";
+          startPolling();
+          render();
+        }
+
+        if (!d.returning) return;
         /* Recognised, so say so once, in the thread, above the opener.
 
            Deliberately not "Welcome back, Monzur". Being named by a website

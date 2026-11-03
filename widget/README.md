@@ -17,9 +17,17 @@ reads it. Two things are deliberately **not** in this folder:
 
 ### Deploying it
 
-The browser bundle is `web/embed/dist/ohm-assistant.js`, built from
-`web/embed/src/embed.js` with `node web/embed/build.mjs`. It is served from
-its own Vercel project and loaded by `components/layout/SiteAssistant.tsx`.
+**This folder is the only source. Edit `web/embed/src/embed.js` here.**
+
+There was a second copy of this project outside the repo, and an evening went
+into a bug that was only ever the two drifting apart: sixteen lines of fixes
+sat in the other copy while `npm run widget:build` kept building this one, so
+every rebuild looked successful and changed nothing. If you find another copy
+on a machine, it is stale.
+
+`npm run widget:build` compiles `web/embed/src/embed.js` and copies the result
+to `public/ohm-assistant.js`, which is what the site actually serves. It runs
+automatically before `npm run build`, so a deploy cannot ship a stale bundle.
 
 `convex/` is the assistant's backend, already deployed to `cool-ferret-103`.
 Redeploy with `npx convex deploy` and that deployment's key.

@@ -149,8 +149,17 @@ export const hello = mutation({
       .withIndex("by_visitor", (i) => i.eq("visitorId", a.visitorId))
       .collect();
 
+    const state = (s ?? mine.find((x) => x.sessionId === a.sessionId))?.handover ?? "none";
+
     return {
       ok: true,
+      /* Whether this conversation is already with a person. A page can load
+         into the middle of a handover: the visitor refreshed, or the escalation
+         came from a call rather than from something they typed here. Without
+         this the widget would not start listening until they sent a message,
+         and the first thing they sent would go to the assistant. */
+      handover: state,
+      withPerson: state === "waiting" || state === "live",
       /* True only when they have been here in an earlier conversation. A
          reload is the same conversation and must not count. */
       returning: mine.filter((x) => x.sessionId !== a.sessionId).length > 0,
