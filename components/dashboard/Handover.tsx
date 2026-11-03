@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import type { InboxRow, Thread } from "@/lib/dashboard/handover";
-import { fetchThread, takeOver, sendReply, handBack } from "@/app/dashboard/handover/actions";
+import { fetchThread, takeOver, sendReply, handBack } from "@/app/lead-dashboard/handover/actions";
 import { Pill } from "./ui";
 import { IconSend, IconChat, IconMic, IconCheck, IconAlert, IconInbox } from "./icons";
 

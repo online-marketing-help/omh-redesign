@@ -11,11 +11,11 @@ export default async function HandoverPage() {
 
   return (
     <Shell
-      active="/dashboard/handover"
+      active="/lead-dashboard/handover"
       title="Needs a person"
       lead="Conversations the assistant handed over, either because the answer was not in Online Marketing Help's own information or because the visitor asked for a person. Answer them here and your words appear in the chat on the site."
-      counts={{ "/dashboard/handover": inbox.waiting }}
-      urgent={["/dashboard/handover"]}
+      counts={{ "/lead-dashboard/handover": inbox.waiting }}
+      urgent={["/lead-dashboard/handover"]}
     >
       {!inbox.reachable ? (
         <Empty>

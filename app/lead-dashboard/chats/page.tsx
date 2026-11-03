@@ -45,7 +45,7 @@ export default async function Chats() {
         {
           t: "link",
           v: s.name || "Visitor",
-          href: `/dashboard/conversations/${encodeURIComponent(s.sessionId)}`,
+          href: `/lead-dashboard/conversations/${encodeURIComponent(s.sessionId)}`,
           sub: s.phone || s.email || undefined,
         },
         /* What they opened with. It says more about why they came than the
@@ -63,10 +63,10 @@ export default async function Chats() {
 
   return (
     <Shell
-      active="/dashboard/chats"
+      active="/lead-dashboard/chats"
       title="Conversations"
       lead="Everyone who talked to the assistant. One id covers their typing and their call, so a person who chats and then rings is one conversation here."
-      counts={{ "/dashboard/chats": sessions.length }}
+      counts={{ "/lead-dashboard/chats": sessions.length }}
     >
       {!available ? (
         <Empty>

@@ -53,7 +53,7 @@ export default async function Overview() {
       at: c.startedAt, kind: "call" as const, id: c.callId,
       title: c.summary || "Call with no summary recorded",
       meta: fmtDuration(c.durationMs), tag: c.recordingUrl ? "recording" : null,
-      href: `/dashboard/calls/${c.callId}`,
+      href: `/lead-dashboard/calls/${c.callId}`,
     })),
     ...widget.leads.map((l) => ({
       at: l.at, kind: "lead" as const, id: l._id,
@@ -61,25 +61,25 @@ export default async function Overview() {
       meta: l.phone || l.email || "", tag: temperature(l),
       /* Straight to the conversation behind the lead, the same as clicking
          the name on the leads screen. */
-      href: `/dashboard/conversations/${encodeURIComponent(l.sessionId)}`,
+      href: `/lead-dashboard/conversations/${encodeURIComponent(l.sessionId)}`,
     })),
     ...widget.bookings.map((b) => ({
       at: b.at, kind: "booking" as const, id: b._id,
       title: `${b.name} booked ${b.service}`,
       meta: `${b.preferredDate} at ${b.preferredTime}`, tag: b.status,
-      href: `/dashboard/conversations/${encodeURIComponent(b.sessionId)}`,
+      href: `/lead-dashboard/conversations/${encodeURIComponent(b.sessionId)}`,
     })),
   ].sort((a, b) => b.at - a.at).slice(0, 10);
 
   return (
     <Shell
-      active="/dashboard"
+      active="/lead-dashboard"
       title="Overview"
       lead="Everything your assistant handled, what it captured, and what it booked."
       counts={{
-        "/dashboard/calls": calls.length,
-        "/dashboard/leads": widget.leads.length,
-        "/dashboard/bookings": widget.bookings.length,
+        "/lead-dashboard/calls": calls.length,
+        "/lead-dashboard/leads": widget.leads.length,
+        "/lead-dashboard/bookings": widget.bookings.length,
       }}
       toolbar={<Freshness last={last?.startedAt} />}
     >
@@ -121,7 +121,7 @@ export default async function Overview() {
           something that already happened; this one is somebody still waiting. */}
       {inbox.waiting > 0 && (
         <Link
-          href="/dashboard/handover"
+          href="/lead-dashboard/handover"
           className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-[rgb(var(--accent-rgb)/.45)] bg-[rgb(var(--accent-rgb)/.14)] px-4 py-3.5 outline-none transition-colors duration-150 hover:bg-[rgb(var(--accent-rgb)/.2)] focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
         >
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[rgb(var(--accent-rgb)/.3)] text-[var(--dash-accent-text)]">
@@ -175,7 +175,7 @@ export default async function Overview() {
                 they left a way to reach them and said what they were after.
               </p>
               <Link
-                href="/dashboard/leads"
+                href="/lead-dashboard/leads"
                 className="mt-3 inline-flex items-center gap-1 text-[13.5px] font-semibold text-[var(--dash-accent-text)] underline underline-offset-4 outline-none hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
               >
                 See every lead

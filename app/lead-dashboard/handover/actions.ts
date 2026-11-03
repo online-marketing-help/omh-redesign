@@ -44,7 +44,7 @@ export async function takeOver(sessionId: string): Promise<Result> {
           : res.error || "Could not take this conversation over.",
     };
   }
-  revalidatePath("/dashboard/handover");
+  revalidatePath("/lead-dashboard/handover");
   return { ok: true, thread: await handover.getThread(sessionId) };
 }
 
@@ -57,7 +57,7 @@ export async function sendReply(sessionId: string, text: string): Promise<Result
 
   const res = await handover.reply(sessionId, clean, auth.who);
   if (!res?.ok) return { ok: false, message: res?.error || "The reply did not send." };
-  revalidatePath("/dashboard/handover");
+  revalidatePath("/lead-dashboard/handover");
   return { ok: true, thread: await handover.getThread(sessionId) };
 }
 
@@ -67,6 +67,6 @@ export async function handBack(sessionId: string, note?: string): Promise<Result
 
   const res = await handover.release(sessionId, note);
   if (!res?.ok) return { ok: false, message: "Could not hand this one back." };
-  revalidatePath("/dashboard/handover");
+  revalidatePath("/lead-dashboard/handover");
   return { ok: true, thread: await handover.getThread(sessionId) };
 }

@@ -47,10 +47,10 @@ export default async function Bookings() {
 
   return (
     <Shell
-      active="/dashboard/bookings"
+      active="/lead-dashboard/bookings"
       title="Appointments"
       lead="Booked by the assistant while the caller was still on the line, or while they were typing."
-      counts={{ "/dashboard/bookings": bookings.length }}
+      counts={{ "/lead-dashboard/bookings": bookings.length }}
     >
       {!reachable ? (
         <Empty>The bookings store could not be reached just now.</Empty>

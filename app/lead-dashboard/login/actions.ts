@@ -14,7 +14,7 @@ export type SignInState = { error?: string };
     would otherwise turn the sign-in form into an open redirect. */
 function safeNext(next: unknown): string {
   const s = typeof next === "string" ? next : "";
-  return s.startsWith("/dashboard") && !s.startsWith("//") ? s : "/dashboard";
+  return s.startsWith("/lead-dashboard") && !s.startsWith("//") ? s : "/lead-dashboard";
 }
 
 export async function signIn(_prev: SignInState, form: FormData): Promise<SignInState> {
@@ -49,7 +49,7 @@ export async function signIn(_prev: SignInState, form: FormData): Promise<SignIn
     httpOnly: true,
     sameSite: "lax",
     /* Scoped to the dashboard: the public site never needs to see it. */
-    path: "/dashboard",
+    path: "/lead-dashboard",
     secure: process.env.NODE_ENV === "production",
     maxAge: SESSION_SECONDS,
   });
@@ -59,6 +59,6 @@ export async function signIn(_prev: SignInState, form: FormData): Promise<SignIn
 
 export async function signOut() {
   const jar = await cookies();
-  jar.delete({ name: COOKIE, path: "/dashboard" });
-  redirect("/dashboard/login");
+  jar.delete({ name: COOKIE, path: "/lead-dashboard" });
+  redirect("/lead-dashboard/login");
 }

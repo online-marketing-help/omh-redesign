@@ -26,10 +26,10 @@ export default async function LoginPage({
   searchParams: Promise<{ next?: string }>;
 }) {
   /* Already in: nobody should be made to sign in twice. */
-  if (await isSignedIn()) redirect("/dashboard");
+  if (await isSignedIn()) redirect("/lead-dashboard");
 
   const { next } = await searchParams;
-  const target = next?.startsWith("/dashboard") && !next.startsWith("//") ? next : "/dashboard";
+  const target = next?.startsWith("/lead-dashboard") && !next.startsWith("//") ? next : "/lead-dashboard";
 
   return (
     <div id="omh-dashboard" className="min-h-dvh bg-warm text-ink lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">

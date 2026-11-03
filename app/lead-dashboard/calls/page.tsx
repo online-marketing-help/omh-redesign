@@ -32,7 +32,7 @@ export default async function Calls() {
       { t: "num", v: fmtDuration(c.durationMs) },
       {
         t: "link",
-        href: `/dashboard/calls/${c.callId}`,
+        href: `/lead-dashboard/calls/${c.callId}`,
         v: c.summary
           ? c.summary.slice(0, 120) + (c.summary.length > 120 ? "..." : "")
           : "No summary recorded",
@@ -45,10 +45,10 @@ export default async function Calls() {
 
   return (
     <Shell
-      active="/dashboard/calls"
+      active="/lead-dashboard/calls"
       title="Calls"
       lead="Every call the assistant took. Open one to hear the recording and read what was said."
-      counts={{ "/dashboard/calls": calls.length }}
+      counts={{ "/lead-dashboard/calls": calls.length }}
     >
       <div className="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Kpi label="Calls on record" value={String(calls.length)} icon={IconPhone} accent />

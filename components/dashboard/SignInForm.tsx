@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { signIn, type SignInState } from "@/app/dashboard/login/actions";
+import { signIn, type SignInState } from "@/app/lead-dashboard/login/actions";
 import { IconLock, IconEye, IconEyeOff, IconArrow, IconAlert } from "./icons";
 
 /* The sign-in form.

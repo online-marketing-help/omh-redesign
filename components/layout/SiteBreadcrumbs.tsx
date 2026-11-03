@@ -22,8 +22,8 @@ function ownsCrumbs(path: string) {
     /* The client dashboard is a workspace, not a page of the site: it has its
        own rail carrying the same navigation, and this breadcrumb is absolutely
        positioned so it landed on top of that rail. */
-    path === "/dashboard" ||
-    path.startsWith("/dashboard/") ||
+    path === "/lead-dashboard" ||
+    path.startsWith("/lead-dashboard/") ||
     path === "/ai-voice-agents" ||
     path.startsWith("/ai-voice-agents/") ||
     (segs[0] === "case-studies" && segs.length > 1) ||

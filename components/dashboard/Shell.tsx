@@ -2,7 +2,7 @@ import Link from "next/link";
 import { NAV_ICON, IconSignOut } from "./icons";
 import { getInbox } from "@/lib/dashboard/handover";
 import { dashboardLocked } from "@/lib/dashboard/auth";
-import { signOut } from "@/app/dashboard/login/actions";
+import { signOut } from "@/app/lead-dashboard/login/actions";
 
 /* The frame every dashboard screen sits in.
 
@@ -20,14 +20,14 @@ import { signOut } from "@/app/dashboard/login/actions";
    a 248px rail on a laptop in a meeting room is fine and on a phone is not. */
 
 const TABS = [
-  { href: "/dashboard", label: "Overview" },
+  { href: "/lead-dashboard", label: "Overview" },
   /* Second, directly under Overview: it is the only screen with someone
      waiting on the other end, so it is the one worth seeing first. */
-  { href: "/dashboard/handover", label: "Needs a person" },
-  { href: "/dashboard/calls", label: "Calls" },
-  { href: "/dashboard/chats", label: "Conversations" },
-  { href: "/dashboard/leads", label: "Leads" },
-  { href: "/dashboard/bookings", label: "Appointments" },
+  { href: "/lead-dashboard/handover", label: "Needs a person" },
+  { href: "/lead-dashboard/calls", label: "Calls" },
+  { href: "/lead-dashboard/chats", label: "Conversations" },
+  { href: "/lead-dashboard/leads", label: "Leads" },
+  { href: "/lead-dashboard/bookings", label: "Appointments" },
 ] as const;
 
 export async function Shell({
@@ -54,14 +54,14 @@ export async function Shell({
      each page, so the figure is on the rail on every screen. Somebody waiting
      is the one thing worth interrupting whatever you were reading. */
   const inbox = await getInbox();
-  const rail = { "/dashboard/handover": inbox.waiting, ...counts };
+  const rail = { "/lead-dashboard/handover": inbox.waiting, ...counts };
 
   return (
     <div id="omh-dashboard" className="min-h-dvh bg-warm text-ink">
       <Rail
         active={active}
         counts={rail}
-        urgent={["/dashboard/handover", ...urgent]}
+        urgent={["/lead-dashboard/handover", ...urgent]}
       />
 
       <div className="lg:pl-[248px]">

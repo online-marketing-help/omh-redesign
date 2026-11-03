@@ -109,10 +109,10 @@ export const IconAlert = (p: P) => (
 );
 
 export const NAV_ICON = {
-  "/dashboard": IconOverview,
-  "/dashboard/handover": IconHandover,
-  "/dashboard/calls": IconPhone,
-  "/dashboard/chats": IconChat,
-  "/dashboard/leads": IconLead,
-  "/dashboard/bookings": IconCalendar,
+  "/lead-dashboard": IconOverview,
+  "/lead-dashboard/handover": IconHandover,
+  "/lead-dashboard/calls": IconPhone,
+  "/lead-dashboard/chats": IconChat,
+  "/lead-dashboard/leads": IconLead,
+  "/lead-dashboard/bookings": IconCalendar,
 } as const;

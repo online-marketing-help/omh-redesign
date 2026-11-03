@@ -38,7 +38,7 @@ export default async function Leads() {
       {
         t: "link",
         v: l.name || "No name given",
-        href: `/dashboard/conversations/${encodeURIComponent(l.sessionId)}`,
+        href: `/lead-dashboard/conversations/${encodeURIComponent(l.sessionId)}`,
         sub: l.company || undefined,
       },
       {
@@ -72,10 +72,10 @@ export default async function Leads() {
 
   return (
     <Shell
-      active="/dashboard/leads"
+      active="/lead-dashboard/leads"
       title="Leads"
       lead="Everyone the assistant captured, by chat or by phone, with how warm they were when they left."
-      counts={{ "/dashboard/leads": leads.length }}
+      counts={{ "/lead-dashboard/leads": leads.length }}
     >
       {!reachable ? (
         <Empty>The lead store could not be reached just now, so this list is not current.</Empty>

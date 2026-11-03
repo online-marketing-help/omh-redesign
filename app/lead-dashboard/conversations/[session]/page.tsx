@@ -53,7 +53,7 @@ export default async function Conversation({
 
   return (
     <Shell
-      active="/dashboard/leads"
+      active="/lead-dashboard/leads"
       title={name}
       lead={
         reachable
@@ -62,7 +62,7 @@ export default async function Conversation({
       }
       toolbar={
         <Link
-          href="/dashboard/leads"
+          href="/lead-dashboard/leads"
           className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-line bg-surface px-3 py-1.5 text-[13.5px] font-semibold outline-none transition-colors duration-150 hover:bg-warm focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
         >
           <IconBack className="h-4 w-4" />
@@ -107,7 +107,7 @@ export default async function Conversation({
                   note={`${fmtWhen(c.startedAt)} · ${fmtDuration(c.durationMs)}`}
                   action={
                     <Link
-                      href={`/dashboard/calls/${c.callId}`}
+                      href={`/lead-dashboard/calls/${c.callId}`}
                       className="font-sans text-[13px] font-semibold text-[var(--dash-accent-text)] underline underline-offset-4 outline-none hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                     >
                       Open the call
@@ -230,7 +230,7 @@ function Outcome({ thread }: { thread: NonNullable<Awaited<ReturnType<typeof get
                 <p className="text-[14px] font-medium">Still waiting on a person</p>
                 <p className="mt-0.5 text-[12.5px] leading-relaxed text-muted">{q.question}</p>
                 <Link
-                  href="/dashboard/handover"
+                  href="/lead-dashboard/handover"
                   className="mt-1.5 inline-block font-sans text-[13px] font-semibold text-[var(--dash-accent-text)] underline underline-offset-4 outline-none hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                 >
                   Answer them
@@ -271,7 +271,7 @@ async function OtherVisits({
         {others.map((s) => (
           <li key={s.sessionId}>
             <Link
-              href={`/dashboard/conversations/${encodeURIComponent(s.sessionId)}`}
+              href={`/lead-dashboard/conversations/${encodeURIComponent(s.sessionId)}`}
               className="flex gap-3 px-4 py-3 outline-none transition-colors duration-150 hover:bg-warm focus-visible:bg-warm sm:px-5"
             >
               <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-warm text-muted">
