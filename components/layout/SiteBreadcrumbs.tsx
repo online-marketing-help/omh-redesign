@@ -19,6 +19,11 @@ function ownsCrumbs(path: string) {
   const segs = path.split("/").filter(Boolean);
   return (
     path === "/" ||
+    /* The client dashboard is a workspace, not a page of the site: it has its
+       own rail carrying the same navigation, and this breadcrumb is absolutely
+       positioned so it landed on top of that rail. */
+    path === "/dashboard" ||
+    path.startsWith("/dashboard/") ||
     path === "/ai-voice-agents" ||
     path.startsWith("/ai-voice-agents/") ||
     (segs[0] === "case-studies" && segs.length > 1) ||
