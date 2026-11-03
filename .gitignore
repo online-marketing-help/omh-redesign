@@ -45,3 +45,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Security reports: findings about this site, never in a public repo
+SECURITY-AUDIT-*.md
+security-audit*.md
