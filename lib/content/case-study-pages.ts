@@ -7,9 +7,6 @@ import { caseStudies, caseStudyMedia, caseStudyServices, type CaseStudy, type Ca
 
 type Stat = { value: string; label: string };
 
-/** The client's site as the PDF draws it in the hero, used where we have no screenshot in public/images/clients. */
-type SiteMock = { brand: string; nav: string[]; headline: string; sub: string; cta: string; cards: [string, string, string] };
-
 /** The chart card beside "The outcome". Line shapes are traced from the brief's own charts (no axis values in the
     brief), so they show the trend only; every number printed comes from the brief's "Data shown in the chart" table. */
 export type OutcomePanel =
@@ -30,8 +27,10 @@ export type CaseStudyPageData = {
   glance: [string, string][];
   /** "Results" when the figures are measured, "Project highlights" when they describe the work. */
   stats?: { heading: "Results" | "Project highlights"; items: Stat[]; source?: string };
-  site?: SiteMock;
-  /** A photo or logo instead of the client's site (older studies). */
+  /** Size of the hero screenshot in public/images/clients/<slug>.webp when it isn't 1440x900 (the client's own
+      captures, 3 Nov 2026, cropped to drop cookie bars and badges). */
+  shot?: [number, number];
+  /** A photo or logo instead of the client's site (older studies with no real site to capture). */
   cover?: { src: string; alt: string; logo?: boolean };
   challenge: { title: string; body: string[]; list?: { title: string; items: string[] } };
   /** Card title, then a sentence or a list of what was done. */
@@ -96,14 +95,6 @@ export const caseStudyPages: CaseStudyPageData[] = [
         { value: "4", label: "main journeys: products, projects, downloads, knowledge" },
       ],
     },
-    site: {
-      brand: "Komfort",
-      nav: ["Products", "ESG Hub", "Projects", "Services", "Contact"],
-      headline: "Responsible for Compliance. Creativity. Sustainability.",
-      sub: "UK specialist in high-performance internal glazing, metal and fire-rated partitioning systems.",
-      cta: "View products",
-      cards: ["Glazed partitioning", "Fire rated", "Acoustic"],
-    },
     challenge: {
       title: "A big product range, a technical audience",
       body: [
@@ -154,14 +145,7 @@ export const caseStudyPages: CaseStudyPageData[] = [
       ],
       source: "Source: Google Search Console, May to October 2026.",
     },
-    site: {
-      brand: "Camp Kerala",
-      nav: ["Experiences", "Events", "Weddings", "Shikar Tents"],
-      headline: "Luxury under-canvas accommodation",
-      sub: "Five-star enclaves at the Ryder Cup, Glastonbury Festival and private events.",
-      cta: "Enquire now",
-      cards: ["Shikar Tents", "Ryder Cup", "Glastonbury"],
-    },
+    shot: [1440, 662],
     challenge: {
       title: "Demand that peaks around the biggest events",
       body: [
@@ -223,14 +207,7 @@ export const caseStudyPages: CaseStudyPageData[] = [
         { value: "Ongoing", label: "support and maintenance" },
       ],
     },
-    site: {
-      brand: "Barbados Maritime",
-      nav: ["Registration", "Registrars", "News", "Contact"],
-      headline: "Registrar directory",
-      sub: "Find a Barbados registrar office near you.",
-      cta: "Search by country",
-      cards: ["Registration", "Registrars", "News"],
-    },
+    shot: [1440, 662],
     challenge: {
       title: "A global audience looking for the right office",
       body: [
@@ -279,14 +256,7 @@ export const caseStudyPages: CaseStudyPageData[] = [
         { value: "10", label: "topic SEO content plan" },
       ],
     },
-    site: {
-      brand: "Ascent Energy",
-      nav: ["EV charging", "Solar", "Battery", "Contact"],
-      headline: "EV charging and solar, installed nationwide",
-      sub: "Domestic and commercial installations across England, Wales, Scotland and Northern Ireland.",
-      cta: "Get a quote",
-      cards: ["EV charging", "Solar PV", "Battery storage"],
-    },
+    shot: [1440, 662],
     challenge: {
       title: "A slow first impression",
       body: [
@@ -467,14 +437,7 @@ export const caseStudyPages: CaseStudyPageData[] = [
         { value: "Monthly", label: "Google Business Profile updates" },
       ],
     },
-    site: {
-      brand: "HeatPumps4Pools",
-      nav: ["Heat pumps", "Accessories", "Advice", "Contact"],
-      headline: "Heat your pool for less",
-      sub: "Swimming pool heat pumps delivered across the UK.",
-      cta: "Shop now",
-      cards: ["Heat pumps", "Accessories", "Buying advice"],
-    },
+    shot: [1440, 662],
     challenge: {
       title: "Seasonal sales, technical products",
       body: [
@@ -612,14 +575,7 @@ export const caseStudyPages: CaseStudyPageData[] = [
       ],
       source: "Source: Semrush, September 2026; Google review.",
     },
-    site: {
-      brand: "Deeks VAT",
-      nav: ["Services", "Sectors", "VAT Club", "Contact"],
-      headline: "Specialist VAT advice",
-      sub: "For accountants, solicitors, businesses and charities in the UK and overseas.",
-      cta: "Book a call",
-      cards: ["VAT advice", "Customs duty", "Accountants VAT Club"],
-    },
+    shot: [1440, 662],
     challenge: {
       title: "Specialist advice that needs to be found",
       body: [
@@ -749,7 +705,8 @@ function fromLegacy(study: CaseStudy, index: number): CaseStudyPageData {
     lede: study.lede,
     glance,
     stats: study.results.length ? { heading: "Results", items: study.results } : undefined,
-    cover: { src: cover.src, alt: cover.alt, logo: cover.logo },
+    // A capture of the client's site goes in the browser frame uncropped, like the new studies.
+    cover: cover.src.startsWith("/images/clients/") ? undefined : { src: cover.src, alt: cover.alt, logo: cover.logo },
     challenge: {
       title: `Where ${study.client} started`,
       body: [study.objective],

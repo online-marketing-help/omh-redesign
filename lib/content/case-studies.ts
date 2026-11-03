@@ -510,10 +510,10 @@ export const caseStudyMedia: Record<string, { src: string; alt: string; caption:
   "car-showroom": { src: "/images/case-studies/automotive.webp", alt: "Vehicles displayed in a bright car showroom", caption: "Automotive sector photography" },
   "clothing-business": { src: "/images/case-studies/clothing.webp", alt: "A colourful range of retail accessories", caption: "Ecommerce sector photography" },
   "craft-business": { src: "/images/case-studies/craft.webp", alt: "Handcrafted wooden letter forms", caption: "Craft sector photography" },
-  bar: { src: "/images/case-studies/bar.webp", alt: "A spacious restaurant dining room", caption: "Hospitality sector photography" },
+  bar: { src: "/images/clients/bar.webp", alt: "The home page of the Keens Steak House website", caption: "Client website" },
   "fine-dining": { src: "/images/case-studies/restaurant.webp", alt: "A restaurant table set for dinner", caption: "Restaurant sector photography" },
-  "fleming-verandas": { src: "/images/case-studies/fleming.webp", alt: "Fleming Verandas logo", caption: "Client brand", logo: true },
-  "california-accounting": { src: "/images/Services/SEO 2.jpg", alt: "Search results being reviewed on a tablet", caption: "Search marketing illustration" },
+  "fleming-verandas": { src: "/images/clients/fleming-verandas.webp", alt: "The home page of the Fleming Verandas website", caption: "Client website" },
+  "california-accounting": { src: "/images/clients/california-accounting.webp", alt: "The home page of the California Accounting website", caption: "Client website" },
   "allied-hands": { src: "/images/case-studies/allied.webp", alt: "A care worker accompanying an older person outdoors", caption: "Care sector photography" },
   "out-out-entry": { src: "/images/case-studies/out-out.webp", alt: "A group enjoying a pool party", caption: "Activity photography" },
 };

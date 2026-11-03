@@ -22,7 +22,7 @@ const band = "container-omh pt-[clamp(56px,44px+3vw,96px)]";
 const h2 = "mt-5 font-sans text-h2 font-semibold text-balance";
 
 function SiteFrame({ study }: { study: CaseStudyPageData }) {
-  const { site, cover } = study;
+  const { cover, shot = [1440, 900] } = study;
   if (cover) {
     return (
       <div
@@ -46,46 +46,16 @@ function SiteFrame({ study }: { study: CaseStudyPageData }) {
           <span key={i} className="size-2.5 rounded-full bg-ink/20" />
         ))}
       </div>
-      {site ? (
-        // Drawn, not a screenshot: the brief's sketch of the client's home page, for sites we have no capture of.
-        <div role="img" aria-label={`Sketch of the ${study.client} home page`}>
-          <div className="flex items-center justify-between gap-6 px-[clamp(16px,3vw,32px)] py-4">
-            <span className="font-sans text-[15px] font-bold uppercase tracking-[0.18em]">{site.brand}</span>
-            <span className="flex gap-5 text-[12px] font-semibold uppercase tracking-[0.08em] text-ink/70 max-md:hidden">
-              {site.nav.map((item) => (
-                <span key={item}>{item}</span>
-              ))}
-            </span>
-          </div>
-          <div className="bg-inverse px-[clamp(16px,3vw,32px)] py-[clamp(28px,4vw,52px)] text-oninverse">
-            <p className="font-sans text-[clamp(22px,16px+1.4vw,32px)] font-semibold leading-tight text-balance">
-              {site.headline}
-            </p>
-            <p className="mt-3 text-[15px] text-oninverse/70">{site.sub}</p>
-            <span className="mt-6 inline-flex rounded-[6px] bg-teal px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-white">
-              {site.cta}
-            </span>
-          </div>
-          <div className="grid gap-3 bg-soft p-[clamp(12px,2vw,20px)] sm:grid-cols-3">
-            {site.cards.map((label) => (
-              <div key={label} className="rounded-[8px] bg-surface p-3">
-                <div className="h-12 rounded-[5px] bg-soft-dark" />
-                <p className="mt-2.5 text-[14px] font-semibold">{label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <Image
-          src={`/images/clients/${study.slug}.webp`}
-          alt={`The home page of the ${study.client} website`}
-          width={1440}
-          height={900}
-          priority
-          sizes="(max-width: 1024px) 100vw, 1180px"
-          className="h-auto w-full"
-        />
-      )}
+      <Image
+        src={`/images/clients/${study.slug}.webp`}
+        alt={`The home page of the ${study.client} website`}
+        width={shot[0]}
+        height={shot[1]}
+        priority
+        sizes="(max-width: 1024px) 100vw, 1180px"
+        className="h-auto w-full"
+      />
+
     </div>
   );
 }
