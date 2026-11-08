@@ -4,6 +4,7 @@ import { allCaseStudyPages } from "@/lib/content/case-study-pages";
 import { getInsightSlugs } from "@/lib/sanity/insights";
 import { funnelPaths } from "@/lib/content/quote-forms";
 import { SITE } from "@/lib/schema";
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 
 // Audit T-01: the live page-sitemap.xml holds 15 URLs and omits
 // /wordpress-development/, About, Contact, FAQ and Case Studies. Deriving the
@@ -13,7 +14,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const paths = [
     ...readyPages.map((p) => p.href),
-    ...allCaseStudyPages.map((c) => `/case-studies/${c.slug}`),
+    ...(CASE_STUDIES_LIVE ? allCaseStudyPages : []).map((c) => `/case-studies/${c.slug}`),
     ...insightSlugs.map((slug) => `/${slug}`),
     ...funnelPaths,
   ];

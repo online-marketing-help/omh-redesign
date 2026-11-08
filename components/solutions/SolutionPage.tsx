@@ -11,6 +11,7 @@ import { definitionIcons } from "@/components/solutions/definition-icons";
 import { withLinks } from "@/components/services/ServicePrimitives";
 import { navLabels } from "@/lib/content/nav";
 import { solutionOrder, solutions, type SolutionPageContent } from "@/lib/content/solutions";
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 
 function SolutionHero({ content }: { content: SolutionPageContent }) {
   return (
@@ -354,6 +355,7 @@ function FitSection({ content }: { content: SolutionPageContent }) {
 }
 
 function ProofSection({ content }: { content: SolutionPageContent }) {
+  if (!CASE_STUDIES_LIVE) return null;
   return (
     <section className="border-b border-line bg-surface">
       <div className="container-omh section-md">

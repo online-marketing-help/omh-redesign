@@ -52,6 +52,7 @@ import {
 } from "@/lib/content/home";
 import { getFeaturedInsights } from "@/lib/sanity/insights";
 import { imageRatio, insightHref } from "@/lib/content/insights-types";
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 
 export const metadata: Metadata = {
   title: { absolute: homeMeta.title },
@@ -254,6 +255,7 @@ export default async function Home() {
         </div>
       </section>
 
+      {CASE_STUDIES_LIVE && (
       <section id="proof" className="container-omh py-[clamp(72px,8vw,128px)]">
         <Reveal>
           <div className="grid grid-cols-[0.74fr_1.26fr] items-start gap-[clamp(48px,7vw,112px)] max-lg:grid-cols-1 max-sm:gap-10">
@@ -319,6 +321,7 @@ export default async function Home() {
           </div>
         </Reveal>
       </section>
+      )}
 
       <section className="dark-grid border-y border-oninverse/10 bg-inverse py-[clamp(72px,8vw,128px)] text-oninverse">
         <div className="container-omh">

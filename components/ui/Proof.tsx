@@ -4,6 +4,7 @@ import { BadgeCheck, Quote, Star, TrendingUp } from "lucide-react";
 import type { ReactNode } from "react";
 import { caseStudies } from "@/lib/content/case-studies";
 import { siteTestimonials } from "@/lib/content/testimonials";
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 
 /*
   Placeholder discipline (brief §1): unverified facts never render as if they
@@ -75,7 +76,7 @@ export function ReviewProof({ heading, serviceId, className = "" }: { heading: s
           <Star className="size-4 shrink-0 fill-amber text-amber" aria-hidden="true" />
           {REVIEW_PROOF}
         </li>
-        {study && (
+        {study && CASE_STUDIES_LIVE && (
           <li>
             <Link href={study.href} aria-label={`Read the ${study.client} case study`} className={`${pill} transition-colors hover:border-ink/40`}>
               <TrendingUp className="size-4 shrink-0 text-amber-deep" aria-hidden="true" />

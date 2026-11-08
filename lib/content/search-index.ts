@@ -2,6 +2,7 @@ import { caseStudies } from "@/lib/content/case-studies";
 import { readyPages } from "@/lib/content/nav";
 import { freeConsultation, quoteFormPages } from "@/lib/content/quote-forms";
 import { getInsightSearchEntries } from "@/lib/sanity/insights";
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 
 export type SearchEntry = {
   title: string;
@@ -26,7 +27,7 @@ export async function getSearchIndex(): Promise<SearchEntry[]> {
     })),
     { title: freeConsultation.seo.title, href: `/${freeConsultation.slug}`, group: "Page" as const },
     { title: "Free Growth Review", href: "/get-more-leads", group: "Page" as const },
-    ...caseStudies.map((study) => ({
+    ...(CASE_STUDIES_LIVE ? caseStudies : []).map((study) => ({
       title: study.shortTitle,
       href: `/case-studies/${study.slug}`,
       group: "Case study" as const,

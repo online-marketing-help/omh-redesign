@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { AnchorHTMLAttributes, ReactNode } from "react";
+import { isHiddenHref } from "@/lib/flags";
 
 // Future Elementor widget: "OMH Button"
 type Variant = "primary" | "secondary" | "inverse" | "ghost-white";
@@ -31,6 +32,7 @@ export function Button({
   small?: boolean;
   children: ReactNode;
 } & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href">) {
+  if (isHiddenHref(href)) return null;
   return (
     <Link
       href={href}
@@ -52,6 +54,7 @@ export function TextLink({
   href: string;
   children: ReactNode;
 } & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href">) {
+  if (isHiddenHref(href)) return null;
   return (
     <Link
       href={href}

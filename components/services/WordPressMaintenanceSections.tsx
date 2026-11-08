@@ -14,6 +14,7 @@ import { Button, TextLink } from "@/components/ui/Button";
 import { Eyebrow, Fpo, ReviewProof } from "@/components/ui/Proof";
 import { ServiceBand as Band } from "@/components/services/ServiceBand";
 import { wordpressMaintenance as content } from "@/lib/content/wordpress-maintenance";
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 
 type Package = (typeof content.packages)[number];
 
@@ -390,6 +391,7 @@ export function MaintenanceProofSection() {
                   </li>
                 ))}
               </ul>
+              {CASE_STUDIES_LIVE && (
               <div className="mt-7">
                 <TextLink
                   href="/case-studies"
@@ -398,6 +400,7 @@ export function MaintenanceProofSection() {
                   View case studies
                 </TextLink>
               </div>
+              )}
             </div>
             <div className="col-span-12 mt-9">
               <div className="grid grid-cols-2 gap-5 max-sm:grid-cols-1">

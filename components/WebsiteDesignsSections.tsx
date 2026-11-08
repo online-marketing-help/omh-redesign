@@ -31,6 +31,7 @@ import { caseStudies } from "@/lib/content/case-studies";
 import { company } from "@/lib/content/nav";
 import { websiteDesigns as page } from "@/lib/content/website-designs";
 import { wordpressDevelopment } from "@/lib/content/wordpress-development";
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 
 /*
   Phase 7 — /website-designs. Scaffold rule: every section is a `ServiceBand`,
@@ -239,6 +240,7 @@ export function WebsiteDesignsPage() {
         </div>
       </ServiceBand>
 
+      {CASE_STUDIES_LIVE && (
       <ServiceBand label={page.caseStudies.eyebrow} tone="white" accent={ACCENT} labelStyle={LABEL}>
         <div className="flex items-end justify-between gap-10 max-lg:block">
           <h2 className="font-sans text-h2 font-semibold text-balance">
@@ -286,6 +288,7 @@ export function WebsiteDesignsPage() {
           </li>
         </ul>
       </ServiceBand>
+      )}
 
       <ServiceBand label={page.contact.eyebrow} tone="navy" accent={ACCENT} labelStyle={LABEL}>
         <div className="grid grid-cols-12 items-center gap-x-12 gap-y-8 max-lg:block">

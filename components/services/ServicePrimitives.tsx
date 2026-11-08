@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { isHiddenHref } from "@/lib/flags";
 
 export function HighlightedText({
   text,
@@ -172,6 +173,7 @@ export function withLinks(text: string) {
         }
         const match = /^\[([^\]]+)\]\((\/[^)]*)\)$/.exec(part);
         if (!match) return part;
+        if (isHiddenHref(match[2])) return match[1];
         // ponytail: a plain inline anchor, not TextLink — TextLink appends an
         // arrow and is inline-flex, which breaks mid-sentence.
         return (

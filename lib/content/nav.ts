@@ -1,3 +1,4 @@
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 // Navigation and company facts, kept out of layout code (brief §21/§22).
 // IA matches the master brief §7. `ready: true` marks pages that are actually
 // designed in this preview; every other route falls through to the coming-soon
@@ -118,7 +119,7 @@ export const primaryNav: NavItem[] = [
     // AI-specific demo strip; the header's "Book a Growth Consultation" stays the general CTA.
     cta: { text: "Hear an AI voice agent handle a real call.", label: "Book a Free Demo", href: "/ai-voice-agents#book-demo-form" },
   },
-  { label: "Case Studies", href: "/case-studies" },
+  ...(CASE_STUDIES_LIVE ? [{ label: "Case Studies", href: "/case-studies" }] : []),
   { label: "Insights", href: "/insights" },
   { label: "Pricing", href: "/pricing" },
   {
@@ -158,7 +159,7 @@ export const readyPages: NavLink[] = [
   { label: "Social Media Marketing", href: "/social-media-marketing-services", ready: true },
   { label: "Paid Social Advertising", href: "/social-media-paid-advertising", ready: true },
   { label: "About", href: "/about-us", ready: true },
-  { label: "Case Studies", href: "/case-studies", ready: true },
+  ...(CASE_STUDIES_LIVE ? [{ label: "Case Studies", href: "/case-studies", ready: true }] : []),
   { label: "Insights", href: "/insights", ready: true },
   { label: "Contact", href: "/contact", ready: true },
   { label: "Generate More Qualified Leads", href: "/solutions/generate-qualified-leads", ready: true },

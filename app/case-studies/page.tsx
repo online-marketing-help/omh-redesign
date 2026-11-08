@@ -2,13 +2,15 @@ import type { Metadata } from "next";
 import { CaseStudyArchive } from "@/components/case-studies/CaseStudyArchive";
 import { hubStudies } from "@/lib/content/case-studies-hub";
 import { JsonLd, SITE, defaultOgImages } from "@/lib/schema";
+import { notFound } from "next/navigation";
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 
 const title = "Digital Marketing Case Studies | SEO, PPC & Websites | OMH";
 const description =
   "Real UK client case studies across websites, SEO and Google Ads. See the work we delivered, with dated and sourced results.";
 const url = `${SITE}/case-studies`;
 
-export const metadata: Metadata = {
+export const metadata: Metadata = !CASE_STUDIES_LIVE ? {} : {
   title: { absolute: title },
   description,
   alternates: { canonical: url },
@@ -35,6 +37,7 @@ const collection = {
 };
 
 export default function CaseStudiesPage() {
+  if (!CASE_STUDIES_LIVE) notFound();
   return (
     <>
       <JsonLd data={collection} />

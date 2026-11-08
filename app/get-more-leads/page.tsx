@@ -10,6 +10,7 @@ import { FinalCta } from "@/components/ui/FinalCta";
 import Image from "@/components/ui/SiteImage";
 import { caseStudies } from "@/lib/content/case-studies";
 import { finalCta, hero, stats } from "@/lib/content/home";
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 
 export const metadata: Metadata = {
   title: "Free Growth Review for UK Businesses",
@@ -167,7 +168,7 @@ export default function GetMoreLeadsPage() {
         titleAccent={restaurantTraffic}
         body={finalCta.body}
         primary={{ label: finalCta.primary.label, href: "#free-review", event: "get_more_leads_final_cta_click" }}
-        secondary={{ label: "Read the case study", href: `/case-studies/${restaurant.slug}`, event: "get_more_leads_case_study_click" }}
+        secondary={CASE_STUDIES_LIVE ? { label: "Read the case study", href: `/case-studies/${restaurant.slug}`, event: "get_more_leads_case_study_click" } : undefined}
         steps={["Review your current activity", "Find the clearest next step", "Build a connected growth plan"]}
         contactEvents={{ phone: "get_more_leads_phone_click", email: "get_more_leads_email_click" }}
       />

@@ -21,6 +21,7 @@ import { ArrowRight, Button } from "@/components/ui/Button";
 import { Eyebrow, ReviewProof } from "@/components/ui/Proof";
 import { caseStudies } from "@/lib/content/case-studies";
 import { ecommerceSeo as page } from "@/lib/content/ecommerce-seo";
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 
 /* /ecommerce-seo-services on the service-page scaffold (hero with proof badge, ruled
    problem list, capability showcase, fit columns, process timeline, package cards,
@@ -305,10 +306,12 @@ export function EcommerceSeoResults() {
             <p className="text-[14px] font-semibold uppercase tracking-[0.14em] text-amber-deep">{r.label}</p>
             <h3 className="mt-4 font-sans text-h3 font-semibold text-balance">{r.heading}</h3>
             <p className="mt-4 text-body leading-relaxed text-ink/75">{r.body}</p>
+            {CASE_STUDIES_LIVE && (
             <Link href={`/case-studies/${study.slug}`} data-event={`${event}_case_study_click`} className="group mt-5 inline-flex items-center gap-2 font-semibold text-amber-deep hover:underline underline-offset-4">
               {r.cta}
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
             </Link>
+            )}
             <dl className="mt-8 grid grid-cols-4 gap-4 border-t border-line pt-6 max-md:grid-cols-2">
               {study.results.map((result) => (
                 <div key={result.label}>

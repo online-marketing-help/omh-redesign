@@ -15,6 +15,7 @@ import { Eyebrow, ReviewProof } from "@/components/ui/Proof";
 import { MediaFrame } from "@/components/ServiceMedia";
 import { ServiceBand as Band } from "@/components/services/ServiceBand";
 import { shopifyDevelopment as content } from "@/lib/content/shopify-development";
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 
 type Package = (typeof content.packages)[number];
 
@@ -273,7 +274,7 @@ export function ShopifyCaseStudyFeature() {
                   <li key={field} className="border-b border-soft-dark py-3 text-body text-ink/70">{field}</li>
                 ))}
               </ul>
-              <div className="mt-7"><TextLink href="/case-studies" data-event="shopify_case_study_click">View case studies</TextLink></div>
+              {CASE_STUDIES_LIVE && <div className="mt-7"><TextLink href="/case-studies" data-event="shopify_case_study_click">View case studies</TextLink></div>}
             </div>
 
             <div className="col-span-12 mt-9">

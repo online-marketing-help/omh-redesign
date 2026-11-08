@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { CaseStudyPage } from "@/components/case-studies/CaseStudyPage";
 import { allCaseStudyPages, getCaseStudyPage } from "@/lib/content/case-study-pages";
 import { defaultOgImages } from "@/lib/schema";
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -19,7 +20,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const page = getCaseStudyPage(slug);
-  if (!page) return {};
+  if (!page || !CASE_STUDIES_LIVE) return {};
   const canonical = `https://onlinemarketinghelp.co.uk/case-studies/${slug}`;
   return {
     title: { absolute: page.metaTitle },
@@ -32,6 +33,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function CaseStudyRoute({ params }: Props) {
   const { slug } = await params;
   const page = getCaseStudyPage(slug);
-  if (!page) notFound();
+  if (!page || !CASE_STUDIES_LIVE) notFound();
   return <CaseStudyPage study={page} />;
 }

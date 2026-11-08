@@ -22,6 +22,7 @@ import { ArrowRight, Button, TextLink } from "@/components/ui/Button";
 import { Eyebrow, Fpo, ReviewProof } from "@/components/ui/Proof";
 import { ServiceBand as Band } from "@/components/services/ServiceBand";
 import { wordpressDevelopment as content } from "@/lib/content/wordpress-development";
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 
 type Package = (typeof content.packages)[number];
 
@@ -181,7 +182,7 @@ export function ServiceCapabilityGrid() {
         detail: ["Structure planned before design", "Built to be edited without a developer", "Set up for tracking from day one", "Speed, security and schema basics in the build"],
         primary: { label: "Start a project", href: "/wordpress-development-request-quote", event: "wpdev_build_start_click" },
         secondary: { label: "See the packages", href: "#packages", event: "wpdev_build_packages_click" },
-        aside: (
+        aside: CASE_STUDIES_LIVE && (
           <Link href={`/case-studies/${recent.slug}`} data-event="wpdev_build_case_study_click" className="group block rounded-[10px] border border-oninverse/12 bg-oninverse/[0.06] p-4 transition-colors hover:bg-oninverse/[0.1]">
             <p className="text-[14px] font-semibold uppercase tracking-[0.14em] text-[var(--accent-light)]">Recent build</p>
             <div className="mt-3 grid grid-cols-[96px_1fr] items-center gap-4 max-sm:grid-cols-1">
