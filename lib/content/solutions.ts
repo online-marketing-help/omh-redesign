@@ -1,3 +1,4 @@
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 export type SolutionTheme = "ppc" | "shopify" | "wordpress" | "seo" | "maintenance";
 
 export type DefinitionIcon =
@@ -365,7 +366,7 @@ export const solutions: Record<string, SolutionPageContent> = {
     signal: "Clarity → confidence → action",
     signalMocks: [
       { kind: "page", title: "Clear offer, clear next step", chips: ["Who it is for", "What it costs"], cta: "Get a quote" },
-      { kind: "proof", items: ["Google reviews", "Accreditations", "Case studies"] },
+      { kind: "proof", items: ["Google reviews", "Accreditations", CASE_STUDIES_LIVE ? "Case studies" : "Trustpilot reviews"] },
       { kind: "form", fields: ["Name", "Phone"], done: "Enquiry sent", cta: "Request a quote" },
     ],
     heroPoints: ["Evidence-led page reviews", "Design and development support", "Tracking before assumptions"],

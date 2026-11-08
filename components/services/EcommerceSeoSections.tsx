@@ -47,6 +47,7 @@ export function EcommerceSeoHero() {
                 <Button href={h.primary.href} arrow data-event={`${event}_hero_cta_click`}>{h.primary.label}</Button>
                 <Button href={h.secondary.href} variant="secondary" arrow data-event={`${event}_view_packages_click`}>{h.secondary.label}</Button>
               </div>
+              {CASE_STUDIES_LIVE && (<>
               <dl className="mt-10 flex flex-wrap gap-x-10 gap-y-5 border-t border-line pt-7">
                 {h.stats.map(([label, value]) => (
                   <div key={label}>
@@ -56,6 +57,7 @@ export function EcommerceSeoHero() {
                 ))}
               </dl>
               <p className="mt-3 text-bsm text-muted">{h.statsNote}</p>
+              </>)}
             </div>
           </div>
           <div className="hero-in hero-in-2 col-span-5 col-start-8">
@@ -294,6 +296,7 @@ export function EcommerceSeoWhyOmh() {
 }
 
 export function EcommerceSeoResults() {
+  if (!CASE_STUDIES_LIVE) return null;
   const r = page.results;
   const study = caseStudies.find((c) => c.slug === r.caseSlug)!;
   return (

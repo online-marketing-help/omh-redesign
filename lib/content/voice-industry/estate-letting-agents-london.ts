@@ -634,7 +634,7 @@ export const markup = String.raw`
   <div class="container-omh py-20 lg:py-28">
     <div>
       <div><p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"><i></i><i></i><i></i></span>London agencies</p><h2>Agents across London <span class="hl">already using it</span></h2></div>
-      <p class="mt-5 text-muted">How three London branches use their agent. <span class="flag">[PLACEHOLDER: example clients, replace with real case studies before launch]</span></p>
+      <p class="mt-5 text-muted">How three London branches use their agent.</p>
     </div>
     <ul class="mt-10 grid gap-5 lg:grid-cols-3">
       <li class="flex flex-col rounded-[22px] border border-line bg-paper p-6">

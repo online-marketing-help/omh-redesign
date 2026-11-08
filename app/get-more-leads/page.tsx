@@ -164,8 +164,8 @@ export default function GetMoreLeadsPage() {
       </ServiceBand>
 
       <FinalCta
-        title={`${restaurantTraffic} more organic traffic for one of our restaurant clients.`}
-        titleAccent={restaurantTraffic}
+        title={CASE_STUDIES_LIVE ? `${restaurantTraffic} more organic traffic for one of our restaurant clients.` : finalCta.headline}
+        titleAccent={CASE_STUDIES_LIVE ? restaurantTraffic : undefined}
         body={finalCta.body}
         primary={{ label: finalCta.primary.label, href: "#free-review", event: "get_more_leads_final_cta_click" }}
         secondary={CASE_STUDIES_LIVE ? { label: "Read the case study", href: `/case-studies/${restaurant.slug}`, event: "get_more_leads_case_study_click" } : undefined}

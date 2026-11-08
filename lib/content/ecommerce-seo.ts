@@ -1,3 +1,4 @@
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 /*
   /ecommerce-seo-services. Copy is verbatim from the client's brief
   "OMH-Ecommerce-SEO-Services-Page" (Oct 2026): focus keyword "ecommerce seo services",
@@ -34,7 +35,7 @@ export const ecommerceSeo = {
     body: "Our ecommerce SEO services help online stores get found for the searches that lead to orders. As a UK ecommerce SEO agency, we work through your categories, product pages, site speed, structured data and content, then report on organic revenue as well as rankings.",
     primary: { label: "Get My Ecommerce SEO Audit", href: "/contact" },
     secondary: { label: "See Ecommerce SEO Packages", href: "#packages" },
-    stats: [
+    stats: [ // shown only while CASE_STUDIES_LIVE (EcommerceSeoHero)
       ["Organic traffic", "+73%"],
       ["Purchase conversions", "+35%"],
       ["Client partnership", "3 years"],
@@ -223,7 +224,7 @@ export const ecommerceSeo = {
       { q: "How long does ecommerce SEO take to show results?", a: "Technical fixes can show movement within a few weeks. Category rankings and organic revenue usually build over three to six months, and longer in very competitive markets." },
       { q: "Do you work with Shopify, WooCommerce and Magento stores?", a: "Yes. We provide ecommerce SEO services for Shopify, WooCommerce and Magento, and we can review other platforms once we see how they handle URLs, collections and schema." },
       { q: "Why hire an ecommerce SEO agency instead of a freelancer?", a: "An ecommerce SEO agency gives you technical SEO, content, development and paid search support in one team, with cover when someone is away. Whether you call it an SEO ecommerce agency or an SEO agency for ecommerce, the test is the same: ask who does the work and how results are reported." },
-      { q: "What makes you the best ecommerce SEO company for my store?", a: "We would rather show you than claim it. Look at our [ecommerce case studies](/case-studies), speak to your proposed ecommerce SEO consultant and check that the scope ties back to revenue." },
+      { q: "What makes you the best ecommerce SEO company for my store?", a: CASE_STUDIES_LIVE ? "We would rather show you than claim it. Look at our [ecommerce case studies](/case-studies), speak to your proposed ecommerce SEO consultant and check that the scope ties back to revenue." : "We would rather show you than claim it. Speak to your proposed ecommerce SEO consultant and check that the scope ties back to revenue." },
       { q: "Do you only work with stores in London?", a: "No. We are an ecommerce SEO agency UK brands use from London to Edinburgh. Stores searching for an ecommerce SEO agency London teams can meet often work with us remotely, and we serve the whole UK from our Essex base." },
       { q: "Can you guarantee first page rankings?", a: "No. Nobody controls Google's rankings. We commit to the agreed work, clear communication and reporting against agreed measures." },
     ],

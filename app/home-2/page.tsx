@@ -425,14 +425,15 @@ export default async function Home2() {
           <Reveal>
             <div className="mb-12">
               <div>
-                <StarRating label="Client success stories" />
+                <StarRating label={CASE_STUDIES_LIVE ? "Client success stories" : "Client reviews"} />
                 <h2 className="mt-6 font-sans text-h2 font-semibold">
                   What our <span className="text-amber-deep">clients say</span>
                 </h2>
               </div>
               <p className="mt-5 text-body leading-relaxed text-ink/70">
-                Feedback from published client case studies across SEO, paid media and web
-                development.
+                {CASE_STUDIES_LIVE
+                  ? "Feedback from published client case studies across SEO, paid media and web development."
+                  : "Published reviews from our clients on Trustpilot and Google."}
               </p>
             </div>
 

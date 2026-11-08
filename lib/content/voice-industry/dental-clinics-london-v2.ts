@@ -777,7 +777,7 @@ ${roiCalculator("dental", "bg-paper border-t border-line")}
   <div class="container-omh py-20 lg:py-28">
     <div>
       <div><p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"><i></i><i></i><i></i></span>London practices</p><h2>The problem, <span class="hl">then the result</span></h2></div>
-      <p class="mt-5 text-muted">Flip each card to see what changed. <span class="flag">[PLACEHOLDER: example practices, replace with real case studies before launch]</span></p>
+      <p class="mt-5 text-muted">Flip each card to see what changed.</p>
     </div>
     <ul class="mt-10 grid gap-5 lg:grid-cols-3">
       <li class="cf" data-cf>

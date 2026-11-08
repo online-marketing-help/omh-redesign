@@ -212,6 +212,7 @@ export function AmazonPricing() {
 }
 
 export function AmazonProofGuide() {
+  if (!CASE_STUDIES_LIVE) return null;
   return (
     <SectionShell label="Proof and preparation" dark>
       <Reveal>

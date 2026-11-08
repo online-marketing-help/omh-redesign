@@ -1,5 +1,7 @@
 import type { CaseMeta } from "@/components/ui/Case";
 import { caseStudies } from "@/lib/content/case-studies";
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
+import { siteTestimonials } from "@/lib/content/testimonials";
 
 // Homepage SEO brief (Oct 2026): focus "full service digital marketing agency",
 // co-primary "digital marketing agency uk".
@@ -139,10 +141,16 @@ export const services = [
   { label: "WordPress Maintenance Packages", href: "/wordpress-website-maintenance", body: "Updates, security, backups and support." },
 ];
 
-export const testimonials = caseStudies
-  .filter((s) => s.testimonial)
-  .slice(0, 3)
-  .map((s) => ({ quote: s.testimonial!.quote, name: s.testimonial!.attribution }));
+// While case studies are unpublished (lib/flags.ts) the quotes come from published Trustpilot/Google reviews instead.
+export const testimonials = CASE_STUDIES_LIVE
+  ? caseStudies
+      .filter((s) => s.testimonial)
+      .slice(0, 3)
+      .map((s) => ({ quote: s.testimonial!.quote, name: s.testimonial!.attribution }))
+  : ["Kiera Taylor-Elton", "Sanjay", "Tania Smyths"].map((n) => {
+      const t = siteTestimonials.find((x) => x.name === n)!;
+      return { quote: t.quote, name: t.name };
+    });
 
 // 14 tiles. The home page draws positions 1, 5, 10 and 12 double-height (the two AI
 // tiles among them); with dense packing that is the spread that fills the three-column

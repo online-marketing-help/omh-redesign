@@ -205,6 +205,7 @@ export function PpcPricingPackages() {
 }
 
 export function PpcProofSection() {
+  if (!CASE_STUDIES_LIVE) return null;
   return (
     <Band label="Proof" tone="white">
       <Reveal>

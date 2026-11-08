@@ -435,6 +435,7 @@ export function IncludedFeatures() {
 // ── Section 8: Proof ────────────────────────────────────────────────────────
 // Future Elementor widget: "OMH Case Study Feature"
 export function CaseStudyFeature() {
+  if (!CASE_STUDIES_LIVE) return null;
   return (
     <Band label="Proof" tone="white">
       <Reveal>
