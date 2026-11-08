@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, Play } from "lucide-react";
+import { ChevronLeft, ChevronRight, Play, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { InstagramReel } from "@/lib/instagram";
 
@@ -22,14 +22,21 @@ export function InstagramCarousel({ reels, profileUrl, handle }: { reels: Instag
   const dragStart = useRef<number | null>(null);
   const dragged = useRef(false);
   const dragging = drag !== null;
+  // The reel playing in the popup. The video only exists while it is open, so closing it stops the sound.
+  const [playing, setPlaying] = useState<InstagramReel | null>(null);
+  const dialog = useRef<HTMLDialogElement>(null);
 
   const go = (step: number) => setActive((current) => (current + step + count) % count);
 
   useEffect(() => {
-    if (paused || dragging || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (paused || dragging || playing || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const timer = setInterval(() => setActive((current) => (current + 1) % count), AUTOPLAY_MS);
     return () => clearInterval(timer);
-  }, [paused, dragging, count]);
+  }, [paused, dragging, playing, count]);
+
+  useEffect(() => {
+    if (playing) dialog.current?.showModal();
+  }, [playing]);
 
   function endDrag(clientX: number) {
     if (dragStart.current === null) return;
@@ -107,6 +114,12 @@ export function InstagramCarousel({ reels, profileUrl, handle }: { reels: Instag
                 target="_blank"
                 rel="noreferrer"
                 tabIndex={hidden ? -1 : undefined}
+                onClick={(e) => {
+                  // Plays here when there is a video; the link stays for the snapshot and for new-tab clicks.
+                  if (!reel.video || e.ctrlKey || e.metaKey || e.shiftKey) return;
+                  e.preventDefault();
+                  setPlaying(reel);
+                }}
                 className={`group absolute left-1/2 top-0 w-[240px] overflow-hidden rounded-[22px] border border-oninverse/12 bg-[oklch(19%_.025_300)] shadow-[0_30px_80px_-20px_oklch(65%_.25_0)] sm:w-[300px] ${dragging ? "" : "transition-all duration-700 ease-out"}`}
                 style={{
                   transform: `translateX(-50%) translateX(${offset * 62}%) translateZ(${-distance * 160}px) rotateY(${offset * -32}deg)`,
@@ -169,6 +182,36 @@ export function InstagramCarousel({ reels, profileUrl, handle }: { reels: Instag
           Follow us on Instagram
         </a>
       </div>
+
+      {/* Native modal: Esc, focus trapping and the backdrop come with it. A click on the backdrop closes it. */}
+      <dialog
+        ref={dialog}
+        aria-label={playing ? playing.caption.slice(0, 80) || "Instagram reel" : undefined}
+        onClose={() => setPlaying(null)}
+        onClick={(e) => e.target === e.currentTarget && e.currentTarget.close()}
+        className="m-auto overflow-visible bg-transparent p-0 backdrop:bg-black/80"
+      >
+        {playing && (
+          <div className="relative">
+            <video
+              src={playing.video}
+              poster={playing.image}
+              controls
+              autoPlay
+              playsInline
+              className="max-h-[85vh] w-[min(92vw,420px)] rounded-[22px] bg-black"
+            />
+            <button
+              type="button"
+              aria-label="Close reel"
+              onClick={() => dialog.current?.close()}
+              className="absolute -top-3 -right-3 grid size-10 cursor-pointer place-items-center rounded-full bg-white text-black shadow-lg"
+            >
+              <X className="size-5" aria-hidden />
+            </button>
+          </div>
+        )}
+      </dialog>
     </div>
   );
 }
