@@ -21,7 +21,7 @@ type Media = {
   permalink: string;
 };
 
-const MAX_REELS = 6;
+const MAX_REELS = 12;
 const FIELDS = "id,caption,media_product_type,thumbnail_url,media_url,permalink";
 
 // Instagram leaves out thumbnail_url for some reels (copyrighted audio), and there is nothing to show without it.
@@ -62,7 +62,7 @@ export async function getInstagramReels(): Promise<InstagramReel[]> {
   const media = facebook ? `https://graph.facebook.com/v21.0/${userId}/media` : "https://graph.instagram.com/me/media";
 
   try {
-    // Reels share this list with ordinary posts, so ask for enough to find six. Thumbnail and video URLs expire after a
+    // Reels share this list with ordinary posts, so ask for enough to find twelve. Thumbnail and video URLs expire after a
     // while; the hourly refresh replaces them well before that.
     const response = await fetch(`${media}?fields=${FIELDS}&limit=50&access_token=${encodeURIComponent(token)}`, {
       next: { revalidate: 3600 },
