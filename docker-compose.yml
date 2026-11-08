@@ -2,7 +2,9 @@
 # that n8n already runs on. Nothing in the existing stack is touched.
 services:
   omh:
-    build: .
+    build:
+      context: .
+      secrets: [env]
     env_file: .env
     restart: always
     networks: [web]
@@ -24,6 +26,11 @@ services:
 
 volumes:
   omh-static:
+
+# .env handed to the build as a secret (see Dockerfile), so it never ends up in the image.
+secrets:
+  env:
+    file: .env
 
 networks:
   web:

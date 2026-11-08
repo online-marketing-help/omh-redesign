@@ -11,7 +11,9 @@ ARG NEXT_PUBLIC_SANITY_PROJECT_ID=qr5jqq87
 ARG NEXT_PUBLIC_SANITY_DATASET=production
 ENV NEXT_PUBLIC_SANITY_PROJECT_ID=$NEXT_PUBLIC_SANITY_PROJECT_ID \
     NEXT_PUBLIC_SANITY_DATASET=$NEXT_PUBLIC_SANITY_DATASET
-RUN npm run build
+# The server's .env, mounted for the build only (never copied into a layer), so pages pre-rendered here see the same
+# settings as the running site: without it the home page baked in the Instagram snapshot until its hourly refresh.
+RUN --mount=type=secret,id=env,target=/app/.env npm run build
 
 FROM node:22-alpine
 WORKDIR /app
