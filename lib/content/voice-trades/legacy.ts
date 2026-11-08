@@ -3,6 +3,7 @@
 // structure, classes and data-* hooks as lib/content/voice-builders/legacy.ts.
 import { roiCalculator } from "@/lib/content/roi-calculator";
 import { tradesFaqTopics, tradesFaqs as voiceFaqs } from "@/lib/content/voice-trades/markup";
+import { callTypeCards } from "@/lib/content/sample-calls";
 
 
 const faqItem = ({ q, a, cat }: (typeof voiceFaqs)[number], i: number) => `      <details class="group rounded-[14px] border border-line bg-paper transition-colors open:border-[var(--va-line-strong)] open:bg-surface open:shadow-[0_18px_40px_-30px_rgb(0_0_0/0.45)]" data-faq-item data-cat="${cat}"${i ? "" : " open"} data-track-name="${q}">
@@ -21,39 +22,32 @@ const faqItem = ({ q, a, cat }: (typeof voiceFaqs)[number], i: number) => `     
 const faqFilter = (key: string, label: string) =>
   `        <button type="button" class="min-h-[44px] rounded-full border border-[var(--va-line-strong)] px-4 text-[15px] font-semibold aria-pressed:border-ink aria-pressed:bg-ink aria-pressed:text-paper" data-faq-filter="${key}" aria-pressed="${key === "all"}" data-track="faq_filter" data-track-name="${label}">${label} <span class="ml-1 opacity-70 tnum" data-faq-count="${key}"></span></button>`;
 
-// The six sample calls from the brief. No recordings exist yet, so every card is marked "Coming soon".
-const samples: [string, string, string, number, string][] = [
-  ["AI Voice Agent for Electrical Faults", "A caller with tripping power booked in, and a burning smell sent straight to the electrician.", "wrench", 1, `<i style="--h:30%"></i><i style="--h:55%"></i><i style="--h:80%"></i><i style="--h:45%"></i><i style="--h:65%"></i><i style="--h:90%"></i><i style="--h:50%"></i><i style="--h:35%"></i><i style="--h:70%"></i><i style="--h:85%"></i><i style="--h:40%"></i><i style="--h:60%"></i><i style="--h:75%"></i><i style="--h:30%"></i><i style="--h:50%"></i><i style="--h:65%"></i><i style="--h:45%"></i><i style="--h:80%"></i><i style="--h:55%"></i><i style="--h:35%"></i><i style="--h:60%"></i><i style="--h:40%"></i><i style="--h:70%"></i><i style="--h:90%"></i><i style="--h:50%"></i><i style="--h:65%"></i><i style="--h:30%"></i><i style="--h:75%"></i><i style="--h:45%"></i><i style="--h:85%"></i><i style="--h:55%"></i><i style="--h:40%"></i>`],
-  ["AI Voice Agent for Storm Damage", "A roof leak flagged urgent, with the address and photos taken before the roofer calls back.", "home", 3, `<i style="--h:90%"></i><i style="--h:50%"></i><i style="--h:35%"></i><i style="--h:70%"></i><i style="--h:85%"></i><i style="--h:40%"></i><i style="--h:60%"></i><i style="--h:75%"></i><i style="--h:30%"></i><i style="--h:50%"></i><i style="--h:65%"></i><i style="--h:45%"></i><i style="--h:80%"></i><i style="--h:55%"></i><i style="--h:35%"></i><i style="--h:60%"></i><i style="--h:40%"></i><i style="--h:70%"></i><i style="--h:90%"></i><i style="--h:50%"></i><i style="--h:65%"></i><i style="--h:30%"></i><i style="--h:75%"></i><i style="--h:45%"></i><i style="--h:85%"></i><i style="--h:55%"></i><i style="--h:40%"></i><i style="--h:30%"></i><i style="--h:55%"></i><i style="--h:80%"></i><i style="--h:45%"></i><i style="--h:65%"></i>`],
-  ["AI Voice Agent for Cleaning Quotes", "An end-of-tenancy clean priced from the list and booked for moving day.", "tag", 2, `<i style="--h:40%"></i><i style="--h:60%"></i><i style="--h:75%"></i><i style="--h:30%"></i><i style="--h:50%"></i><i style="--h:65%"></i><i style="--h:45%"></i><i style="--h:80%"></i><i style="--h:55%"></i><i style="--h:35%"></i><i style="--h:60%"></i><i style="--h:40%"></i><i style="--h:70%"></i><i style="--h:90%"></i><i style="--h:50%"></i><i style="--h:65%"></i><i style="--h:30%"></i><i style="--h:75%"></i><i style="--h:45%"></i><i style="--h:85%"></i><i style="--h:55%"></i><i style="--h:40%"></i><i style="--h:30%"></i><i style="--h:55%"></i><i style="--h:80%"></i><i style="--h:45%"></i><i style="--h:65%"></i><i style="--h:90%"></i><i style="--h:50%"></i><i style="--h:35%"></i><i style="--h:70%"></i><i style="--h:85%"></i>`],
-  ["AI Voice Agent for Measure-Ups", "A fitted wardrobe enquiry with photos and sizes collected and a visit booked.", "clipboard", 4, `<i style="--h:65%"></i><i style="--h:45%"></i><i style="--h:80%"></i><i style="--h:55%"></i><i style="--h:35%"></i><i style="--h:60%"></i><i style="--h:40%"></i><i style="--h:70%"></i><i style="--h:90%"></i><i style="--h:50%"></i><i style="--h:65%"></i><i style="--h:30%"></i><i style="--h:75%"></i><i style="--h:45%"></i><i style="--h:85%"></i><i style="--h:55%"></i><i style="--h:40%"></i><i style="--h:30%"></i><i style="--h:55%"></i><i style="--h:80%"></i><i style="--h:45%"></i><i style="--h:65%"></i><i style="--h:90%"></i><i style="--h:50%"></i><i style="--h:35%"></i><i style="--h:70%"></i><i style="--h:85%"></i><i style="--h:40%"></i><i style="--h:60%"></i><i style="--h:75%"></i><i style="--h:30%"></i><i style="--h:50%"></i>`],
-  ["AI Voice Agent for Garden Quotes", "A patio and planting enquiry qualified by size and budget, then a site visit booked.", "map-pin", 1, `<i style="--h:60%"></i><i style="--h:40%"></i><i style="--h:70%"></i><i style="--h:90%"></i><i style="--h:50%"></i><i style="--h:65%"></i><i style="--h:30%"></i><i style="--h:75%"></i><i style="--h:45%"></i><i style="--h:85%"></i><i style="--h:55%"></i><i style="--h:40%"></i><i style="--h:30%"></i><i style="--h:55%"></i><i style="--h:80%"></i><i style="--h:45%"></i><i style="--h:65%"></i><i style="--h:90%"></i><i style="--h:50%"></i><i style="--h:35%"></i><i style="--h:70%"></i><i style="--h:85%"></i><i style="--h:40%"></i><i style="--h:60%"></i><i style="--h:75%"></i><i style="--h:30%"></i><i style="--h:50%"></i><i style="--h:65%"></i><i style="--h:45%"></i><i style="--h:80%"></i><i style="--h:55%"></i><i style="--h:35%"></i>`],
-  ["AI Voice Agent for After-Hours Calls", "A Sunday evening enquiry answered, summarised and waiting in your inbox for Monday.", "moon", 3, `<i style="--h:65%"></i><i style="--h:30%"></i><i style="--h:75%"></i><i style="--h:45%"></i><i style="--h:85%"></i><i style="--h:55%"></i><i style="--h:40%"></i><i style="--h:30%"></i><i style="--h:55%"></i><i style="--h:80%"></i><i style="--h:45%"></i><i style="--h:65%"></i><i style="--h:90%"></i><i style="--h:50%"></i><i style="--h:35%"></i><i style="--h:70%"></i><i style="--h:85%"></i><i style="--h:40%"></i><i style="--h:60%"></i><i style="--h:75%"></i><i style="--h:30%"></i><i style="--h:50%"></i><i style="--h:65%"></i><i style="--h:45%"></i><i style="--h:80%"></i><i style="--h:55%"></i><i style="--h:35%"></i><i style="--h:60%"></i><i style="--h:40%"></i><i style="--h:70%"></i><i style="--h:90%"></i><i style="--h:50%"></i>`],
-];
-const sample = ([h3, text, ico, tint, wave]: (typeof samples)[number]) => `      <figure class="flex flex-col rounded-[16px] border border-line bg-surface p-3 transition-colors hover:border-[var(--va-line-strong)]" data-audio-card data-audio-pending>
-        <div class="audio-panel relative aspect-video overflow-hidden rounded-[11px] bg-[var(--va-tint-${tint})]">
-          <span class="pointer-events-none absolute -right-6 -top-4 text-ink/10" aria-hidden="true"><svg class="icon !h-[150px] !w-[150px]" aria-hidden="true" focusable="false"><use href="#i-${ico}"/></svg></span>
-          <button type="button" class="audio-toggle" aria-disabled="true" aria-label="Recording coming soon" title="Recording coming soon"><svg class="icon i-play" aria-hidden="true" focusable="false"><use href="#i-play"/></svg><svg class="icon i-pause" aria-hidden="true" focusable="false"><use href="#i-pause"/></svg></button>
-          <div class="absolute inset-x-4 bottom-3 flex items-center gap-3">
-            <div class="audio-wave" aria-hidden="true">${wave}</div>
-            <span class="audio-time">Coming soon</span>
-          </div>
-        </div>
-        <figcaption class="flex flex-1 flex-col px-2 pb-2 pt-4">
-          <h3 class="!text-[20px] !leading-[1.3]">${h3}</h3>
-          <p class="mt-2 text-[16px] leading-[1.5] text-muted">${text}</p>
-        </figcaption>
-      </figure>`;
+// Six of the client's recordings (3 Nov 2026), two each from the plumbers, heating and builders pages, with those pages'
+// titles and captions verbatim. The brief's six trade scripts have no recordings yet.
+const samples = [
+  callTypeCards("AI Voice Agent for Plumbers", "Plumber", [
+    [1, "Emergency Plumbing Call", 55, "drop", "Our AI voice agent telling a caller with a burst pipe to turn off the stopcock, then passing the job to the emergency team."],
+    [3, "Drain Blockage & Unblocking Service", 49, "wrench", "Our AI voice agent taking the details of a blocked outside drain that's backing up, so the team can assess the job."],
+  ]),
+  callTypeCards("AI Voice Agent for Heating & HVAC", "Heating", [
+    [2, "New Boiler Installation & Replacement Enquiry", 73, "home", "Our AI voice agent collecting the boiler type, its age, the property size and the timing for a replacement quote."],
+    [3, "Annual Boiler Servicing & Maintenance Booking", 59, "wrench", "Our AI voice agent arranging a routine annual service for a Vaillant boiler after checking the postcode is covered."],
+  ]),
+  callTypeCards("AI Voice Agent for Contractors & Builders", "Builder", [
+    [1, "New Building Project Enquiry & Lead Qualification", 90, "hard-hat", "Our AI voice agent taking the size, budget and timing of a single-storey extension and passing it to the team."],
+    [4, "Free Quote Request & Site Visit Booking", 85, "clipboard", "Our AI voice agent collecting the details of a garage-to-office conversion and helping arrange a site visit."],
+  ]),
+].join("\n");
 
 export const tradesLegacyMarkup = String.raw`
 <section id="feedback" data-component="ClientFeedback" class="bg-surface">
   <div class="container-omh py-14 lg:py-20">
     <div>
       <div>
-        <p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"><i></i><i></i><i></i></span>Client feedback</p>
-        <h2>Trades call recordings, <span class="hl">on the way</span></h2>
+        <p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"><i></i><i></i><i></i></span>Sample calls</p>
+        <h2>Trades sample calls, <span class="hl">by call type</span></h2>
       </div>
-      <p class="mt-5 text-muted">Voice agents are a new service for us, so we haven't filled this wall with invented praise. Recordings of each of these trades calls are being prepared and stay marked as coming soon until they're checked. Book a demo to hear one set up for your trade today.</p>
+      <p class="mt-5 text-muted">Hear how our AI voice agent handles six everyday trades calls, from a burst pipe to booking a site visit, taken from our plumbing, heating and building pages. These are sample recordings with made-up firms and customers. Book a demo to hear one set up for your trade.</p>
     </div>
 
     <dl class="mt-12 grid border-y border-[var(--va-line-strong)] sm:grid-cols-3">
@@ -63,7 +57,7 @@ export const tradesLegacyMarkup = String.raw`
     </dl>
 
     <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-${samples.map(sample).join("\n")}
+${samples}
     </div>
   </div>
 </section>
