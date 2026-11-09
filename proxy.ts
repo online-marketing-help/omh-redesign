@@ -107,6 +107,26 @@ function maintenanceResponse() {
   });
 }
 
+/* Tells the root layout that this request is for the dashboard.
+
+   The dashboard is an internal tool, so the marketing site's analytics have
+   no business running on it. Plerdy proved the point: its script writes
+   `plerdy-tracking-id` attributes into the DOM before React hydrates, so the
+   markup React found was not the markup the server sent, and every dashboard
+   page threw a hydration error.
+
+   A request header rather than a pathname test inside the layout, because the
+   layout is shared with the public site and should not grow a list of routes
+   it treats differently. This file already knows which requests are the
+   dashboard; it is the right place to say so. */
+export const DASHBOARD_HEADER = "x-omh-dashboard";
+
+function pass(request: NextRequest) {
+  const headers = new Headers(request.headers);
+  headers.set(DASHBOARD_HEADER, "1");
+  return NextResponse.next({ request: { headers } });
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
@@ -120,12 +140,12 @@ export async function proxy(request: NextRequest) {
   }
 
   /* The sign-in page itself must stay reachable, or there is no way in. */
-  if (pathname === "/lead-dashboard/login") return NextResponse.next();
+  if (pathname === "/lead-dashboard/login") return pass(request);
 
-  if (!PASSWORD) return NextResponse.next();
+  if (!PASSWORD) return pass(request);
 
   const token = await dashboardToken(PASSWORD);
-  if (sameToken(request.cookies.get(COOKIE)?.value, token)) return NextResponse.next();
+  if (sameToken(request.cookies.get(COOKIE)?.value, token)) return pass(request);
 
   const to = request.nextUrl.clone();
   to.pathname = "/lead-dashboard/login";
