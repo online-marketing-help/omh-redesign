@@ -15,12 +15,23 @@ import { useId, useState } from "react";
 
 export type Point = { label: string; day: string; calls: number; minutes: number };
 
-export function Trend({ days, unit = "calls" }: { days: Point[]; unit?: string }) {
+export function Trend({
+  days,
+  unit = "calls",
+  height = 190,
+}: {
+  days: Point[];
+  unit?: string;
+  /* Drawn height. It is a prop because this chart sits beside a card whose
+     height is set by its content, and a short chart next to a long list is
+     what left a six hundred pixel hole down the middle of the overview. */
+  height?: number;
+}) {
   const uid = useId().replace(/:/g, "");
   const [hover, setHover] = useState<number | null>(null);
 
   const W = 720;
-  const H = 190;
+  const H = height;
   const PAD = { l: 30, r: 10, t: 14, b: 26 };
   const iw = W - PAD.l - PAD.r;
   const ih = H - PAD.t - PAD.b;

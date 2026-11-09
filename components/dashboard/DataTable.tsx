@@ -278,7 +278,16 @@ export function DataTable({
               visible, which hands the sticky headers to the viewport where they
               belong. Below it the wrapper scrolls sideways with them. */}
           <div
-            className="overflow-x-auto xl:overflow-x-visible rounded-2xl border border-line bg-surface"
+            /* Scrolls sideways until there is genuinely room for the table.
+
+               This flipped to `visible` at the xl breakpoint, 1280px, but the
+               widest table here needs about 1060px of its own and the rail
+               takes 248 before the page padding. So at exactly 1280 the
+               wrapper stopped scrolling and the TABLE pushed the whole page
+               sideways instead, which is the one thing the wrapper exists to
+               prevent. The number is the width at which it actually fits, not
+               the nearest named breakpoint. */
+            className="overflow-x-auto min-[1400px]:overflow-x-visible rounded-2xl border border-line bg-surface"
             style={{ boxShadow: "var(--e1), var(--ring-inset)" }}
           >
             <table className="w-full border-collapse text-[14px]" style={{ minWidth }}>

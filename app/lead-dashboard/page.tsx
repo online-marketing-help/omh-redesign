@@ -69,6 +69,10 @@ export default async function Overview({
   const prev = previousWindow(calls, WEEK);
   const days = dailySeries(calls, 14);
   const lastWeek = days.slice(-7);
+  /* The edges of the fortnight, read off rather than eyeballed from the line. */
+  const ranked = [...days].sort((a, b) => b.calls - a.calls);
+  const busiest = ranked[0];
+  const quietest = ranked[ranked.length - 1];
   const last = calls[0];
   const allMinutes = calls.reduce((n, c) => n + c.durationMs, 0) / 60000;
 
@@ -80,6 +84,14 @@ export default async function Overview({
     .filter((b) => b.status !== "cancelled" && b.preferredDate >= todayIso)
     .sort((a, b) => a.preferredDate.localeCompare(b.preferredDate));
 
+
+  /* Today, in the client's own day rather than the server's. */
+  const leadsToday = widget.leads.filter(
+    (l) => new Date(l.at).toISOString().slice(0, 10) === todayIso,
+  ).length;
+  const bookedToday = widget.bookings.filter(
+    (b) => new Date(b.at).toISOString().slice(0, 10) === todayIso,
+  ).length;
 
   /* One feed rather than three lists. A person reading this wants to know
      what happened in order, not to reconcile three tables by timestamp. */
@@ -104,7 +116,7 @@ export default async function Overview({
       meta: `${b.preferredDate} at ${b.preferredTime}`, tag: b.status,
       href: `/lead-dashboard/conversations/${encodeURIComponent(b.sessionId)}`,
     })),
-  ].sort((a, b) => b.at - a.at).slice(0, 10);
+  ].sort((a, b) => b.at - a.at).slice(0, 9);
 
   return (
     <Shell
@@ -119,6 +131,57 @@ export default async function Overview({
       }}
       toolbar={<Freshness last={last?.startedAt} />}
     >
+      {/* The day in one sentence, before any card.
+
+          Every other block on this page is a figure you have to interpret.
+          This is the interpretation, written out, because the first question
+          anybody opening a dashboard has is "is today normal", and a grid of
+          numbers answers that only after you have read all of it. */}
+      <div
+        className="mb-3 overflow-hidden rounded-2xl bg-inverse text-oninverse"
+        style={{
+          boxShadow: "var(--e2)",
+          backgroundImage:
+            "linear-gradient(135deg, rgb(var(--accent-rgb) / .22), transparent 55%)",
+        }}
+        data-rise
+      >
+        <div className="flex flex-col gap-5 px-5 py-5 sm:flex-row sm:items-center sm:gap-8 sm:px-7 sm:py-6">
+          <div className="min-w-0 flex-1">
+            <p className="font-sans text-[11px] font-semibold uppercase tracking-[.14em] text-white/55">
+              Today
+            </p>
+            <p className="mt-2 max-w-[56ch] font-sans text-[19px] font-semibold leading-snug tracking-[-.01em] sm:text-[21px]">
+              {day.calls === 0 && leadsToday === 0
+                ? "Nothing has come in yet today."
+                : `${day.calls} ${day.calls === 1 ? "call" : "calls"} and ${leadsToday} ${
+                    leadsToday === 1 ? "lead" : "leads"
+                  } so far${bookedToday ? `, ${bookedToday} booked` : ""}.`}
+              {inbox.waiting > 0
+                ? ` ${inbox.waiting} ${inbox.waiting === 1 ? "person is" : "people are"} waiting on a reply.`
+                : " Nobody is waiting on a reply."}
+            </p>
+          </div>
+          {/* Stacked on a phone: side by side, the sentence is flex-1 and
+              gets squeezed to two words a line while the figures keep their
+              width. */}
+          <dl className="flex shrink-0 gap-7 border-t border-white/12 pt-4 sm:border-0 sm:pt-0">
+            <div>
+              <dd className="font-sans text-[30px] font-semibold leading-none tabular-nums">
+                {dueToday.length}
+              </dd>
+              <dt className="mt-1.5 text-[12px] text-white/55">follow-ups due</dt>
+            </div>
+            <div>
+              <dd className="font-sans text-[30px] font-semibold leading-none tabular-nums">
+                {upcoming.length}
+              </dd>
+              <dt className="mt-1.5 text-[12px] text-white/55">appointments ahead</dt>
+            </div>
+          </dl>
+        </div>
+      </div>
+
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Kpi
           rise={0}
@@ -153,12 +216,17 @@ export default async function Overview({
         />
       </div>
 
-      {/* Above the chart on purpose. Every other figure on this page is
-          something that already happened; this one is somebody still waiting. */}
+      {/* The two things that need somebody, side by side rather than stacked.
+
+          Both are one line of text in a full-width box, so stacking them cost
+          two rows of page height to say what fits on one. They are also the
+          same kind of thing, a thing waiting on a person, and reading as one
+          band makes that obvious. */}
+      <div className="mt-3 grid gap-3 lg:grid-cols-2">
       {inbox.waiting > 0 && (
         <Link
-          href="/lead-dashboard/handover"
-          className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-[rgb(var(--accent-rgb)/.45)] bg-[rgb(var(--accent-rgb)/.14)] px-4 py-3.5 outline-none transition-colors duration-150 hover:bg-[rgb(var(--accent-rgb)/.2)] focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+          href={demo ? "/lead-dashboard/handover?demo=1" : "/lead-dashboard/handover"}
+          className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-[rgb(var(--accent-rgb)/.45)] bg-[rgb(var(--accent-rgb)/.14)] px-4 py-3.5 outline-none transition-colors duration-150 hover:bg-[rgb(var(--accent-rgb)/.2)] focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
         >
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[rgb(var(--accent-rgb)/.3)] text-[var(--dash-accent-text)]">
             <IconHandover className="h-[17px] w-[17px]" />
@@ -186,7 +254,7 @@ export default async function Overview({
       {active.length > 0 && (
         <Link
           href={demo ? "/lead-dashboard/sequences?demo=1" : "/lead-dashboard/sequences"}
-          className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-line bg-surface px-4 py-3 outline-none transition-colors duration-150 hover:bg-warm focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+          className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-line bg-surface px-4 py-3 outline-none transition-colors duration-150 hover:bg-warm focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
           style={{ boxShadow: "var(--e1), var(--ring-inset)" }}
         >
           <IconRoute className="h-4 w-4 shrink-0 text-[var(--dash-accent-text)]" />
@@ -206,9 +274,22 @@ export default async function Overview({
           </span>
         </Link>
       )}
+      </div>
 
-      <div className="mt-3 grid items-start gap-3 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      {/* A bento grid, not two independent columns.
+
+          The old layout was two rows of 2fr/1fr, and each card was free to be
+          whatever height its content wanted. "Where leads came from" drew
+          fifteen channels at 938px beside a 321px chart, which left a 617px
+          hole down the middle of the page: the first thing anybody noticed.
+
+          Twelve columns with explicit spans, and each card's content capped so
+          the pair either side of the gutter land within a row of each other.
+          The caps are not arbitrary: an overview is a glance, and the full
+          list is one click away on every one of them. */}
+      <div className="mt-3 grid gap-3 xl:grid-cols-12">
         <Card
+          className="xl:col-span-7"
           rise={4}
           title="Call volume"
           note="Last 14 days"
@@ -218,15 +299,57 @@ export default async function Overview({
             </span>
           }
         >
-          <Trend days={days} />
+          <Trend days={days} height={272} />
+
+          {/* Three readings off the same fortnight, under the line.
+
+              Equalising the two cards in this row moved the empty space from
+              between them to inside this one, which is not a fix. A line
+              shows the shape of a fortnight and hides its edges: the busiest
+              day and the quietest day are what somebody actually wants from
+              it, and reading them off a chart by eye is guesswork. */}
+          <dl className="mt-4 grid grid-cols-3 gap-3 border-t border-line pt-4">
+            {[
+              {
+                k: "Busiest day",
+                v: busiest ? String(busiest.calls) : "none",
+                note: busiest ? busiest.day : null,
+              },
+              {
+                k: "Quietest day",
+                v: quietest ? String(quietest.calls) : "none",
+                note: quietest ? quietest.day : null,
+              },
+              {
+                k: "Average a day",
+                v: days.length
+                  ? (days.reduce((n, d) => n + d.calls, 0) / days.length).toFixed(1)
+                  : "0",
+                note: "over 14 days",
+              },
+            ].map((c) => (
+              <div key={c.k}>
+                <dd className="font-sans text-[20px] font-semibold leading-none tabular-nums text-ink">
+                  {c.v}
+                </dd>
+                <dt className="mt-1.5 text-[12.5px] text-muted">{c.k}</dt>
+                {c.note && <p className="text-[12px] text-muted/80">{c.note}</p>}
+              </div>
+            ))}
+          </dl>
         </Card>
 
-        <Card rise={5} title="Where leads came from" note="Every channel, this period">
+        <Card
+          className="xl:col-span-5"
+          rise={5}
+          title="Where leads came from"
+          note="Ranked, this period"
+        >
           {widget.leads.length === 0 ? (
             <p className="py-6 text-center text-[13.5px] text-muted">No leads captured yet.</p>
           ) : (
             <>
-              <BarCompare unit="leads" bars={channelBars} />
+              <BarCompare unit="leads" bars={channelBars} limit={6} />
               <Link
                 href={demo ? "/lead-dashboard/channels?demo=1" : "/lead-dashboard/channels"}
                 className="mt-4 inline-flex items-center gap-1 text-[13.5px] font-semibold text-[var(--dash-accent-text)] underline underline-offset-4 outline-none hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
@@ -236,10 +359,14 @@ export default async function Overview({
             </>
           )}
         </Card>
-      </div>
 
-      <div className="mt-3 grid items-start gap-3 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <Card rise={6} title="Recent activity" note="Calls, leads and bookings in one line" pad={false}>
+        <Card
+          className="xl:col-span-7"
+          rise={6}
+          title="Recent activity"
+          note="Calls, leads and bookings in one line"
+          pad={false}
+        >
           {feed.length === 0 ? (
             <div className="p-5">
               <Empty>
@@ -285,6 +412,7 @@ export default async function Overview({
         </Card>
 
         <Card
+          className="xl:col-span-5"
           rise={7}
           title="Next appointments"
           note={upcoming.length ? `${upcoming.length} still to come` : undefined}
@@ -296,7 +424,7 @@ export default async function Overview({
             </div>
           ) : (
             <ul className="divide-y divide-line">
-              {upcoming.slice(0, 5).map((b) => (
+              {upcoming.slice(0, 7).map((b) => (
                 <li key={b._id} className={`px-4 py-3 sm:px-5 ${tr}`}>
                   <div className="flex items-baseline justify-between gap-3">
                     <span className="font-sans text-[14px] font-semibold tabular-nums">

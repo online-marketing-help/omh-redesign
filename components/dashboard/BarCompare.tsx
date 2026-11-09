@@ -38,6 +38,7 @@ export function BarCompare({
   bars,
   unit,
   max,
+  limit,
   emptyNote = "Nothing to compare yet.",
 }: {
   bars: Bar[];
@@ -45,10 +46,22 @@ export function BarCompare({
   unit: string;
   /** Force the scale, so two charts side by side can share one. */
   max?: number;
+  /* Show only the top few and say how many were left off.
+
+     An overview card is a glance, not a report. Fifteen channels drawn in
+     full made this card nine hundred pixels tall beside a three hundred
+     pixel chart, and the hole that left on the other side of the page was
+     the first thing anybody noticed about the screen. The ranking is the
+     point here; the long tail belongs on the Channels report. */
+  limit?: number;
   emptyNote?: string;
 }) {
-  const sorted = [...bars].sort((a, b) => b.value - a.value);
-  const top = max ?? Math.max(...sorted.map((b) => b.value), 1);
+  const ranked = [...bars].sort((a, b) => b.value - a.value);
+  const sorted = limit ? ranked.slice(0, limit) : ranked;
+  const hidden = ranked.length - sorted.length;
+  /* The scale stays the full set's, so a capped chart and an uncapped one
+     of the same data draw the same bars at the same widths. */
+  const top = max ?? Math.max(...ranked.map((b) => b.value), 1);
 
   if (!sorted.length || top <= 0) {
     return <p className="py-6 text-center text-[13.5px] text-muted">{emptyNote}</p>;
@@ -93,6 +106,12 @@ export function BarCompare({
           );
         })}
       </ol>
+
+      {hidden > 0 && (
+        <p className="mt-3 text-[12.5px] text-muted">
+          and {hidden} more {hidden === 1 ? "channel" : "channels"}
+        </p>
+      )}
 
       {/* The same figures as sentences, for a screen reader and for anyone
           who would rather read than measure. */}
