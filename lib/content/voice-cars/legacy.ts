@@ -27,7 +27,7 @@ export const carsLegacyMarkup = String.raw`
         <p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"><i></i><i></i><i></i></span>Sample calls</p>
         <h2>Dealership sample calls, <span class="hl">by call type</span></h2>
       </div>
-      <p class="mt-5 text-muted">Hear how our AI voice agent handles five everyday dealership calls, from a new car enquiry to questions about a listing. These are sample recordings with made-up dealerships and customers. We'll add client results here once we've checked them with each client.</p>
+      <p class="mt-5 text-muted">Hear how our AI voice agent handles six everyday dealership calls, from a new car enquiry to a follow-up call on a missed enquiry. These are sample recordings with made-up dealerships and customers. We'll add client results here once we've checked them with each client.</p>
     </div>
 
     <dl class="mt-12 grid border-y border-[var(--va-line-strong)] sm:grid-cols-3">
@@ -43,6 +43,7 @@ ${callTypeCards("AI Voice Agent for Car Dealerships", "Car dealership", [
   [3, "Used Car Enquiry & Part-Exchange", 84, "refresh", "Our AI voice agent taking a used Mercedes C-Class enquiry and the details of the caller's part-exchange car."],
   [4, "Car Finance & Monthly Payment Enquiry", 76, "pound", "Our AI voice agent noting the car, deposit and term a caller has in mind and passing the finance question to the finance team."],
   [5, "Vehicle Availability, Price & General Questions", 64, "tag", "Our AI voice agent checking a Volkswagen Golf listing by its reference and the dealership's warranty details before answering."],
+  [6, "Missed Call Recovery & Follow-Up", 64, "phone-missed", "Our AI voice agent following up a Kia Sportage enquiry and taking a Saturday showroom visit request for the sales team to confirm."],
 ])}
     </div>
   </div>
