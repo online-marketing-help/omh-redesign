@@ -27,7 +27,7 @@ export const hvacLegacyMarkup = String.raw`
         <p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"><i></i><i></i><i></i></span>Sample calls</p>
         <h2>Heating sample calls, <span class="hl">by call type</span></h2>
       </div>
-      <p class="mt-5 text-muted">Hear how our AI voice agent handles five everyday heating calls, from a boiler breakdown to a callback about a new boiler. These are sample recordings with made-up firms and customers. We'll add client results here once we've checked them with each client.</p>
+      <p class="mt-5 text-muted">Hear how our AI voice agent handles six everyday heating calls, from a boiler breakdown to a callback about a new boiler. These are sample recordings with made-up firms and customers. We'll add client results here once we've checked them with each client.</p>
     </div>
 
     <dl class="mt-12 grid border-y border-[var(--va-line-strong)] sm:grid-cols-3">
@@ -41,6 +41,7 @@ ${callTypeCards("AI Voice Agent for Heating & HVAC", "Heating", [
   [1, "Emergency Boiler Breakdown & No Heating", 75, "flame", "Our AI voice agent taking the error code and boiler make, giving the gas safety warning and flagging a no-heating call."],
   [2, "New Boiler Installation & Replacement Enquiry", 73, "home", "Our AI voice agent collecting the boiler type, its age, the property size and the timing for a replacement quote."],
   [3, "Annual Boiler Servicing & Maintenance Booking", 59, "wrench", "Our AI voice agent arranging a routine annual service for a Vaillant boiler after checking the postcode is covered."],
+  [4, "Air Conditioning Installation & Quote Request", 77, "sun", "Our AI voice agent collecting the rooms, property type and postcode for a home air conditioning quote, then offering a site survey."],
   [5, "Existing Customer — Heating System Fault & Repair Update", 66, "refresh", "Our AI voice agent finding a job by its reference and recording that the radiators still aren't heating after a visit."],
   [6, "Missed Call Recovery & Heating Installation Follow-Up", 46, "phone-missed", "Our AI voice agent calling back a missed caller about a new boiler quote and asking how soon they want it replaced."],
 ])}

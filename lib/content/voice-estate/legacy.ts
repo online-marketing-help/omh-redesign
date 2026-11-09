@@ -27,7 +27,7 @@ export const estateLegacyMarkup = String.raw`
         <p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"><i></i><i></i><i></i></span>Sample calls</p>
         <h2>Estate agency sample calls, <span class="hl">by call type</span></h2>
       </div>
-      <p class="mt-5 text-muted">Hear how our AI voice agent handles five everyday agency calls, from a buyer booking a viewing to an offer passed to a negotiator. These are sample recordings with made-up agencies and callers. We'll add client results here once we've checked them with each client.</p>
+      <p class="mt-5 text-muted">Hear how our AI voice agent handles six everyday agency calls, from a buyer booking a viewing to an offer passed to a negotiator. These are sample recordings with made-up agencies and callers. We'll add client results here once we've checked them with each client.</p>
     </div>
 
     <dl class="mt-12 grid border-y border-[var(--va-line-strong)] sm:grid-cols-3">
@@ -42,6 +42,7 @@ ${callTypeCards("AI Voice Agent for Real Estate", "Estate agency", [
   [2, "Rental Property Enquiry", 62, "key", "Our AI voice agent checking a flat's rent and availability, sharing the deposit details and offering a viewing."],
   [3, "Property Valuation Lead", 51, "pound", "Our AI voice agent taking the details of a three-bedroom semi in Chelmsford and arranging a valuation."],
   [4, "Viewing Cancellation & Rescheduling", 46, "replay", "Our AI voice agent finding a booked viewing and offering a new time on Friday afternoon."],
+  [5, "General Property Information", 55, "message", "Our AI voice agent answering a buyer's questions about a three-bedroom house from the listing, passing the rest to the sales team and arranging a weekend viewing."],
   [6, "Offer Enquiry & Human Handover", 56, "transfer", "Our AI voice agent recording a buyer's offer and passing it to the sales negotiator."],
 ])}
     </div>

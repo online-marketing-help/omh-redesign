@@ -27,7 +27,7 @@ export const plumbersLegacyMarkup = String.raw`
         <p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"><i></i><i></i><i></i></span>Sample calls</p>
         <h2>Plumbing sample calls, <span class="hl">by call type</span></h2>
       </div>
-      <p class="mt-5 text-muted">Hear how our AI voice agent handles five everyday plumbing calls, from a burst pipe to a letting agent reporting a leak. These are sample recordings with made-up firms and customers. We'll add client results here once we've checked them with each client.</p>
+      <p class="mt-5 text-muted">Hear how our AI voice agent handles six everyday plumbing calls, from a burst pipe to a letting agent reporting a leak. These are sample recordings with made-up firms and customers. We'll add client results here once we've checked them with each client.</p>
     </div>
 
     <dl class="mt-12 grid border-y border-[var(--va-line-strong)] sm:grid-cols-3">
@@ -41,6 +41,7 @@ ${callTypeCards("AI Voice Agent for Plumbers", "Plumber", [
   [1, "Emergency Plumbing Call", 55, "drop", "Our AI voice agent telling a caller with a burst pipe to turn off the stopcock, then passing the job to the emergency team."],
   [2, "Boiler Breakdown & Heating Repair", 51, "flame", "Our AI voice agent noting the boiler's error code and make, then checking the service area and engineer appointments."],
   [3, "Drain Blockage & Unblocking Service", 49, "wrench", "Our AI voice agent taking the details of a blocked outside drain that's backing up, so the team can assess the job."],
+  [4, "Plumbing Quote & New Job Enquiry", 53, "clipboard", "Our AI voice agent taking the details of a kitchen tap replacement in Chelmsford so the team can confirm the quote."],
   [5, "Existing Job Update & Engineer ETA", 45, "clock", "Our AI voice agent finding today's job and asking the team for an arrival time instead of guessing one."],
   [6, "Landlord & Letting Agent Plumbing Maintenance", 57, "key", "Our AI voice agent logging a letting agency's report of a leak in a tenant's flat and passing it to the maintenance team."],
 ])}

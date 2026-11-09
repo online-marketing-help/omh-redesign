@@ -27,7 +27,7 @@ export const dentalLegacyMarkup = String.raw`
         <p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"><i></i><i></i><i></i></span>Sample calls</p>
         <h2>Dental sample calls, <span class="hl">by call type</span></h2>
       </div>
-      <p class="mt-5 text-muted">Hear how our AI voice agent handles four everyday dental calls, from a patient in pain to a follow-up after treatment. These are sample recordings with made-up practices and patients. We'll add client results here once we've checked them with each client.</p>
+      <p class="mt-5 text-muted">Hear how our AI voice agent handles six everyday dental calls, from a patient in pain to a follow-up after treatment. These are sample recordings with made-up practices and patients. We'll add client results here once we've checked them with each client.</p>
     </div>
 
     <dl class="mt-12 grid border-y border-[var(--va-line-strong)] sm:grid-cols-3">
@@ -42,6 +42,8 @@ ${callTypeCards("AI Voice Agent for Dental Clinics", "Dental", [
   [2, "Dental Treatment Enquiry", 41, "sparkle", "Our AI voice agent answering a teeth whitening enquiry from the practice's approved price list and offering a consultation."],
   [3, "Missed Call Callback & New Lead Qualification", 48, "phone-missed", "Our AI voice agent picking up a new patient who couldn't get through earlier and logging a callback for the afternoon."],
   [4, "Post-Treatment Follow-up", 38, "calendar", "Our AI voice agent following up after treatment and checking the booking calendar for the patient's next appointment."],
+  [5, "Dental Payment & Finance Information", 48, "pound", "Our AI voice agent giving a routine check-up price from the clinic's approved list and arranging a call back about payment plans."],
+  [6, "Human Handover & Complex Patient Enquiry", 49, "transfer", "Our AI voice agent leaving a patient's treatment plan to the dental team and recording a callback request instead of giving clinical advice."],
 ])}
     </div>
   </div>
