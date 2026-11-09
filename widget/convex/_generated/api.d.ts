@@ -9,13 +9,10 @@
  */
 
 import type * as campaigns from "../campaigns.js";
-import type * as clock from "../clock.js";
 import type * as functions from "../functions.js";
 import type * as handover from "../handover.js";
 import type * as http from "../http.js";
-import type * as routes from "../routes.js";
 import type * as routing from "../routing.js";
-import type * as templates from "../templates.js";
 import type * as visitors from "../visitors.js";
 
 import type {
@@ -26,13 +23,10 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   campaigns: typeof campaigns;
-  clock: typeof clock;
   functions: typeof functions;
   handover: typeof handover;
   http: typeof http;
-  routes: typeof routes;
   routing: typeof routing;
-  templates: typeof templates;
   visitors: typeof visitors;
 }>;
 

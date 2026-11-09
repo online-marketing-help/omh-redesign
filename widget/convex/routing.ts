@@ -26,8 +26,8 @@ import { mutation, query } from "./_generated/server";
 import type { QueryCtx, MutationCtx } from "./_generated/server";
 import { v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
-import { ROUTES, nextStep, stepAt, type RouteId } from "./routes";
-import { render } from "./templates";
+import { ROUTES, nextStep, stepAt, type RouteId } from "../gates/routes";
+import { render } from "../gates/templates";
 import { phoneKey, emailKey } from "./visitors";
 
 const LEASE_MS = 120 * 1000;

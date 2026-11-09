@@ -1,6 +1,6 @@
 import {
   londonWall, londonInstant, londonAt, isSendableHour, nextSendableAt,
-} from "../convex/clock.ts";
+} from "../gates/clock.ts";
 
 let pass = 0, fail = 0;
 function eq(label: string, got: unknown, want: unknown) {

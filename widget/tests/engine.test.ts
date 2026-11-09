@@ -1,8 +1,8 @@
 import { readFileSync } from "node:fs";
 import { ctx, INDEXES } from "./convex-mock.ts";
 import * as R from "../convex/routing.ts";
-import { ROUTES } from "../convex/routes.ts";
-import { londonInstant } from "../convex/clock.ts";
+import { ROUTES } from "../gates/routes.ts";
+import { londonInstant } from "../gates/clock.ts";
 
 const SCHEMA = readFileSync(new URL("../convex/schema.ts", import.meta.url), "utf8");
 

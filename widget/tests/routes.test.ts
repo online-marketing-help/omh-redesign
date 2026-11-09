@@ -1,5 +1,5 @@
-import { ROUTES, dueAt, nextStep, channelsUsed, stepAt } from "../convex/routes.ts";
-import { londonWall, londonInstant, isSendableHour } from "../convex/clock.ts";
+import { ROUTES, dueAt, nextStep, channelsUsed, stepAt } from "../gates/routes.ts";
+import { londonWall, londonInstant, isSendableHour } from "../gates/clock.ts";
 
 let pass = 0, fail = 0;
 function eq(label: string, got: unknown, want: unknown) {
