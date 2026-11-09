@@ -178,7 +178,7 @@ export const inbox = query({
 
     const rows = await Promise.all(
       sessions.map(async (s) => {
-        const [last, profile] = await Promise.all([
+        const [last, profile, lead] = await Promise.all([
           ctx.db
             .query("messages")
             .withIndex("by_session_at", (i) => i.eq("sessionId", s.sessionId))
@@ -186,6 +186,15 @@ export const inbox = query({
             .first(),
           ctx.db
             .query("profiles")
+            .withIndex("by_session", (i) => i.eq("sessionId", s.sessionId))
+            .first(),
+          /* The person behind the session, not just the profile.
+             Without this every row in the queue reads "Visitor": the profile
+             is only filled once somebody volunteers a name mid-conversation,
+             while the lead carries it as soon as they are captured. Ten
+             identical rows is not a queue anybody can work. */
+          ctx.db
+            .query("leads")
             .withIndex("by_session", (i) => i.eq("sessionId", s.sessionId))
             .first(),
         ]);
@@ -199,10 +208,17 @@ export const inbox = query({
           lastSeenAt: s.lastSeenAt,
           takenBy: s.handoverBy ?? null,
           pageUrl: s.pageUrl ?? null,
-          name: profile?.name ?? null,
-          email: profile?.email ?? null,
-          phone: profile?.phone ?? null,
-          company: profile?.company ?? null,
+          name: profile?.name ?? lead?.name ?? null,
+          email: profile?.email ?? lead?.email ?? null,
+          phone: profile?.phone ?? lead?.phone ?? null,
+          company: profile?.company ?? lead?.company ?? null,
+          /* Which advert or page produced them. You answer a Google Ads lead
+             differently from somebody who wandered in, and the person
+             replying had no way of telling them apart. */
+          sourceChannel: lead?.sourceChannel ?? s.sourceChannel ?? null,
+          service: lead?.service ?? profile?.interestedIn?.[0] ?? null,
+          hot: lead?.hot ?? false,
+          leadId: lead?._id ?? null,
           /* The question that caused it, which is the one thing a person needs
              before anything else on the screen. */
           reason: mine[0]?.reason ?? null,
@@ -312,6 +328,12 @@ export const thread = query({
         budget: l.budget ?? null,
         message: l.message ?? null,
         hot: l.hot,
+        /* What a person decided came of this lead. Carried here so the
+           conversation page can both show it and set it: that page is where
+           somebody is standing when they finish reading the transcript, which
+           is the moment they actually know the answer. */
+        outcome: l.outcome ?? null,
+        valueGbp: l.valueGbp ?? null,
         channel: l.channel,
         at: l.at,
       })),

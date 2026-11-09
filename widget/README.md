@@ -22,8 +22,25 @@ reads it. Two things are deliberately **not** in this folder:
 There was a second copy of this project outside the repo, and an evening went
 into a bug that was only ever the two drifting apart: sixteen lines of fixes
 sat in the other copy while `npm run widget:build` kept building this one, so
-every rebuild looked successful and changed nothing. If you find another copy
-on a machine, it is stale.
+every rebuild looked successful and changed nothing.
+
+That can no longer happen. The working copy at `OHM/widget/` now **symlinks**
+into this folder rather than holding its own bytes:
+
+```
+OHM/widget/convex           -> ../website/widget/convex
+OHM/widget/web/embed/src    -> ../../../website/widget/web/embed/src
+OHM/widget/web/embed/dist   deleted; it held a stale bundle
+```
+
+So editing either path edits one file. `OHM/widget/` still keeps what cannot
+live in a repository: `n8n/`, `retell/`, `kb/` and `.env.local`.
+
+When the symlinks were made, `convex/` and `web/embed/src/embed.js` were already
+byte-identical in both copies, but the two `dist/ohm-assistant.js` bundles were
+**not**: the working copy's bundle predated the `withPerson` handover fix, so
+anything built from it would have shipped the handover bug again. That bundle is
+the one that was deleted. If you find a third copy on a machine, it is stale.
 
 `npm run widget:build` compiles `web/embed/src/embed.js` and copies the result
 to `public/ohm-assistant.js`, which is what the site actually serves. It runs

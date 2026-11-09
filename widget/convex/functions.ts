@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query, internalMutation, internalQuery } from "./_generated/server";
-import { findPerson, phoneKey, emailKey } from "./visitors";
+import { findPerson, phoneKey, emailKey, attributionArg, classifySource, cleanAttribution } from "./visitors";
 
 /* =========================================================================
    Everything the assistant can read or write. The HTTP layer in http.ts is
@@ -402,6 +402,12 @@ export const saveLead = mutation({
     message: v.optional(v.string()),
     hot: v.optional(v.boolean()),
     channel: v.optional(v.string()),
+    /* Where they came from, as opposed to `channel`, which is how they are
+       talking to us. A caller that knows (the Meta lead-ad webhook, a Google
+       Ads lead form) passes it; the widget does not need to, because the
+       session already carries what the browser saw. */
+    sourceChannel: v.optional(v.string()),
+    attribution: v.optional(attributionArg),
   },
   handler: async (ctx, a) => {
     /* One row per person, not per capture.
@@ -425,6 +431,16 @@ export const saveLead = mutation({
 
     const pk = phoneKey(a.phone);
     const ek = emailKey(a.email);
+
+    /* Where they came from. The caller may know better than the browser did
+       (a Meta lead ad carries its own ad id), so an explicit value wins;
+       otherwise inherit what the session captured on first load. */
+    const attribution =
+      cleanAttribution(a.attribution) ?? session?.attribution ?? undefined;
+    const sourceChannel = a.sourceChannel
+      ? classifySource({ sourceChannel: a.sourceChannel }, "unknown")
+      : (session?.sourceChannel ??
+         classifySource(a.attribution, a.channel === "voice" ? "website_voice" : "website_chat"));
 
     if (existing) {
       /* Merge rather than replace. A later visit that mentions no company
@@ -486,6 +502,14 @@ export const saveLead = mutation({
            visit was marked dealt with. */
         status: existing.status === "closed" ? "new" : existing.status,
         notified: false,
+        /* First touch wins. Somebody who first arrived through a Google ad
+           and comes back directly a week later is still a Google ad lead;
+           overwriting here would quietly credit the second visit's channel
+           with the first visit's advert. */
+        sourceChannel: existing.sourceChannel ?? sourceChannel,
+        attribution:
+          existing.attribution ??
+          (attribution ? { ...attribution, firstTouchAt: existing.firstAt ?? existing.at } : undefined),
       });
       return { ok: true, leadId: existing._id, returning: true, visits: (existing.visits ?? 1) + 1 };
     }
@@ -510,6 +534,8 @@ export const saveLead = mutation({
       phoneKey: pk,
       emailKey: ek,
       status: "new",
+      sourceChannel,
+      attribution: attribution ? { ...attribution, firstTouchAt: now() } : undefined,
     });
     return { ok: true, leadId: id, returning: false, visits: 1 };
   },

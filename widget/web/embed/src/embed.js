@@ -144,6 +144,66 @@
     }
   }
 
+  /* What advert sent them, captured once and kept.
+
+     Stored beside the visitor id rather than in the visit, because the whole
+     point is that it survives: somebody who clicks a Google ad on Monday,
+     reads two pages, then comes back on Friday and starts a chat is still a
+     Google ad lead. A per-visit capture would credit Friday's direct visit
+     and the ad spend would look like it produced nothing.
+
+     Written once and never updated. The second page of a visit carries no
+     gclid, so an overwrite would erase the thing we came for. */
+  function attribution() {
+    var KEY = "ohm_attribution";
+    try {
+      var saved = localStorage.getItem(KEY);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      /* Blocked or corrupt. Fall through and read the URL instead: worse than
+         a stored first touch, better than nothing. */
+    }
+
+    var q = {};
+    try {
+      var sp = new URLSearchParams(location.search);
+      sp.forEach(function (v, k) { q[k.toLowerCase()] = v; });
+    } catch (e) { q = {}; }
+
+    var ref = "";
+    try {
+      /* Our own pages are not a referrer worth recording. */
+      ref = document.referrer || "";
+      if (ref && ref.indexOf(location.hostname) !== -1) ref = "";
+    } catch (e) { ref = ""; }
+
+    var a = {};
+    function put(key, value) {
+      if (value && String(value).trim()) a[key] = String(value).trim().slice(0, 500);
+    }
+    /* gclid and fbclid are minted by the ad platform. A utm_ can be typed by
+       anyone, so these two are the ones that actually prove the advert. */
+    put("gclid", q.gclid);
+    put("fbclid", q.fbclid);
+    put("source", q.utm_source);
+    put("medium", q.utm_medium);
+    put("campaign", q.utm_campaign);
+    put("keyword", q.utm_term);
+    put("adGroup", q.utm_content);
+    put("campaignId", q.campaignid || q.campaign_id);
+    put("adId", q.adid || q.ad_id || q.creative);
+    put("landingPage", location.href);
+    put("referrer", ref);
+
+    /* Nothing identifying at all: no advert, no referrer. Do not store an
+       empty object, so a later visit that DOES carry one can still be the
+       first touch. */
+    if (!a.gclid && !a.fbclid && !a.source && !a.referrer) return null;
+
+    try { localStorage.setItem(KEY, JSON.stringify(a)); } catch (e) {}
+    return a;
+  }
+
   function sessionId() {
     try {
       var found = sessionStorage.getItem("ohm_assistant_session");
@@ -919,6 +979,7 @@ button,input{font:inherit;color:inherit;margin:0}
         visitorId: visitor,
         channel: "chat",
         pageUrl: location.href,
+        attribution: attribution() || undefined,
       }),
     })
       .then(function (r) { return r.ok ? r.json() : null; })

@@ -107,15 +107,169 @@ export async function findPerson(
  * the person's own first name, and only to a browser already carrying that
  * person's id.
  */
+/* =========================================================================
+   Where they came from.
+
+   `channel` on a session says how somebody is talking to us, "chat" or
+   "voice". It does not say which advert produced them, which is the question
+   every channel report actually asks. So acquisition is a second field,
+   `sourceChannel`, with the detail beside it.
+
+   First touch wins and is never overwritten. The advert that produced
+   somebody is the one they first arrived on; the last page they happened to
+   land on is not the same question and answering it would quietly credit
+   organic traffic with paid leads.
+   ========================================================================= */
+
+export const attributionArg = v.object({
+  sourceChannel: v.optional(v.string()),
+  source: v.optional(v.string()),
+  medium: v.optional(v.string()),
+  campaign: v.optional(v.string()),
+  campaignId: v.optional(v.string()),
+  adGroup: v.optional(v.string()),
+  adId: v.optional(v.string()),
+  formId: v.optional(v.string()),
+  keyword: v.optional(v.string()),
+  gclid: v.optional(v.string()),
+  fbclid: v.optional(v.string()),
+  landingPage: v.optional(v.string()),
+  referrer: v.optional(v.string()),
+});
+
+type AttrIn = {
+  sourceChannel?: string;
+  source?: string;
+  medium?: string;
+  campaign?: string;
+  campaignId?: string;
+  adGroup?: string;
+  adId?: string;
+  formId?: string;
+  keyword?: string;
+  gclid?: string;
+  fbclid?: string;
+  landingPage?: string;
+  referrer?: string;
+};
+
+/* The channels a lead can be recorded under.
+
+   The split that used to be here, `facebook_dm` for a message that came from
+   an advert against `facebook_page` for one that did not, is gone. Nobody
+   running the business thinks of those as two channels: it is one thread, on
+   one surface, answered the same way. Which advert produced it is kept in
+   `attribution`, which is where a question about an advert belongs.
+
+   What stays split is the ADVERT against the MESSAGE. A Facebook lead form is
+   somebody filling in a form inside Facebook; a Facebook message is somebody
+   typing to you. Different intent, different route, different cost, and
+   `facebook_ads` is the figure that says whether the ad spend is working. */
+const SOURCE_CHANNELS = new Set([
+  "website_chat", "website_voice", "website_form",
+  /* Paid. */
+  "google_ads", "facebook_ads", "instagram_ads",
+  /* Messages, however the person got there. */
+  "facebook", "instagram", "whatsapp",
+  "phone_inbound", "phone_missed",
+  "reactivation", "organic", "direct", "referral", "unknown",
+]);
+
+/* Search engines, for telling an organic visit from a referral.
+
+   A visit with no advert click and no campaign tag is classified by where it
+   came from, and "came from Google" and "came from a link on somebody else's
+   website" are different answers to the only question this field asks. */
+const SEARCH_ENGINES = /(^|\.)(google|bing|duckduckgo|yahoo|ecosia|brave|startpage)\./i;
+
+/**
+ * Work out the acquisition channel from what the browser could see.
+ *
+ * `gclid` and `fbclid` are minted by the ad platform and are the only two
+ * signals here that cannot be typed by hand, so they win over any `utm_`.
+ * A caller that already knows better (the Meta lead-ad webhook, say) passes
+ * `sourceChannel` explicitly and this leaves it alone.
+ */
+export function classifySource(a: AttrIn | undefined, fallback: string): string {
+  const given = a?.sourceChannel;
+  if (given && SOURCE_CHANNELS.has(given)) return given;
+
+  /* A click id is the only signal here that cannot be typed by hand, so it is
+     checked before anything else. */
+  if (a?.gclid) return "google_ads";
+  if (a?.fbclid) {
+    const src = (a.source || "").toLowerCase();
+    const med = (a.medium || "").toLowerCase();
+    /* A click-to-WhatsApp advert lands in a WhatsApp thread, so it is a
+       WhatsApp conversation. Which advert opened it is in `attribution`. */
+    if (src.includes("whatsapp") || med.includes("whatsapp")) return "whatsapp";
+    return src.includes("instagram") || src === "ig" ? "instagram_ads" : "facebook_ads";
+  }
+
+  const medium = (a?.medium || "").toLowerCase();
+  const source = (a?.source || "").toLowerCase();
+  if (medium === "cpc" || medium === "ppc" || medium === "paid") {
+    if (source.includes("google")) return "google_ads";
+    if (source.includes("instagram")) return "instagram_ads";
+    if (source.includes("facebook") || source.includes("fb")) return "facebook_ads";
+  }
+  if (medium === "organic") return "organic";
+
+  /* No advert click and no campaign tag. What is left is where the browser
+     says they came from, and that is a real signal rather than a guess.
+
+     This used to call every referrer a "referral", which put everybody who
+     found the site through a normal Google search into the same bucket as
+     somebody who followed a link from another company's website. Those are
+     the two different answers this field exists to tell apart, so a search
+     engine host is now read as organic and everything else as a referral.
+
+     No referrer at all is direct: typed in, a bookmark, or a browser that
+     stripped it. The last of those is why `direct` is always a little
+     overstated, everywhere, in every analytics tool. */
+  const ref = (a?.referrer || "").toLowerCase();
+  if (ref) {
+    let host = "";
+    try {
+      host = new URL(ref).hostname;
+    } catch {
+      host = ref;
+    }
+    if (SEARCH_ENGINES.test(`.${host}`)) return "organic";
+    return "referral";
+  }
+  if (medium === "referral") return "referral";
+
+  return fallback;
+}
+
+/** Drop empty strings and anything absurdly long before it reaches the row. */
+export function cleanAttribution(a: AttrIn | undefined): AttrIn | undefined {
+  if (!a) return undefined;
+  const out: Record<string, string> = {};
+  for (const [k, v0] of Object.entries(a)) {
+    if (k === "sourceChannel") continue;
+    const t = typeof v0 === "string" ? v0.trim() : "";
+    if (t) out[k] = t.slice(0, 500);
+  }
+  return Object.keys(out).length ? (out as AttrIn) : undefined;
+}
+
 export const hello = mutation({
   args: {
     sessionId: v.string(),
     visitorId: v.string(),
     channel: v.optional(v.string()),
     pageUrl: v.optional(v.string()),
+    attribution: v.optional(attributionArg),
   },
   handler: async (ctx, a) => {
     const channel = a.channel ?? "chat";
+    const attribution = cleanAttribution(a.attribution);
+    const sourceChannel = classifySource(
+      a.attribution,
+      channel === "voice" ? "website_voice" : "website_chat",
+    );
 
     const s = await ctx.db
       .query("sessions")
@@ -123,11 +277,15 @@ export const hello = mutation({
       .first();
 
     if (s) {
-      if (s.visitorId !== a.visitorId) {
-        await ctx.db.patch(s._id, { visitorId: a.visitorId, lastSeenAt: now() });
-      } else {
-        await ctx.db.patch(s._id, { lastSeenAt: now() });
+      const patch: Record<string, unknown> = { lastSeenAt: now() };
+      if (s.visitorId !== a.visitorId) patch.visitorId = a.visitorId;
+      /* Only if the session has none. A second page view on the same visit
+         carries no gclid and would otherwise overwrite the one that did. */
+      if (!s.sourceChannel) patch.sourceChannel = sourceChannel;
+      if (!s.attribution && attribution) {
+        patch.attribution = { ...attribution, firstTouchAt: now() };
       }
+      await ctx.db.patch(s._id, patch);
     } else {
       await ctx.db.insert("sessions", {
         sessionId: a.sessionId,
@@ -136,10 +294,28 @@ export const hello = mutation({
         startedAt: now(),
         lastSeenAt: now(),
         pageUrl: a.pageUrl,
+        sourceChannel,
+        attribution: attribution
+          ? { ...attribution, firstTouchAt: now() }
+          : undefined,
       });
     }
 
     const person = await findPerson(ctx, { visitorId: a.visitorId });
+
+    /* Carry it onto the person, but only if they do not already have one.
+       Somebody who first arrived through a Google ad and comes back a week
+       later directly is still a Google ad lead. */
+    if (person && !person.sourceChannel) {
+      await ctx.db.patch(person._id, {
+        sourceChannel,
+        attribution: person.attribution
+          ? person.attribution
+          : attribution
+            ? { ...attribution, firstTouchAt: now() }
+            : undefined,
+      });
+    }
 
     /* Conversations this person has had, this one included. Counted from
        sessions rather than from the lead's own counter so it stays right even

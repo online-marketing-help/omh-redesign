@@ -170,6 +170,8 @@ http.route({
       message: b.message || undefined,
       hot: b.hot === true || b.hot === "true",
       channel: b.channel || undefined,
+      sourceChannel: b.sourceChannel || b.source_channel || undefined,
+      attribution: b.attribution || undefined,
     }),
   ),
 });
@@ -422,6 +424,7 @@ http.route({
       visitorId: String(b.visitorId ?? b.visitor_id ?? ""),
       channel: b.channel || undefined,
       pageUrl: b.pageUrl || b.page_url || undefined,
+      attribution: b.attribution || undefined,
     }),
   ),
 });
@@ -506,6 +509,366 @@ http.route({
     ctx.runQuery(api.functions.conversations, {
       limit: b.limit ? Number(b.limit) : undefined,
     }),
+  ),
+});
+
+/* ------------------------------------------------------------- routing
+
+   The lead routing engine. n8n is the only caller: `07-router` enrols,
+   `08-sequence-worker` claims and completes, `09-twilio-inbound` records
+   replies and opt-outs. Every one of these is behind the same shared secret
+   as the rest of the file.
+
+   Nothing here sends anything. Convex renders the message and hands it back;
+   the provider call stays in n8n where it is visible and re-runnable.
+   ------------------------------------------------------------------------ */
+
+http.route({
+  path: "/router/enrol",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runMutation(api.routing.enrol, {
+      leadId: b.leadId,
+      route: String(b.route ?? ""),
+      sessionId: b.sessionId || undefined,
+    }),
+  ),
+});
+
+http.route({
+  path: "/sequence/claimDue",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runMutation(api.routing.claimDue, {
+      limit: b.limit ? Number(b.limit) : undefined,
+      leaseMs: b.leaseMs ? Number(b.leaseMs) : undefined,
+    }),
+  ),
+});
+
+http.route({
+  path: "/sequence/completeStep",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runMutation(api.routing.completeStep, {
+      sequenceId: b.sequenceId,
+      leaseToken: String(b.leaseToken ?? ""),
+      outcome: String(b.outcome ?? ""),
+      reason: b.reason || undefined,
+    }),
+  ),
+});
+
+http.route({
+  path: "/sequence/stop",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runMutation(api.routing.stopSequences, {
+      leadId: b.leadId,
+      reason: String(b.reason ?? "manual"),
+    }),
+  ),
+});
+
+http.route({
+  path: "/sequence/board",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runQuery(api.routing.sequenceBoard, {
+      limit: b.limit ? Number(b.limit) : undefined,
+    }),
+  ),
+});
+
+http.route({
+  path: "/backfillKeys",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runMutation(api.routing.backfillKeys, {
+      limit: b.limit ? Number(b.limit) : undefined,
+    }),
+  ),
+});
+
+http.route({
+  path: "/confirmations/pending",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runMutation(api.routing.pendingConfirmations, {
+      limit: b.limit ? Number(b.limit) : undefined,
+    }),
+  ),
+});
+
+http.route({
+  path: "/confirmations/mark",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runMutation(api.routing.markConfirmationSent, { bookingId: b.bookingId }),
+  ),
+});
+
+http.route({
+  path: "/touch/record",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runMutation(api.routing.recordTouch, {
+      leadId: b.leadId || undefined,
+      sessionId: b.sessionId || undefined,
+      direction: String(b.direction ?? "out"),
+      channel: String(b.channel ?? ""),
+      route: b.route || undefined,
+      step: b.step !== undefined && b.step !== null ? Number(b.step) : undefined,
+      status: String(b.status ?? "sent"),
+      providerId: b.providerId || undefined,
+      body: b.body || undefined,
+      error: b.error || undefined,
+      idempotencyKey: b.idempotencyKey || undefined,
+    }),
+  ),
+});
+
+/* Twilio and Retell both report delivery later, on their own callback. */
+http.route({
+  path: "/touch/status",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runMutation(api.routing.updateTouchStatus, {
+      providerId: String(b.providerId ?? ""),
+      status: String(b.status ?? ""),
+      error: b.error || undefined,
+    }),
+  ),
+});
+
+/* ------------------------------------------------------------- consent */
+
+http.route({
+  path: "/consent/log",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runMutation(api.routing.logConsent, {
+      leadId: b.leadId || undefined,
+      phoneKey: b.phoneKey || undefined,
+      emailKey: b.emailKey || undefined,
+      kind: String(b.kind ?? ""),
+      action: String(b.action ?? ""),
+      basis: b.basis || undefined,
+      evidence: b.evidence || undefined,
+      source: b.source || undefined,
+      by: b.by || undefined,
+    }),
+  ),
+});
+
+http.route({
+  path: "/consent/check",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runQuery(api.routing.checkSendable, {
+      leadId: b.leadId,
+      channel: String(b.channel ?? ""),
+      route: b.route || undefined,
+    }),
+  ),
+});
+
+/* The inbound STOP lands here. It both lists them and stops anything in
+   flight: recording the opt-out without stopping the sequence would let the
+   next step go out, which is exactly what they just asked us not to do. */
+http.route({
+  path: "/suppress/add",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runMutation(api.routing.suppress, {
+      key: String(b.key ?? ""),
+      kind: String(b.kind ?? "phone"),
+      reason: String(b.reason ?? "manual"),
+      note: b.note || undefined,
+    }),
+  ),
+});
+
+http.route({
+  path: "/suppress/check",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runQuery(api.routing.isSuppressed, {
+      key: String(b.key ?? ""),
+      kind: b.kind || undefined,
+    }),
+  ),
+});
+
+/* ------------------------------------------------- the off switch, reading */
+
+http.route({
+  path: "/settings/outbound",
+  method: "POST",
+  handler: route(async (ctx, b) => {
+    /* One route for both, because the dashboard reads it on every render and
+       writes it from one button. `enabled` present means write. */
+    if (typeof b.enabled === "boolean") {
+      return await ctx.runMutation(api.routing.setOutbound, {
+        enabled: b.enabled,
+        by: b.by || undefined,
+      });
+    }
+    return await ctx.runQuery(api.routing.outboundEnabled, {});
+  }),
+});
+
+http.route({
+  path: "/lead/outcome",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runMutation(api.routing.setOutcome, {
+      leadId: b.leadId,
+      outcome: String(b.outcome ?? ""),
+      valueGbp: b.valueGbp !== undefined && b.valueGbp !== null && b.valueGbp !== ""
+        ? Number(b.valueGbp)
+        : undefined,
+      lostReason: b.lostReason || undefined,
+      by: b.by || undefined,
+    }),
+  ),
+});
+
+http.route({
+  path: "/inbox/feed",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runQuery(api.routing.inboxFeed, {
+      limit: b.limit ? Number(b.limit) : undefined,
+      sinceMs: b.sinceMs ? Number(b.sinceMs) : undefined,
+    }),
+  ),
+});
+
+http.route({
+  path: "/lead/find",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runQuery(api.routing.findLead, {
+      phone: b.phone || b.From || b.from || undefined,
+      email: b.email || undefined,
+    }),
+  ),
+});
+
+http.route({
+  path: "/lead/timeline",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runQuery(api.routing.leadTimeline, {
+      leadId: b.leadId,
+      limit: b.limit ? Number(b.limit) : undefined,
+    }),
+  ),
+});
+
+http.route({
+  path: "/stats/channels",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runQuery(api.routing.channelFacts, {
+      sinceMs: b.sinceMs ? Number(b.sinceMs) : undefined,
+      limit: b.limit ? Number(b.limit) : undefined,
+    }),
+  ),
+});
+
+http.route({
+  path: "/lead/outcome/many",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runMutation(api.routing.setOutcomeMany, {
+      leadIds: Array.isArray(b.leadIds) ? b.leadIds : [],
+      outcome: String(b.outcome ?? ""),
+      by: b.by || undefined,
+    }),
+  ),
+});
+
+/* ---------------------------------------------------------------- campaigns
+
+   A deliberate run: reactivation, mostly. `11-reactivation` creates one,
+   enrols the list in pages of a hundred, and sends the first message inline
+   the same way the router does for an enquiry. The dashboard reads the
+   report. */
+
+http.route({
+  path: "/campaign/create",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runMutation(api.campaigns.create, {
+      name: String(b.name ?? ""),
+      kind: b.kind || undefined,
+      route: b.route || undefined,
+      audience: b.audience || undefined,
+      consentBasis: b.consentBasis || undefined,
+      note: b.note || undefined,
+      intended:
+        b.intended !== undefined && b.intended !== null && b.intended !== ""
+          ? Number(b.intended)
+          : undefined,
+      by: b.by || undefined,
+    }),
+  ),
+});
+
+http.route({
+  path: "/campaign/enrol",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runMutation(api.campaigns.enrolBatch, {
+      campaignId: b.campaignId,
+      leadIds: Array.isArray(b.leadIds) ? b.leadIds : [],
+    }),
+  ),
+});
+
+http.route({
+  path: "/campaign/status",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runMutation(api.campaigns.setStatus, {
+      campaignId: b.campaignId,
+      status: String(b.status ?? ""),
+      by: b.by || undefined,
+    }),
+  ),
+});
+
+/* Its own route rather than `status: "stopped"`, because stopping a campaign
+   has to stop the queued steps as well. Two routes would let a caller set the
+   status and leave the texts going out. */
+http.route({
+  path: "/campaign/stop",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runMutation(api.campaigns.stop, {
+      campaignId: b.campaignId,
+      by: b.by || undefined,
+    }),
+  ),
+});
+
+http.route({
+  path: "/campaign/list",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runQuery(api.campaigns.list, {
+      limit: b.limit ? Number(b.limit) : undefined,
+    }),
+  ),
+});
+
+http.route({
+  path: "/campaign/report",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runQuery(api.campaigns.report, { campaignId: b.campaignId }),
   ),
 });
 
