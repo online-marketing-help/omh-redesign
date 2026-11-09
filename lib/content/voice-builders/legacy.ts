@@ -27,7 +27,7 @@ export const buildersLegacyMarkup = String.raw`
         <p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"><i></i><i></i><i></i></span>Sample calls</p>
         <h2>Builder sample calls, <span class="hl">by call type</span></h2>
       </div>
-      <p class="mt-5 text-muted">Hear how our AI voice agent handles five everyday builder calls, from a new extension enquiry to a customer chasing a return date. These are sample recordings with made-up firms and customers. We'll add client results here once we've checked them with each client.</p>
+      <p class="mt-5 text-muted">Hear how our AI voice agent handles six everyday builder calls, from a new extension enquiry to a customer chasing a return date. These are sample recordings with made-up firms and customers. We'll add client results here once we've checked them with each client.</p>
     </div>
 
     <dl class="mt-12 grid border-y border-[var(--va-line-strong)] sm:grid-cols-3">
@@ -43,6 +43,7 @@ ${callTypeCards("AI Voice Agent for Contractors & Builders", "Builder", [
   [3, "Roofing, Structural Repairs & Urgent Building Work", 84, "drop", "Our AI voice agent flagging water coming through a ceiling near a light as a priority, with a safety warning, without promising a same-day visit."],
   [4, "Free Quote Request & Site Visit Booking", 85, "clipboard", "Our AI voice agent collecting the details of a garage-to-office conversion and helping arrange a site visit."],
   [5, "Existing Customer - Project Update & Schedule Changes", 56, "clock", "Our AI voice agent finding a bathroom project by its reference and checking the schedule rather than guessing a return date."],
+  [6, "Missed Call Recovery & Follow-Up", 64, "phone-missed", "Our AI voice agent calling back someone who enquired earlier, checking they still need help and passing a callback request to the team."],
 ])}
     </div>
   </div>
