@@ -32,6 +32,24 @@ export type Lead = {
   visits?: number;
   firstAt?: number;
   visitorIds?: string[];
+  /* `channel` above is how they are TALKING to us, "chat" or "voice".
+     `sourceChannel` is which advert or page produced them, which is the
+     question every channel report actually asks. Optional: rows captured
+     before attribution existed carry neither. */
+  sourceChannel?: string;
+  /* Set by a person on the dashboard, never by the assistant. */
+  outcome?: string;
+  valueGbp?: number;
+  attribution?: {
+    campaign?: string;
+    adId?: string;
+    gclid?: string;
+    fbclid?: string;
+    keyword?: string;
+    source?: string;
+    medium?: string;
+    landingPage?: string;
+  };
 };
 
 export type Booking = {

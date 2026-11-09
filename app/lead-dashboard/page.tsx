@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Shell } from "@/components/dashboard/Shell";
 import { Card, Pill, Empty, tr } from "@/components/dashboard/ui";
-import { Kpi, deltaOf, Mix } from "@/components/dashboard/Stats";
+import { Kpi, deltaOf } from "@/components/dashboard/Stats";
 import { Trend } from "@/components/dashboard/Trend";
 import {
   IconPhone, IconClock, IconLead, IconCalendar, IconChat, IconHandover,
@@ -13,18 +13,56 @@ import {
 import { getWidgetData, temperature, fmtDate } from "@/lib/dashboard/convex";
 import { getInbox } from "@/lib/dashboard/handover";
 import { londonToday } from "@/lib/dashboard/day";
+import { isDemo, demoWidgetData, demoCalls, demoSequenceBoard } from "@/lib/dashboard/demo";
+import { getSequenceBoard, sourceLabel, when, canonicalSource } from "@/lib/dashboard/routing";
+import { BarCompare } from "@/components/dashboard/BarCompare";
+import { IconRoute } from "@/components/dashboard/icons";
 
 export const dynamic = "force-dynamic";
 
 const WEEK = 7 * 86400000;
 
-export default async function Overview() {
-  const [raw, widget, inbox] = await Promise.all([
-    getCalls().catch(() => []),
-    getWidgetData(),
-    getInbox(),
-  ]);
-  const { real: calls } = realCalls(raw);
+export default async function Overview({
+  searchParams,
+}: {
+  searchParams: Promise<{ demo?: string }>;
+}) {
+  const demo = isDemo(await searchParams);
+
+  const [raw, widget, inbox] = demo
+    ? [demoCalls(), demoWidgetData(), { waiting: 2, live: 0, rows: [], orphanQuestions: 0, awaitingReply: 0 }]
+    : await Promise.all([getCalls().catch(() => []), getWidgetData(), getInbox()]);
+
+  /* The example calls are already "real": realCalls strips our own test
+     traffic, and a demonstration has none. */
+  const calls = demo ? raw : realCalls(raw).real;
+
+  /* The front page was built before channels existed and said nothing about
+     them, which left it disagreeing with every other screen. */
+  const board = demo ? demoSequenceBoard() : await getSequenceBoard(200);
+  const active = (board?.rows ?? []).filter((r) => r.status === "active");
+  const endOfDay = new Date();
+  endOfDay.setHours(23, 59, 59, 999);
+  const dueToday = active.filter(
+    (r) => r.nextDueAt && r.nextDueAt <= endOfDay.getTime(),
+  );
+  const nextOut = [...active]
+    .filter((r) => r.nextDueAt)
+    .sort((a, b) => (a.nextDueAt ?? 0) - (b.nextDueAt ?? 0))[0];
+
+  const hot = widget.leads.filter((l) => temperature(l) === "hot").length;
+  const warm = widget.leads.filter((l) => temperature(l) === "warm").length;
+
+  const bySource = new Map<string, number>();
+  for (const l of widget.leads) {
+    const k = canonicalSource(l.sourceChannel);
+    bySource.set(k, (bySource.get(k) ?? 0) + 1);
+  }
+  const channelBars = [...bySource.entries()].map(([key, value]) => ({
+    key,
+    label: sourceLabel(key),
+    value,
+  }));
 
   const day = today(calls);
   const week = windowOf(calls, WEEK);
@@ -42,9 +80,6 @@ export default async function Overview() {
     .filter((b) => b.status !== "cancelled" && b.preferredDate >= todayIso)
     .sort((a, b) => a.preferredDate.localeCompare(b.preferredDate));
 
-  const hot = widget.leads.filter((l) => temperature(l) === "hot").length;
-  const warm = widget.leads.filter((l) => temperature(l) === "warm").length;
-  const cold = widget.leads.length - hot - warm;
 
   /* One feed rather than three lists. A person reading this wants to know
      what happened in order, not to reconcile three tables by timestamp. */
@@ -74,6 +109,7 @@ export default async function Overview() {
   return (
     <Shell
       active="/lead-dashboard"
+      demo={demo}
       title="Overview"
       lead="Everything your assistant handled, what it captured, and what it booked."
       counts={{
@@ -94,7 +130,7 @@ export default async function Overview() {
         />
         <Kpi
           rise={1}
-          label="Calls, last 7 days"
+          label="Last 7 days"
           value={String(week.calls)}
           delta={deltaOf(week.calls, prev.calls)}
           sub={week.calls > 0 ? fmtMinutes(week.minutes) : last ? `last ${fmtWhen(last.startedAt)}` : "none yet"}
@@ -144,7 +180,34 @@ export default async function Overview() {
         </Link>
       )}
 
-      <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      {/* What is about to go out. Every other figure on this page is
+          something that already happened; this one is the operational number
+          somebody acts on before lunch. */}
+      {active.length > 0 && (
+        <Link
+          href={demo ? "/lead-dashboard/sequences?demo=1" : "/lead-dashboard/sequences"}
+          className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-line bg-surface px-4 py-3 outline-none transition-colors duration-150 hover:bg-warm focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+          style={{ boxShadow: "var(--e1), var(--ring-inset)" }}
+        >
+          <IconRoute className="h-4 w-4 shrink-0 text-[var(--dash-accent-text)]" />
+          <span className="text-[13.5px] font-semibold text-ink">
+            {dueToday.length === 0
+              ? `${active.length} being followed up`
+              : `${dueToday.length} follow-${dueToday.length === 1 ? "up goes" : "ups go"} out today`}
+          </span>
+          {nextOut && (
+            <span className="text-[13.5px] text-muted">
+              Next: {nextOut.stepLabel ?? "a message"} to {nextOut.name ?? "a lead"},{" "}
+              {when(nextOut.nextDueAt)}.
+            </span>
+          )}
+          <span className="ml-auto shrink-0 text-[13.5px] font-medium text-[var(--dash-accent-text)] underline underline-offset-4">
+            See all
+          </span>
+        </Link>
+      )}
+
+      <div className="mt-3 grid items-start gap-3 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <Card
           rise={4}
           title="Call volume"
@@ -158,34 +221,24 @@ export default async function Overview() {
           <Trend days={days} />
         </Card>
 
-        <Card rise={5} title="Lead temperature" note="How warm they were when they left">
+        <Card rise={5} title="Where leads came from" note="Every channel, this period">
           {widget.leads.length === 0 ? (
             <p className="py-6 text-center text-[13.5px] text-muted">No leads captured yet.</p>
           ) : (
             <>
-              <Mix
-                parts={[
-                  { label: "Hot", value: hot, fill: "#c4572f" },
-                  { label: "Warm", value: warm, fill: "var(--accent)" },
-                  { label: "Cold", value: cold, fill: "var(--color-line)" },
-                ]}
-              />
-              <p className="mt-4 border-t border-line pt-3 text-[12.5px] leading-relaxed text-muted">
-                Hot is set by the assistant during the conversation. Warm means
-                they left a way to reach them and said what they were after.
-              </p>
+              <BarCompare unit="leads" bars={channelBars} />
               <Link
-                href="/lead-dashboard/leads"
-                className="mt-3 inline-flex items-center gap-1 text-[13.5px] font-semibold text-[var(--dash-accent-text)] underline underline-offset-4 outline-none hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+                href={demo ? "/lead-dashboard/channels?demo=1" : "/lead-dashboard/channels"}
+                className="mt-4 inline-flex items-center gap-1 text-[13.5px] font-semibold text-[var(--dash-accent-text)] underline underline-offset-4 outline-none hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
               >
-                See every lead
+                The full channel report
               </Link>
             </>
           )}
         </Card>
       </div>
 
-      <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      <div className="mt-3 grid items-start gap-3 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <Card rise={6} title="Recent activity" note="Calls, leads and bookings in one line" pad={false}>
           {feed.length === 0 ? (
             <div className="p-5">

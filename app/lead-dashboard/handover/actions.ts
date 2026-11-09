@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { assertCanWrite } from "@/lib/dashboard/auth";
 import * as handover from "@/lib/dashboard/handover";
 import type { Thread } from "@/lib/dashboard/handover";
+import { demoThread } from "@/lib/dashboard/demo";
 
 /* =========================================================================
    What the handover screen is allowed to do.
@@ -22,6 +23,23 @@ export type Result = { ok: boolean; message?: string; thread?: Thread | null };
 /** The live thread, for the screen's own refresh. Read only, and it still
     requires the password: the transcript is a visitor's conversation. */
 export async function fetchThread(sessionId: string): Promise<Result> {
+  /* The example data, answered here rather than by a `demo` flag passed down
+     from the page.
+
+     A server action is its own endpoint and gets no search parameters, so the
+     session id is what it has to go on. That is safe to key off: `demo-` is
+     already one of the prefixes `lib/dashboard/test-rows.ts` refuses to count
+     as a real conversation, so no live session can ever be named this and no
+     real transcript can be reached through this branch. It returns before the
+     write check because there is nothing here to protect: none of it
+     happened. */
+  if (sessionId.startsWith("demo-")) {
+    const thread = demoThread(sessionId);
+    return thread
+      ? { ok: true, thread }
+      : { ok: false, message: "No example conversation with that reference." };
+  }
+
   const auth = await assertCanWrite();
   if (!auth.ok) return { ok: false, message: auth.why };
   const thread = await handover.getThread(sessionId);

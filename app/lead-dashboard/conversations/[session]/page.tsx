@@ -2,11 +2,16 @@ import Link from "next/link";
 import { Shell } from "@/components/dashboard/Shell";
 import { Card, Pill, Empty } from "@/components/dashboard/ui";
 import {
-  IconBack, IconChat, IconMic, IconLead, IconCalendar, IconHandover, IconPhone, IconClock,
+  IconBack, IconChat, IconMic, IconLead, IconCalendar, IconHandover,
 } from "@/components/dashboard/icons";
 import { getThread, getVisitorConversations } from "@/lib/dashboard/handover";
 import { getCalls, getCall, fmtDuration, fmtWhen } from "@/lib/dashboard/retell";
 import { fmtDate } from "@/lib/dashboard/convex";
+
+import { FollowUpTimeline } from "@/components/dashboard/FollowUpTimeline";
+import { OutcomePicker } from "@/components/dashboard/OutcomePicker";
+import { getLeadTimeline, canWrite, sourceLabel } from "@/lib/dashboard/routing";
+import { isDemo, demoTimeline } from "@/lib/dashboard/demo";
 
 export const dynamic = "force-dynamic";
 
@@ -26,11 +31,14 @@ export const dynamic = "force-dynamic";
 
 export default async function Conversation({
   params,
+  searchParams,
 }: {
   params: Promise<{ session: string }>;
+  searchParams: Promise<{ demo?: string }>;
 }) {
   const { session } = await params;
   const sessionId = decodeURIComponent(session);
+  const demo = isDemo(await searchParams);
 
   const [thread, allCalls] = await Promise.all([
     getThread(sessionId),
@@ -46,7 +54,17 @@ export default async function Conversation({
      case, and loading every transcript to draw one page is not worth it. */
   const calls = await Promise.all(linked.slice(0, 3).map((c) => getCall(c.callId).catch(() => null)));
 
-  const reachable = thread !== null;
+  /* What was actually DONE about this person, as opposed to what was said to
+     them. Fetched separately because it spans every visit they have had, not
+     only this conversation. */
+  const leadId = thread?.leads?.[0]?.id;
+  const timeline = demo
+    ? demoTimeline()
+    : leadId
+      ? await getLeadTimeline(leadId)
+      : null;
+
+  const reachable = thread !== null || demo;
   const messages = thread?.messages ?? [];
   const lead = thread?.leads?.[0] ?? null;
   const name = lead?.name || thread?.profile?.name || "Visitor";
@@ -54,7 +72,8 @@ export default async function Conversation({
   return (
     <Shell
       active="/lead-dashboard/leads"
-      title={name}
+      demo={demo}
+      title={demo ? demoTimeline().lead.name : name}
       lead={
         reachable
           ? "Everything said in this conversation, by chat and by phone, and what came out of it."
@@ -62,7 +81,7 @@ export default async function Conversation({
       }
       toolbar={
         <Link
-          href="/lead-dashboard/leads"
+          href={demo ? "/lead-dashboard/leads?demo=1" : "/lead-dashboard/leads"}
           className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-line bg-surface px-3 py-1.5 text-[13.5px] font-semibold outline-none transition-colors duration-150 hover:bg-warm focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
         >
           <IconBack className="h-4 w-4" />
@@ -77,7 +96,7 @@ export default async function Conversation({
           assistant&rsquo;s Convex deployment yet, or OHM_WIDGET_SECRET is not
           set on this server.
         </Empty>
-      ) : messages.length === 0 && calls.filter(Boolean).length === 0 ? (
+      ) : !demo && messages.length === 0 && calls.filter(Boolean).length === 0 ? (
         <Empty>
           Nothing was recorded for this conversation. Leads captured before
           message logging was switched on have no transcript behind them.
@@ -85,6 +104,7 @@ export default async function Conversation({
       ) : (
         <div className="grid gap-3 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] xl:items-start">
           <div className="grid gap-3">
+            {timeline && <FollowUpTimeline timeline={timeline} rise={0} />}
             {messages.length > 0 && (
               <Card
                 title="Chat"
@@ -155,20 +175,87 @@ export default async function Conversation({
             )}
           </div>
 
-          <div className="grid gap-3">
-            <Outcome thread={thread} />
-            <OtherVisits sessionId={sessionId} visitorId={thread.visitorId} />
-            <Details thread={thread} sessionId={sessionId} />
-          </div>
+          {!demo && thread && (
+            <div className="grid gap-3">
+              <Outcome thread={thread} demo={demo} />
+              <OtherVisits sessionId={sessionId} visitorId={thread.visitorId} />
+              <Details thread={thread} sessionId={sessionId} />
+            </div>
+          )}
+          {demo && timeline && <Attribution timeline={timeline} />}
         </div>
       )}
     </Shell>
   );
 }
 
+/** Where this person came from, and what permission we hold.
+
+    Two questions that used to have no home on this page: which advert
+    produced them, and whether we are allowed to keep contacting them. */
+function Attribution({ timeline }: { timeline: NonNullable<Awaited<ReturnType<typeof getLeadTimeline>>> }) {
+  const a = timeline.lead.attribution ?? {};
+  const l = timeline.lead;
+  const rows: [string, string][] = [
+    /* The label, not the raw enum. This printed "facebook dm" where every
+       other screen said "Facebook message", and a channel that is spelled
+       two ways reads as two channels. */
+    ["Channel", sourceLabel(l.sourceChannel)],
+    ...(Object.entries(a) as [string, string][])
+      .filter(([k, v]) => v && k !== "firstTouchAt")
+      .map(([k, v]) => [k.replace(/([A-Z])/g, " $1").toLowerCase(), String(v)] as [string, string]),
+  ];
+
+  return (
+    <div className="grid gap-3">
+      <Card title="Where they came from" rise={1}>
+        <dl className="space-y-2.5">
+          {rows.map(([k, v]) => (
+            <div key={k} className="flex items-baseline justify-between gap-4">
+              <dt className="shrink-0 text-[13px] capitalize text-muted">{k}</dt>
+              <dd className="min-w-0 break-all text-right text-[13px] font-medium text-ink">{v}</dd>
+            </div>
+          ))}
+        </dl>
+      </Card>
+
+      <Card title="What we are allowed to send" rise={2}>
+        <dl className="space-y-2.5">
+          {[
+            ["Marketing texts", l.smsConsent],
+            ["Marketing emails", l.emailConsent],
+            ["Automated calls", l.automatedCallConsent === true ? "yes" : l.automatedCallConsent === false ? "no" : null],
+          ].map(([k, v]) => (
+            <div key={String(k)} className="flex items-baseline justify-between gap-4">
+              <dt className="text-[13px] text-muted">{k}</dt>
+              <dd className="text-[13px] font-medium text-ink">
+                {v === "explicit" ? "Yes, they asked for it"
+                  : v === "soft_optin" ? "Yes, past customer"
+                  : v === "yes" ? "Yes"
+                  : "Not on file"}
+              </dd>
+            </div>
+          ))}
+        </dl>
+        <p className="mt-4 border-t border-line pt-3 text-[12.5px] leading-relaxed text-muted">
+          None of this is needed to answer their own enquiry, which is what
+          every message above was. It is needed before anything is sent that
+          they did not ask for.
+        </p>
+      </Card>
+    </div>
+  );
+}
+
 /** What came of it, at the top of the column, because that is the question a
     person opening a lead is actually asking. */
-function Outcome({ thread }: { thread: NonNullable<Awaited<ReturnType<typeof getThread>>> }) {
+function Outcome({
+  thread,
+  demo,
+}: {
+  thread: NonNullable<Awaited<ReturnType<typeof getThread>>>;
+  demo: boolean;
+}) {
   const open = thread.questions.filter((q) => !q.handled);
   const nothing =
     thread.leads.length === 0 && thread.bookings.length === 0 && open.length === 0;
@@ -200,6 +287,23 @@ function Outcome({ thread }: { thread: NonNullable<Awaited<ReturnType<typeof get
                     <Pill kind="hot">hot</Pill>
                   </span>
                 )}
+
+                {/* Set here as well as on the Leads table.
+
+                    This is the page somebody is on when they finish reading
+                    the conversation, which is the moment they actually know
+                    what came of it. Making them go back to a list to record
+                    it is how it ends up never being recorded, and every
+                    channel figure in the dashboard is built on this field. */}
+                <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                  <span className="text-[12.5px] text-muted">Outcome</span>
+                  <OutcomePicker
+                    leadId={l.id}
+                    outcome={l.outcome ?? null}
+                    valueGbp={l.valueGbp ?? null}
+                    canWrite={canWrite && !demo}
+                  />
+                </div>
               </div>
             </li>
           ))}

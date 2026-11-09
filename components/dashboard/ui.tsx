@@ -37,8 +37,14 @@ export function Card({
       }}
     >
       {title && (
-        <header className="flex items-baseline justify-between gap-4 border-b border-line px-4 py-3.5 sm:px-5">
-          <div className="min-w-0">
+        /* Wraps rather than squeezes. With the action held at its natural
+             width by `shrink-0`, a long title beside two controls on a phone
+             was compressed into a four-word column while the buttons kept
+             every pixel they asked for. The basis gives the title a width it
+             will not go below, so the action drops to its own line instead of
+             the heading turning into a stack of single words. */
+        <header className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 border-b border-line px-4 py-3.5 sm:px-5">
+          <div className="min-w-0 flex-1 basis-[min(100%,14rem)]">
             <h2 className="font-sans text-[14px] font-semibold tracking-[-.01em]">{title}</h2>
             {note && <p className="mt-0.5 text-[12.5px] leading-snug text-muted">{note}</p>}
           </div>
@@ -120,3 +126,19 @@ export const td = "border-b border-line px-4 py-3 align-top";
 /** Rows light up under the pointer, which is how a long list stays readable. */
 export const tr = "transition-colors duration-150 hover:bg-warm";
 export const num = "tabular-nums text-right";
+
+/* "Nothing yet" plus a way to see what full looks like.
+
+   An empty screen and a broken screen look identical, and a dashboard that
+   has not run yet is mostly empty screens. This is how somebody tells the
+   difference without reading the code. */
+export function ShowExample({ href }: { href: string }) {
+  return (
+    <a
+      href={href}
+      className="mt-4 inline-flex min-h-9 cursor-pointer items-center rounded-lg border border-line px-3 text-[13px] font-semibold text-ink outline-none transition-colors duration-150 hover:bg-warm focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+    >
+      See it with example data
+    </a>
+  );
+}

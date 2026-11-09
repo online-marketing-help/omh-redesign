@@ -108,6 +108,41 @@ export const IconAlert = (p: P) => (
   <Svg {...p}><circle cx="12" cy="12" r="9" /><path d="M12 7.5v5M12 16.2v.3" /></Svg>
 );
 
+/* The routing screens. Lucide: route, gauge, sliders. */
+export const IconRoute = (p: P) => (
+  <Svg {...p}>
+    <circle cx="6" cy="19" r="3" />
+    <circle cx="18" cy="5" r="3" />
+    <path d="M9 19h5a3 3 0 0 0 3-3V8" />
+  </Svg>
+);
+
+export const IconChannels = (p: P) => (
+  <Svg {...p}>
+    <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
+    <path d="m13.4 10.6 4.2-4.2" />
+    <path d="M3.5 17a9 9 0 1 1 17 0" />
+  </Svg>
+);
+
+export const IconSettings = (p: P) => (
+  <Svg {...p}>
+    <path d="M4 6h10M18 6h2M4 12h2M10 12h10M4 18h8M16 18h4" />
+    <circle cx="16" cy="6" r="2" />
+    <circle cx="8" cy="12" r="2" />
+    <circle cx="14" cy="18" r="2" />
+  </Svg>
+);
+
+/* Shown when automated sending is switched off. Carries meaning on its own,
+   so every use passes a title. */
+export const IconPower = (p: P) => (
+  <Svg {...p}>
+    <path d="M12 3v9" />
+    <path d="M18.4 6.6a9 9 0 1 1-12.8 0" />
+  </Svg>
+);
+
 export const NAV_ICON = {
   "/lead-dashboard": IconOverview,
   "/lead-dashboard/handover": IconHandover,
@@ -115,4 +150,9 @@ export const NAV_ICON = {
   "/lead-dashboard/chats": IconChat,
   "/lead-dashboard/leads": IconLead,
   "/lead-dashboard/bookings": IconCalendar,
+  "/lead-dashboard/inbox": IconInbox,
+  "/lead-dashboard/sequences": IconRoute,
+  "/lead-dashboard/campaigns": IconSend,
+  "/lead-dashboard/channels": IconChannels,
+  "/lead-dashboard/settings": IconSettings,
 } as const;

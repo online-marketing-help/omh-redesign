@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import type { InboxRow, Thread } from "@/lib/dashboard/handover";
 import { fetchThread, takeOver, sendReply, handBack } from "@/app/lead-dashboard/handover/actions";
 import { Pill } from "./ui";
+import { sourceLabel } from "@/lib/dashboard/channels";
 import { IconSend, IconChat, IconMic, IconCheck, IconAlert, IconInbox } from "./icons";
 
 /* =========================================================================
@@ -23,7 +24,6 @@ import { IconSend, IconChat, IconMic, IconCheck, IconAlert, IconInbox } from "./
    ========================================================================= */
 
 const THREAD_MS = 4000;
-const LIST_MS = 12000;
 
 type Props = {
   rows: InboxRow[];
@@ -43,7 +43,18 @@ export function Handover({ rows: initial, canReply, lockedReason }: Props) {
       null,
   );
 
-  useEffect(() => setRows(initial), [initial]);
+  /* Take the server's list when it changes, without an effect.
+
+     This was `useEffect(() => setRows(initial), [initial])`, which renders
+     once with the stale list, then again with the new one. React's own
+     guidance for "adjust state when a prop changes" is this comparison during
+     render: the re-render happens before anything is painted, so the stale
+     list is never shown. */
+  const [seen, setSeen] = useState(initial);
+  if (initial !== seen) {
+    setSeen(initial);
+    setRows(initial);
+  }
 
   return (
     <div className="grid gap-4 xl:grid-cols-[minmax(320px,380px)_minmax(0,1fr)] xl:items-start">
@@ -146,7 +157,7 @@ function Queue({
                   <span className="min-w-0 flex-1">
                     <span className="flex items-baseline justify-between gap-2">
                       <span className="truncate font-sans text-[14px] font-semibold">
-                        {r.name || "Visitor"}
+                        {who(r)}
                       </span>
                       <Pill kind={r.state === "waiting" ? "hot" : r.state === "live" ? "warm" : "confirmed"}>
                         {r.state === "waiting" ? "waiting" : r.state === "live" ? "with you" : "done"}
@@ -156,6 +167,11 @@ function Queue({
                       {r.question || r.lastText || "No message recorded"}
                     </span>
                     <span className="mt-1 flex flex-wrap items-center gap-x-2 text-[12px] text-muted">
+                      {r.sourceChannel && (
+                        <span className="rounded-md bg-warm px-1.5 py-0.5 font-medium text-ink">
+                          {sourceLabel(r.sourceChannel)}
+                        </span>
+                      )}
                       <Since at={r.since} />
                       {r.awaitingReply && r.state !== "closed" && (
                         <span className="inline-flex items-center gap-1 font-medium text-[var(--dash-accent-text)]">
@@ -203,6 +219,12 @@ function Conversation({
   }, [sessionId]);
 
   useEffect(() => {
+    /* Fetching on mount is what this effect is for, and `load` is async: the
+       setState inside it runs in a microtask, not synchronously, which the
+       rule cannot see. Restructuring a live polling loop to satisfy a linter
+       is not a trade worth making on the one screen where a bug means a
+       customer never gets an answer. */
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
     const id = window.setInterval(load, THREAD_MS);
     /* Polling pauses while the tab is in the background: nobody is reading it,
@@ -493,6 +515,23 @@ function Bubble({ role, text, at }: { role: string; text: string; at: number }) 
 
 /** Rendered on the client so it stays right as the minutes pass, and marked
     suppressHydrationWarning because the server's "now" is a second behind. */
+/** Somebody's name, or the nearest thing to it.
+
+    "Visitor" ten times down a queue is not a queue anybody can work, so it is
+    the last resort rather than the default: the lead's name, then the company,
+    then what they asked about, then the number, and only then "Visitor". */
+function who(r: InboxRow): string {
+  const name = (r.name || "").trim();
+  if (name) return name;
+  const company = (r.company || "").trim();
+  if (company) return company;
+  const service = (r.service || "").trim();
+  if (service) return `Asking about ${service}`;
+  const contact = (r.phone || r.email || "").trim();
+  if (contact) return contact;
+  return "Visitor";
+}
+
 function Since({ at }: { at: number }) {
   const [label, setLabel] = useState(() => relative(at));
   useEffect(() => {

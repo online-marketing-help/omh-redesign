@@ -24,10 +24,27 @@ const TABS = [
   /* Second, directly under Overview: it is the only screen with someone
      waiting on the other end, so it is the one worth seeing first. */
   { href: "/lead-dashboard/handover", label: "Needs a person" },
+  /* Every channel in one list. Second after the queue because it is the
+     screen a business would leave open all day. */
+  { href: "/lead-dashboard/inbox", label: "Inbox" },
   { href: "/lead-dashboard/calls", label: "Calls" },
-  { href: "/lead-dashboard/chats", label: "Conversations" },
+  /* Conversations is not a separate entry. It was the same subject as the
+     Inbox at a different grain, one row per person instead of one per
+     message, and two entries for that read as two screens that happened to
+     look alike. It is a toggle inside the Inbox now; the route still works
+     and still carries every link pointing at it. */
   { href: "/lead-dashboard/leads", label: "Leads" },
   { href: "/lead-dashboard/bookings", label: "Appointments" },
+  /* The routing screens. Below the record of what happened, because they are
+     about what is about to happen, which is checked less often but matters
+     more when it is wrong. */
+  { href: "/lead-dashboard/sequences", label: "Follow-ups" },
+  /* Beside Follow-ups rather than beside Channels: a campaign is a batch of
+     follow-ups started on purpose, and the two screens are read together when
+     one is running. */
+  { href: "/lead-dashboard/campaigns", label: "Campaigns" },
+  { href: "/lead-dashboard/channels", label: "Channels" },
+  { href: "/lead-dashboard/settings", label: "Settings" },
 ] as const;
 
 export async function Shell({
@@ -38,6 +55,7 @@ export async function Shell({
   counts = {},
   urgent = [],
   toolbar,
+  demo = false,
 }: {
   children: React.ReactNode;
   active: string;
@@ -49,6 +67,8 @@ export async function Shell({
   urgent?: string[];
   /** Controls that belong to this page, shown on the right of its header. */
   toolbar?: React.ReactNode;
+  /** Serving the example data rather than the real thing. See lib/dashboard/demo.ts. */
+  demo?: boolean;
 }) {
   /* How many people are waiting for an answer, fetched here rather than by
      each page, so the figure is on the rail on every screen. Somebody waiting
@@ -62,6 +82,7 @@ export async function Shell({
         active={active}
         counts={rail}
         urgent={["/lead-dashboard/handover", ...urgent]}
+        demo={demo}
       />
 
       <div className="lg:pl-[248px]">
@@ -69,6 +90,8 @@ export async function Shell({
             sentence, and the tables' own sticky column headers would need a
             fixed offset to clear it. Column headers are the ones worth
             keeping in view, so they get the viewport top to themselves. */}
+        {demo ? <DemoBanner /> : null}
+
         <header className="border-b border-line">
           <div className="mx-auto flex max-w-[1400px] flex-wrap items-end justify-between gap-x-6 gap-y-3 px-5 py-6 sm:px-7 sm:py-7">
             <div className="min-w-0">
@@ -95,6 +118,37 @@ export async function Shell({
   );
 }
 
+/* Example data is on.
+
+   Loud on purpose, and at the top of every screen rather than once at the
+   door. The failure this prevents is somebody reading a figure off a
+   demonstration, writing it down, and repeating it later as something that
+   happened. A banner you can scroll past at the top of a session is not
+   enough; this one is on the screen the figure is on. */
+function DemoBanner() {
+  return (
+    <div className="border-b border-[rgb(var(--accent-rgb)/.3)] bg-[rgb(var(--accent-rgb)/.1)]">
+      <div className="mx-auto flex max-w-[1400px] flex-wrap items-center gap-x-3 gap-y-1 px-5 py-2.5 sm:px-7">
+        <span className="rounded-md bg-inverse px-2 py-0.5 font-sans text-[11px] font-semibold uppercase tracking-[.1em] text-oninverse">
+          Example
+        </span>
+        <p className="text-[13px] font-medium text-ink">
+          Made-up data, for showing how the system works.
+        </p>
+        <p className="text-[13px] text-muted">
+          Nothing here happened, and none of it is stored.
+        </p>
+        <Link
+          href="/lead-dashboard"
+          className="ml-auto text-[13px] font-medium text-[var(--dash-accent-text)] underline underline-offset-4 hover:no-underline"
+        >
+          Show the real figures
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 /** Only shown when there is a session to end. With no password configured
     there is nothing to sign out of, and a dead button is worse than none. */
 function SignOut() {
@@ -116,11 +170,17 @@ function Rail({
   active,
   counts,
   urgent,
+  demo,
 }: {
   active: string;
   counts: Partial<Record<string, number>>;
   urgent: string[];
+  demo: boolean;
 }) {
+  /* While the example data is on, every nav link carries it. Without this,
+     the first tab clicked in a meeting silently drops back to the real
+     figures, which in a half-built system means mostly empty screens. */
+  const to = (href: string) => (demo ? `${href}?demo=1` : href);
   return (
     <nav
       aria-label="Dashboard"
@@ -157,7 +217,7 @@ function Rail({
           return (
             <li key={t.href} className="shrink-0 lg:shrink">
               <Link
-                href={t.href}
+                href={to(t.href)}
                 aria-current={on ? "page" : undefined}
                 className={`group flex items-center gap-2.5 whitespace-nowrap rounded-[10px] px-3 py-2.5 font-sans text-[14px] font-medium outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${
                   on
@@ -215,6 +275,16 @@ function Rail({
           Online Marketing Help
           <span className="mt-0.5 block">AI assistant reporting</span>
         </p>
+        {/* Nothing here yet is the normal state of a system that has not run
+            yet, and it is also indistinguishable from a system that is
+            broken. This is the way to tell them apart. */}
+        <Link
+          href={demo ? "/lead-dashboard" : "/lead-dashboard?demo=1"}
+          className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 font-sans text-[12.5px] font-medium text-white/60 outline-none transition-colors duration-150 hover:bg-white/5 hover:text-white/90 focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+        >
+          {demo ? "Back to the real figures" : "See it with example data"}
+        </Link>
+
         <SignOut />
       </div>
     </nav>

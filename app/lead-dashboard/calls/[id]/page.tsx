@@ -4,12 +4,20 @@ import { Shell } from "@/components/dashboard/Shell";
 import { Card, Pill } from "@/components/dashboard/ui";
 import { IconBack, IconClock, IconCheck, IconLink, IconMic } from "@/components/dashboard/icons";
 import { getCall, fmtDuration, fmtWhen } from "@/lib/dashboard/retell";
+import { isDemo, demoCall } from "@/lib/dashboard/demo";
 
 export const dynamic = "force-dynamic";
 
-export default async function CallDetail({ params }: { params: Promise<{ id: string }> }) {
+export default async function CallDetail({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ demo?: string }>;
+}) {
   const { id } = await params;
-  const call = await getCall(id).catch(() => null);
+  const demo = isDemo(await searchParams);
+  const call = demo ? demoCall(id) : await getCall(id).catch(() => null);
   if (!call) notFound();
 
   const handled = call.successful !== false;
@@ -17,11 +25,12 @@ export default async function CallDetail({ params }: { params: Promise<{ id: str
   return (
     <Shell
       active="/lead-dashboard/calls"
+      demo={demo}
       title="Call"
       lead={fmtWhen(call.startedAt)}
       toolbar={
         <Link
-          href="/lead-dashboard/calls"
+          href={`/lead-dashboard/calls${demo ? "?demo=1" : ""}`}
           className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-line bg-surface px-3 py-1.5 text-[13.5px] font-semibold outline-none transition-colors duration-150 hover:bg-warm focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
         >
           <IconBack className="h-4 w-4" />

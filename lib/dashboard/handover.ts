@@ -25,6 +25,10 @@ export type InboxRow = {
   takenBy: string | null;
   pageUrl: string | null;
   name: string | null;
+  sourceChannel?: string | null;
+  service?: string | null;
+  hot?: boolean;
+  leadId?: string | null;
   email: string | null;
   phone: string | null;
   company: string | null;
@@ -82,6 +86,8 @@ export type Thread = {
     budget: string | null;
     message: string | null;
     hot: boolean;
+    outcome: string | null;
+    valueGbp: number | null;
     channel: string;
     at: number;
   }[];

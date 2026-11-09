@@ -3,19 +3,26 @@ import { Handover } from "@/components/dashboard/Handover";
 import { Empty } from "@/components/dashboard/ui";
 import { getInbox, canReply } from "@/lib/dashboard/handover";
 import { dashboardLocked } from "@/lib/dashboard/auth";
+import { isDemo, demoInboxQueue } from "@/lib/dashboard/demo";
 
 export const dynamic = "force-dynamic";
 
-export default async function HandoverPage() {
-  const inbox = await getInbox();
+export default async function HandoverPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ demo?: string }>;
+}) {
+  const demo = isDemo(await searchParams);
+  const inbox = demo ? demoInboxQueue() : await getInbox();
 
   return (
     <Shell
       active="/lead-dashboard/handover"
       title="Needs a person"
-      lead="Conversations the assistant handed over, either because the answer was not in Online Marketing Help's own information or because the visitor asked for a person. Answer them here and your words appear in the chat on the site."
+      lead="Conversations the assistant handed over. Your reply appears in the chat on the site."
       counts={{ "/lead-dashboard/handover": inbox.waiting }}
       urgent={["/lead-dashboard/handover"]}
+      demo={demo}
     >
       {!inbox.reachable ? (
         <Empty>
@@ -29,12 +36,16 @@ export default async function HandoverPage() {
         <>
           <Handover
             rows={inbox.rows}
-            canReply={canReply && dashboardLocked}
+            /* Never writable on the example data: a reply typed here goes
+               into a real conversation with a real member of the public. */
+            canReply={!demo && canReply && dashboardLocked}
             lockedReason={
-              !canReply
-                ? "Replying needs OHM_WIDGET_SECRET set on the server. Without it this screen can read the queue but not answer it."
+              demo
+                ? "Example data. Replying is switched off here."
+                : !canReply
+                ? "Read only: OHM_WIDGET_SECRET is not set on the server."
                 : !dashboardLocked
-                  ? "Replying is switched off because the dashboard has no password. Anyone who found this URL could otherwise write to a visitor as Online Marketing Help. Set OMH_DASHBOARD_USER and OMH_DASHBOARD_PASSWORD to turn it on."
+                  ? "Read only: set OMH_DASHBOARD_USER and OMH_DASHBOARD_PASSWORD to reply."
                   : undefined
             }
           />
