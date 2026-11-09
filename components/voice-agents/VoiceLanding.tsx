@@ -4,6 +4,7 @@ import { LandingV4Script } from "@/components/voice-agents/LandingV4Script";
 import { VoiceAgentsScript } from "@/components/voice-agents/VoiceAgentsScript";
 import { VoiceMotion } from "@/components/voice-agents/VoiceMotion";
 import { JsonLd, SITE } from "@/lib/schema";
+import { ReelPlayer } from "@/components/voice-agents/ReelPlayer";
 
 /*
   The /ai-voice-agents layout, shared by the main page and the industry pages built on it (real estate first).
@@ -84,6 +85,8 @@ export function VoiceLanding({ runs, graph, page, demoHeading, thingsToTry, brea
       {/* The booking band every "Book a 30-Minute Demo" button on the page points at. */}
       <BookDemo id="book-demo-form" heading={demoHeading} thingsToTry={thingsToTry} />
       <VoiceAgentsScript />
+      {/* Popup for any [data-reel] video card (lib/content/sample-reels.ts); idle on pages without one. */}
+      <ReelPlayer />
       <VoiceMotion />
       {/* Page-specific widgets, e.g. EstateScript. */}
       {children}

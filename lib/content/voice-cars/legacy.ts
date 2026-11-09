@@ -4,6 +4,7 @@
 import { roiCalculator } from "@/lib/content/roi-calculator";
 import { callTypeCards } from "@/lib/content/sample-calls";
 import { carsFaqs as voiceFaqs } from "@/lib/content/voice-cars/markup";
+import { reelCards } from "@/lib/content/sample-reels";
 
 
 const faqItem = ({ q, a, cat }: (typeof voiceFaqs)[number], i: number) => `      <details class="group rounded-[14px] border border-line bg-paper transition-colors open:border-[var(--va-line-strong)] open:bg-surface open:shadow-[0_18px_40px_-30px_rgb(0_0_0/0.45)]" data-faq-item data-cat="${cat}"${i ? "" : " open"} data-track-name="${q}">
@@ -44,6 +45,22 @@ ${callTypeCards("AI Voice Agent for Car Dealerships", "Car dealership", [
   [4, "Car Finance & Monthly Payment Enquiry", 76, "pound", "Our AI voice agent noting the car, deposit and term a caller has in mind and passing the finance question to the finance team."],
   [5, "Vehicle Availability, Price & General Questions", 64, "tag", "Our AI voice agent checking a Volkswagen Golf listing by its reference and the dealership's warranty details before answering."],
   [6, "Missed Call Recovery & Follow-Up", 64, "phone-missed", "Our AI voice agent following up a Kia Sportage enquiry and taking a Saturday showroom visit request for the sales team to confirm."],
+])}
+    </div>
+  </div>
+</section>
+
+<section id="reels" data-component="VideoReels" class="bg-paper">
+  <div class="container-omh py-14 lg:py-20">
+    <div>
+      <p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"><i></i><i></i><i></i></span>Sample videos</p>
+      <h2>Dealership calls, <span class="hl">on video</span></h2>
+      <p class="mt-5 text-muted">Watch our AI voice agent take a dealership call from the first ring to the handover. These are sample videos with made-up dealerships and customers.</p>
+    </div>
+
+    <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+${reelCards("AI Voice Agent for Car Dealerships", "Car dealership", [
+  [1, "New Car Enquiry & Lead Qualification", 84, "Our AI voice agent asking a BMW 3 Series buyer about budget and timing, then arranging a showroom visit with sales."],
 ])}
     </div>
   </div>

@@ -863,6 +863,23 @@ html:has(.va-page dialog[open]) {
   #va-page [data-audio-card].is-playing .audio-toggle::after, #va-page [data-audio-card].is-playing .audio-wave i.is-now { animation: none; }
 }
 
+/* Video reel cards (9 Nov 2026): the audio card's play button, centred on a portrait poster. */
+#va-page .reel-play {
+  position: absolute; left: 50%; top: 50%; translate: -50% -50%; display: grid; place-items: center; width: 64px; height: 64px;
+  border-radius: 999px; background: var(--color-teal); color: #fff; box-shadow: 0 10px 24px -8px rgb(0 0 0 / .55); transition: transform .2s ease, background-color .2s ease;
+}
+#va-page .reel-play .icon { width: 1.5rem; height: 1.5rem; translate: 2px 0; }
+#va-page .reel-poster:hover .reel-play { transform: scale(1.06); background: var(--color-teal-dark); }
+#va-page .reel-poster:focus-visible { outline: 2px solid var(--color-teal); outline-offset: 3px; }
+
+/* The reel popup's seek bar (components/voice-agents/ReelPlayer.tsx), outside #va-page: the dialog sits in the top layer. */
+.reel-seek { appearance: none; height: 18px; background: transparent; cursor: pointer; }
+.reel-seek::-webkit-slider-runnable-track { height: 4px; border-radius: 4px; background: linear-gradient(to right, var(--color-teal) var(--pct), rgb(255 255 255 / .3) var(--pct)); }
+.reel-seek::-moz-range-track { height: 4px; border-radius: 4px; background: linear-gradient(to right, var(--color-teal) var(--pct), rgb(255 255 255 / .3) var(--pct)); }
+.reel-seek::-webkit-slider-thumb { appearance: none; width: 14px; height: 14px; margin-top: -5px; border-radius: 999px; background: #fff; }
+.reel-seek::-moz-range-thumb { width: 14px; height: 14px; border: 0; border-radius: 999px; background: #fff; }
+.reel-seek:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 4px; }
+
 /* Audio cards still waiting for a recording: same look, inactive controls. */
 #va-page [data-audio-pending] .audio-toggle { cursor: default; }
 #va-page [data-audio-pending] .audio-toggle:hover { transform: none; background: var(--color-teal); }

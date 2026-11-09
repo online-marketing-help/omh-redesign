@@ -79,7 +79,7 @@ const runs: Runs = [
   [fresh, ["features"]],
   [v4, ["how"]],
   [fresh, ["use-cases"]],
-  [legacy, ["feedback", "roi-calculator"]],
+  [legacy, ["feedback", "reels", "roi-calculator"]],
   [fresh, ["pricing"]],
   [v4, ["cities"]],
   [legacy, ["faq"]],
