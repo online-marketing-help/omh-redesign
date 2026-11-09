@@ -59,3 +59,8 @@ widget/node_modules
 # Built by widget/tests/run.sh before each run. Generated output, and two of
 # them are over 100KB of bundled source that would be re-written on every run.
 widget/tests/*.bundle.mjs
+
+# The generated n8n workflows: every one bakes the Convex shared secret, and
+# two carry the Retell key. The BUILDER is tracked (n8n is the brain, and an
+# untracked brain is one that can be lost); its output never is.
+widget/n8n/*.json
