@@ -1,0 +1,8 @@
+{
+  "version": "1.0.0",
+  "project": "OMH Customer Engagement Package",
+  "created": "2026-11-10T13:17:43Z",
+  "strict": false,
+  "ui_globs": "src/components app/ components/ pages/ views/ ui/ *.tsx *.jsx *.vue *.svelte",
+  "code_globs": "src/ app/ lib/ server/ api/ convex/ packages/ components/ widget/convex/ widget/gates/ widget/n8n/"
+}

@@ -10,7 +10,7 @@ Usage:
   python3 n8n/push.py            create or update, leave inactive
   python3 n8n/push.py --activate also set them active
 """
-import json, pathlib, sys, urllib.request, urllib.error
+import json, sys, pathlib, urllib.request, urllib.error
 
 HERE = pathlib.Path(__file__).parent
 
@@ -67,7 +67,22 @@ if status == 200:
     for w in existing.get("data", []):
         by_name[w["name"]] = w["id"]
 
-for f in sorted(HERE.glob("0*.json")):
+# Two digits then a dash: 01 through 09, and 11 onward. The old glob was
+# "0*.json", which silently skipped every workflow numbered ten or above:
+# 11-reactivation was generated, sat in this directory, and was never pushed.
+FILES = sorted(HERE.glob("[0-9][0-9]-*.json"))
+
+# `--only <text>` pushes just the workflows whose filename contains it. The
+# update payload carries no `active` field, so n8n should leave the state
+# alone, but six of these are live and answering the public right now. A
+# narrow push is cheaper than being right about that.
+ONLY = next((a.split("=", 1)[1] if "=" in a else sys.argv[sys.argv.index(a) + 1]
+             for a in sys.argv if a.startswith("--only")), None)
+if ONLY:
+    FILES = [f for f in FILES if ONLY in f.name]
+    print(f"  only: {', '.join(f.name for f in FILES) or '(nothing matched)'}")
+
+for f in FILES:
     wf = json.loads(f.read_text())
     name = wf["name"]
     payload = {

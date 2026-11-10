@@ -67,6 +67,14 @@ export type Rendered = {
 
 type Template = (c: RenderContext) => Rendered;
 
+/** " for 1 Dec at 10:00", or nothing at all. Never " for undefined". */
+function when_(c: RenderContext): string {
+  if (c.preferredDate && c.preferredTime) return ` for ${c.preferredDate} at ${c.preferredTime}`;
+  if (c.preferredDate) return ` for ${c.preferredDate}`;
+  if (c.preferredTime) return ` for ${c.preferredTime}`;
+  return "";
+}
+
 const TEMPLATES: Record<string, Template> = {
   /* ---- Route B: website form, or a Google Ads landing page ------------- */
 
@@ -219,25 +227,40 @@ const TEMPLATES: Record<string, Template> = {
 
   /* ---- Confirmations. Not part of a sequence: sent once, on an event. -- */
 
+  /* The three below are the only templates that need facts the LEAD does not
+     carry: a date, a time, a reference. `claimDue` renders a route step with
+     `ctxOf(lead)`, which has a name, a service and their message and nothing
+     else, so any of these used as a step would have said
+
+       "your appointment is booked for undefined at undefined.
+        Your reference is undefined."
+
+     to a real customer. Found by the first direct test of this file, before
+     the reminder was turned into a route step and shipped it.
+
+     So each one says what it knows and no more. A missing detail costs a
+     sentence; `undefined` in a text costs the client's credibility. */
+
   booking_confirmed: (c) => ({
     body:
-      `${hello(c.name)} your appointment with ${TEAM} is booked for ` +
-      `${c.preferredDate} at ${c.preferredTime}. ` +
-      `Your reference is ${c.reference}. ` +
-      `To change it, reply to this text or ring ${PHONE}.`,
+      `${hello(c.name)} your appointment with ${TEAM} is booked` +
+      when_(c) +
+      (c.reference ? `. Your reference is ${c.reference}` : "") +
+      `. To change it, reply to this text or ring ${PHONE}.`,
   }),
 
   booking_reminder: (c) => ({
     body:
-      `${hello(c.name)} a reminder that your appointment with ${TEAM} is ` +
-      `${c.preferredDate} at ${c.preferredTime}. Reply here if you need to move it.`,
+      `${hello(c.name)} a reminder about your appointment with ${TEAM}` +
+      when_(c) +
+      `. Reply here if you need to move it.`,
   }),
 
   purchase_confirmed: (c) => ({
     body:
-      `${hello(c.name)} thanks, that is confirmed${c.service ? ` for ${c.service}` : ""}. ` +
-      `Your reference is ${c.reference}. ` +
-      `Any questions, reply to this text or ring ${PHONE}.`,
+      `${hello(c.name)} thanks, that is confirmed${c.service ? ` for ${c.service}` : ""}` +
+      (c.reference ? `. Your reference is ${c.reference}` : "") +
+      `. Any questions, reply to this text or ring ${PHONE}.`,
   }),
 
   /* ---- Replies to an inbound. Sent once, immediately. ----------------- */

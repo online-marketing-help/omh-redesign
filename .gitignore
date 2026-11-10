@@ -64,3 +64,9 @@ widget/tests/*.bundle.mjs
 # two carry the Retell key. The BUILDER is tracked (n8n is the brain, and an
 # untracked brain is one that can be lost); its output never is.
 widget/n8n/*.json
+
+# Forge: per-session scratch, not project state. The artifacts under
+# docs/engineering/ and the evidence ledger are what belong in history.
+.forge/.edits
+.forge/.last-edit
+.forge/active

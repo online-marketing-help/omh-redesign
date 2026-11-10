@@ -1,0 +1,10 @@
+# iso	kind	status	command	summary
+2026-11-10T13:21:36Z	cmd	pass	python3 push.py --only 11-reactivation; GET /api/v1/workflows	Reactivation created id=30D9cUzONMqtz3c6 active:false; the 6 live workflows unchanged (before/after diff: NONE)
+2026-11-10T13:26:45Z	build	pass	sed -i '' '/^import { demoTimes } from "@\/lib\/book-demo";$/d' components/BookDemo.tsx && npx tsc --noEmit 2>&1|head -3 && npx eslint components app lib widget/gates 2>&1 | tail -4 && cd widget/tests && ./run.sh 2>&1 | grep -E "FAIL|every suite|SOME" && ./run.sh 2>&1 | grep -c "^  ok "	366
+2026-11-10T13:26:57Z	lint	fail	cd /Users/rafiulislam/Work/n8n/OHM/website && npx eslint components app lib widget/gates 2>&1 | head -12	140 |   }, []);
+2026-11-10T13:27:36Z	cmd	pass	npx eslint components/BookDemo.tsx app/api/book-demo/route.ts widget/gates lib/book-demo.ts	0 errors on the files T4 changed
+2026-11-10T13:27:36Z	cmd	fail	npx eslint components app lib widget/gates	3 errors, none from this workstream: ReelPlayer.tsx set-state-in-effect (arrived in pulled commit 50ebc24, another developer) and 2 pre-existing any in lib/dashboard/retell.ts
+2026-11-10T13:27:36Z	cmd	pass	widget/tests/run.sh	every suite passed, 366 assertions (351 + 15 new in availability.test.ts)
+2026-11-10T13:39:46Z	build	pass	./run.sh 2>&1 | grep -E "FAIL|every suite|SOME"; ./run.sh 2>&1 | grep -c "^  ok "; cd /Users/rafiulislam/Work/n8n/OHM/widget && ../website/node_modules/.bin/tsc -p tsconfig.check.json && echo "convex tsc 0"; cd ../website && npx tsc --noEmit && echo "website tsc 0"	website tsc 0
+2026-11-10T13:40:05Z	cmd	pass	widget/tests/run.sh	every suite passed, 514 assertions (366 + 148 in the new templates.test.ts)
+2026-11-10T13:40:05Z	cmd	pass	npx convex deploy	hardened templates deployed to cool-ferret-103
