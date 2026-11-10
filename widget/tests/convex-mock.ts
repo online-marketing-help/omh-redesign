@@ -207,5 +207,16 @@ export class MockDb {
 
 export function ctx() {
   const db = new MockDb();
-  return { db, ctx: { db } as any };
+  /* `runMutation`, because real Convex has it and some of our mutations call
+     each other through it: `setOutcomeMany` calls `setOutcome` per lead so
+     that the fiddly mapping from an outcome to the pipeline status exists in
+     exactly one place.
+
+     Without this the mock simply threw, which meant the bulk path had no
+     test at all and nobody noticed. It runs the handler against the same ctx,
+     which is what Convex does inside one transaction. */
+  const c: any = { db };
+  c.runMutation = (fn: any, args: any) => fn._handler(c, args);
+  c.runQuery = (fn: any, args: any) => fn._handler(c, args);
+  return { db, ctx: c };
 }

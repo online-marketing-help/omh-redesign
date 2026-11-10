@@ -52,12 +52,12 @@ in this workstream.
   - Files: `lib/dashboard/demo.ts`
   - Verify: the section at `?demo=1` shows at least one channel in each of money pit, starved and working, and at least one "too early to say"
 
-- [ ] **A5** - A record of every outcome change
+- [x] **A5** - A record of every outcome change
   - Files: `widget/convex/routing.ts` (`setOutcome`, `setOutcomeMany`), `app/lead-dashboard/conversations/[session]/page.tsx`
   - Test first: `widget/tests/engine.test.ts` extended, asserting a change writes one `touches` row carrying the old and new value and who made it, that setting the same value twice writes one row not two, and that a bulk change writes one row per lead
   - Verify: `widget/tests/run.sh`; the change appears on the lead timeline
 
-- [ ] **A6** - Set the outcome from the conversation, after reading it
+- [x] **A6** - Set the outcome from the conversation, after reading it
   - His words: "from the conversation section, after complete the
     conversation, a human should be able to change the lead status." That is
     the moment somebody actually knows the answer, which is why it belongs

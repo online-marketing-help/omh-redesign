@@ -11,7 +11,7 @@ import { fmtDate } from "@/lib/dashboard/convex";
 import { FollowUpTimeline } from "@/components/dashboard/FollowUpTimeline";
 import { OutcomePicker } from "@/components/dashboard/OutcomePicker";
 import { getLeadTimeline, canWrite, sourceLabel } from "@/lib/dashboard/routing";
-import { isDemo, demoTimeline } from "@/lib/dashboard/demo";
+import { isDemo, demoTimeline, demoThread } from "@/lib/dashboard/demo";
 
 export const dynamic = "force-dynamic";
 
@@ -40,9 +40,15 @@ export default async function Conversation({
   const sessionId = decodeURIComponent(session);
   const demo = isDemo(await searchParams);
 
+  /* The example data gets a thread too.
+
+     The outcome card below is the whole point of this page after you have
+     read the conversation: it is the moment somebody actually knows what
+     came of it. It used to be behind `!demo && thread`, so anybody being
+     SHOWN the system never saw the one control the page exists for. */
   const [thread, allCalls] = await Promise.all([
-    getThread(sessionId),
-    getCalls().catch(() => []),
+    demo ? Promise.resolve(demoThread(sessionId)) : getThread(sessionId),
+    demo ? Promise.resolve([]) : getCalls().catch(() => []),
   ]);
 
   /* Calls belonging to this conversation: either the session recorded the id
@@ -175,11 +181,14 @@ export default async function Conversation({
             )}
           </div>
 
-          {!demo && thread && (
+          {thread && (
             <div className="grid gap-3">
               <Outcome thread={thread} demo={demo} />
-              <OtherVisits sessionId={sessionId} visitorId={thread.visitorId} />
-              <Details thread={thread} sessionId={sessionId} />
+              {/* These two reach Convex per render and have nothing to show
+                  on example data, so they stay off it. The outcome card does
+                  not: it is the control being demonstrated. */}
+              {!demo && <OtherVisits sessionId={sessionId} visitorId={thread.visitorId} />}
+              {!demo && <Details thread={thread} sessionId={sessionId} />}
             </div>
           )}
           {demo && timeline && <Attribution timeline={timeline} />}
@@ -302,6 +311,7 @@ function Outcome({
                     outcome={l.outcome ?? null}
                     valueGbp={l.valueGbp ?? null}
                     canWrite={canWrite && !demo}
+                    demo={demo}
                   />
                 </div>
               </div>

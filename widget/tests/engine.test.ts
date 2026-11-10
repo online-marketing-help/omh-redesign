@@ -784,6 +784,64 @@ console.log("\n== what came of a lead, set by a person ==");
   eq("a reopened lead is not closed", back.status, "contacted");
   eq("and carries no lost reason", back.lostReason, undefined);
 }
+console.log("\n== every outcome change leaves a record ==");
+{
+  /* Before this, "who marked this won, and when" had no answer at all. The
+     lead carried the current value and nothing else, so a figure somebody
+     disagreed with in a meeting could not be traced to a person or a day.
+
+     It goes in `touches` rather than a table of its own, because `touches`
+     already IS the per-lead history the timeline reads. A second history
+     would have to be merged with the first every time anybody looked. */
+  const { db, ctx: c } = ctx();
+  const leadId = await makeLead(db, { sessionId: "smoke-audit" });
+  const notes = async () =>
+    (await db.query("touches").collect()).filter((t: any) => t.channel === "dashboard");
+
+  await call(R.setOutcome, c, { leadId, outcome: "quoted", by: "owner" });
+  const one = await notes();
+  eq("one record", one.length, 1);
+  eq("against the lead", one[0].leadId, leadId);
+  ok("naming who", String(one[0].body).includes("owner"), one[0].body);
+  ok("and what it became", String(one[0].body).includes("quoted"), one[0].body);
+
+  await call(R.setOutcome, c, { leadId, outcome: "won", valueGbp: 2400, by: "owner" });
+  const two = await notes();
+  eq("a second change, a second record", two.length, 2);
+  /* The old value matters more than the new one: the new one is on the lead
+     already, and what an audit is for is what it used to be. */
+  ok("carrying what it was before", String(two[1].body).includes("quoted"), two[1].body);
+  ok("and the value", String(two[1].body).includes("2400") || String(two[1].body).includes("2,400"), two[1].body);
+
+  /* Setting the same value again is not a change. Without this, a dashboard
+     that re-submits on every render fills the timeline with noise and the
+     real changes become unfindable. */
+  await call(R.setOutcome, c, { leadId, outcome: "won", valueGbp: 2400, by: "owner" });
+  eq("setting the same value writes nothing new", (await notes()).length, 2);
+
+  /* Same outcome, different money, IS a change. */
+  await call(R.setOutcome, c, { leadId, outcome: "won", valueGbp: 3000, by: "owner" });
+  eq("a changed value is a change", (await notes()).length, 3);
+
+  /* It is a note, not a message. Nothing in the sending path may ever pick
+     one of these up and text it to somebody. */
+  const all = await notes();
+  ok("recorded as a note, not an outbound message",
+     all.every((t: any) => t.direction === "note"), JSON.stringify(all.map((t: any) => t.direction)));
+  ok("with no idempotency key that a send could match",
+     all.every((t: any) => !t.idempotencyKey));
+}
+{
+  /* A bulk change writes one record per lead, not one for the batch. */
+  const { db, ctx: c } = ctx();
+  const a = await makeLead(db, { sessionId: "smoke-b1" });
+  const b = await makeLead(db, { sessionId: "smoke-b2", phone: "+447700900555", phoneKey: "+447700900555" });
+  await call(R.setOutcomeMany, c, { leadIds: [a, b], outcome: "unqualified", by: "owner" });
+  const notes = (await db.query("touches").collect()).filter((t: any) => t.channel === "dashboard");
+  eq("one record each", notes.length, 2);
+  eq("one per lead", new Set(notes.map((t: any) => t.leadId)).size, 2);
+}
+
 {
   /* The whole point: the channel report can now rank on business, not on
      volume. */

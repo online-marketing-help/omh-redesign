@@ -1400,6 +1400,86 @@ const OUTCOMES = new Set(["open", "quoted", "won", "lost", "unqualified"]);
  * owns outright, and it is what turns "which channel produces leads" into
  * "which channel produces business".
  */
+/* One lead's outcome, and the record of the change.
+
+   A plain function rather than a mutation calling another mutation through
+   `runMutation`: the bulk path needs exactly this and nothing else, and a
+   sub-mutation per lead in a loop buys nothing here. It also keeps the
+   fiddly bit, the mapping from an outcome to the pipeline status, in one
+   place, which is what matters. Reopening a lost lead to "quoted" has to
+   clear `closed`, and that was a bug once. */
+async function applyOutcome(
+  ctx: MutationCtx,
+  leadId: Id<"leads">,
+  outcome: string,
+  valueGbp: number | undefined,
+  lostReason: string | undefined,
+  by: string | undefined,
+): Promise<{ ok: boolean; why?: string; outcome?: string; changed?: boolean }> {
+  if (!OUTCOMES.has(outcome)) return { ok: false, why: "unknown_outcome" };
+  const lead = await ctx.db.get(leadId);
+  if (!lead) return { ok: false, why: "no_such_lead" };
+
+  /* Did anything actually change?
+
+     A dashboard that re-submits on render would otherwise fill the timeline
+     with records of nothing happening, and the real changes become
+     unfindable among them. Same outcome AND same money is not a change;
+     same outcome at a different figure is. */
+  const was = lead.outcome ?? null;
+  const wasValue = lead.valueGbp ?? null;
+  const nowValue = outcome === "won" ? (valueGbp ?? null) : null;
+  const changed = was !== outcome || wasValue !== nowValue;
+
+  await ctx.db.patch(leadId, {
+    outcome,
+    /* A value only belongs on a won deal. Leaving a figure behind on a lead
+       that later went to "lost" would quietly inflate every revenue total
+       that groups by channel. */
+    valueGbp: outcome === "won" ? valueGbp : undefined,
+    lostReason: outcome === "lost" ? lostReason : undefined,
+    outcomeAt: Date.now(),
+    outcomeBy: by,
+    status:
+      outcome === "won" || outcome === "lost" || outcome === "unqualified"
+        ? "closed"
+        : outcome === "quoted"
+          ? "contacted"
+          : lead.status === "new"
+            ? "new"
+            : "contacted",
+  });
+
+  /* The record of the change, in `touches` rather than a table of its own.
+
+     `touches` already IS the per-lead history the timeline reads, and a
+     second history would have to be merged with the first every time anybody
+     looked at a lead.
+
+     `direction: "note"` rather than in or out, and no idempotency key:
+     nothing in the sending path may ever pick one of these up and text it to
+     somebody. Both are asserted. */
+  if (changed) {
+    await ctx.db.insert("touches", {
+      leadId,
+      sessionId: lead.sessionId,
+      direction: "note",
+      channel: "dashboard",
+      status: "recorded",
+      body:
+        `${by || "Somebody"} marked this ${outcome}` +
+        (nowValue !== null ? ` at ${nowValue}` : "") +
+        /* What it used to be is the part an audit is for. The new value is
+           on the lead already. */
+        (was ? `. Was ${was}${wasValue !== null ? ` at ${wasValue}` : ""}` : ". Nothing was set before") +
+        ".",
+      at: Date.now(),
+    });
+  }
+
+  return { ok: true, outcome, changed };
+}
+
 export const setOutcome = mutation({
   args: {
     leadId: v.id("leads"),
@@ -1408,38 +1488,8 @@ export const setOutcome = mutation({
     lostReason: v.optional(v.string()),
     by: v.optional(v.string()),
   },
-  handler: async (ctx, { leadId, outcome, valueGbp, lostReason, by }) => {
-    if (!OUTCOMES.has(outcome)) return { ok: false, why: "unknown_outcome" };
-    const lead = await ctx.db.get(leadId);
-    if (!lead) return { ok: false, why: "no_such_lead" };
-
-    await ctx.db.patch(leadId, {
-      outcome,
-      /* A value only belongs on a won deal. Leaving a figure behind on a
-         lead that later went to "lost" would quietly inflate every revenue
-         total that groups by channel. */
-      valueGbp: outcome === "won" ? valueGbp : undefined,
-      lostReason: outcome === "lost" ? lostReason : undefined,
-      outcomeAt: Date.now(),
-      outcomeBy: by,
-      /* Keep the pipeline status in step, so the older screens that read it
-         do not disagree with the newer ones that read this.
-
-         Reopening has to work in both directions. A lead marked lost and then
-         corrected back to "quoted" was staying `closed`, so it stayed off
-         every open-pipeline list while showing as live on the new ones. */
-      status:
-        outcome === "won" || outcome === "lost" || outcome === "unqualified"
-          ? "closed"
-          : outcome === "quoted"
-            ? "contacted"
-            : /* "open": new if nothing has happened yet, otherwise back in play. */
-              lead.status === "new"
-              ? "new"
-              : "contacted",
-    });
-    return { ok: true, outcome };
-  },
+  handler: (ctx, { leadId, outcome, valueGbp, lostReason, by }) =>
+    applyOutcome(ctx, leadId, outcome, valueGbp, lostReason, by),
 });
 
 /**
@@ -1479,11 +1529,7 @@ export const setOutcomeMany = mutation({
     let changed = 0;
     const refused: string[] = [];
     for (const leadId of leadIds) {
-      const r = (await ctx.runMutation(api.routing.setOutcome, {
-        leadId,
-        outcome,
-        by,
-      })) as { ok: boolean };
+      const r = await applyOutcome(ctx, leadId, outcome, undefined, undefined, by);
       if (r.ok) changed += 1;
       else refused.push(leadId);
     }

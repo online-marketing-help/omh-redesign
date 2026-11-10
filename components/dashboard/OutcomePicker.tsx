@@ -32,11 +32,20 @@ export function OutcomePicker({
   outcome,
   valueGbp,
   canWrite,
+  demo = false,
 }: {
   leadId: string;
   outcome: string | null;
   valueGbp: number | null;
   canWrite: boolean;
+  /* On the example data the control opens and responds and saves nothing.
+
+     A read-only word here was correct and useless: this is the one control
+     the conversation page exists for, and somebody being shown the system
+     could not press it. Saying "nothing was changed" at the moment of the
+     press is better than a dead label, because the press is the moment
+     anybody would assume it had been. */
+  demo?: boolean;
 }) {
   const [current, setCurrent] = useState(outcome);
   const [value, setValue] = useState<number | null>(valueGbp);
@@ -61,6 +70,12 @@ export function OutcomePicker({
   function save(next: string, gbp?: number) {
     setOpen(false);
     setAsking(false);
+    if (demo) {
+      setCurrent(next);
+      setValue(next === "won" ? (gbp ?? null) : null);
+      setError("Example data. Nothing was saved.");
+      return;
+    }
     start(async () => {
       const r = await setLeadOutcome(leadId, next, gbp);
       if (r.ok) {
@@ -73,7 +88,7 @@ export function OutcomePicker({
     });
   }
 
-  if (!canWrite) {
+  if (!canWrite && !demo) {
     return (
       <span className="text-[13px] text-muted">{outcomeLabel(current)}</span>
     );
@@ -160,6 +175,7 @@ export function OutcomePicker({
   const decided = current === "won" || current === "lost" || current === "unqualified";
 
   return (
+    <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
     <button
       type="button"
       ref={anchor}
@@ -182,7 +198,10 @@ export function OutcomePicker({
         <span className="tabular-nums">{money(value)}</span>
       ) : null}
       <IconSort className="h-3 w-3 opacity-50" />
-      {error && <span className="sr-only">{error}</span>}
     </button>
+    {error && (
+      <span role="status" className="text-[12.5px] text-muted">{error}</span>
+    )}
+    </span>
   );
 }

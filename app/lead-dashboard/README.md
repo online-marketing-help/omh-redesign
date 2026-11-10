@@ -70,15 +70,17 @@ four hundred in one mutation is a long transaction holding read locks on
 `suppressions` and `settings`, which every live send also reads.
 
 ### Cost per booked appointment, and per deal
-The Channels report names this as the figure to rank channels on and cannot
-show it.
+**Done.** Spend is a `settings` row, typed in per channel per month, read and
+written through `/settings/spend`. The Channel allocation section on the
+Overview shows cost per booking wherever a figure exists.
 
-**Missing:** spend. Nothing in the system knows what a channel costs.
+A channel with no figure prints "add spend", never £0. Absent and zero are
+different facts all the way from the database to the screen: a zero there
+reads as "it cost us nothing", which is the sentence that gets repeated in a
+client meeting. Nothing is called profitable without a cost behind it.
 
-**To finish:** a number typed in per channel per month, stored in `settings`.
-Crude and correct. The Google Ads and Meta Marketing APIs are the accurate
-version and a project of their own. Until one exists the column reads
-"not set" rather than being quietly omitted.
+Crude on purpose. The Google Ads and Meta Marketing APIs are the accurate
+version and a project of their own.
 
 ### Email reply rate
 The Channels report counts emails sent and texts replied to. It cannot count

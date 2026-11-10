@@ -106,6 +106,7 @@ export default async function Leads({
             outcome={l.outcome ?? null}
             valueGbp={l.valueGbp ?? null}
             canWrite={canWrite && !demo}
+            demo={demo}
           />
         ),
       },

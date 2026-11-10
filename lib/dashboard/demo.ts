@@ -1094,6 +1094,52 @@ export function demoInboxQueue() {
   };
 }
 
+/* A queue row for any demo conversation, not only the nine that were handed
+   over.
+
+   The conversation page builds its whole right-hand column from a thread,
+   and the outcome control lives there: the moment somebody has finished
+   reading a conversation is the moment they know what came of it. Without
+   this, opening any of the other three hundred example conversations showed
+   the transcript and no way to record anything, which is the one thing that
+   page is for. */
+function fromLead(sessionId: string): ReturnType<typeof demoInboxQueue>["rows"][number] | null {
+  const idx = SEEDS.findIndex((_, i) => `demo-${i + 1}` === sessionId);
+  if (idx < 0) return null;
+  const s = SEEDS[idx];
+  const t = now();
+  const since = t - s.agoMs;
+  return {
+    sessionId,
+    channel: s.source.startsWith("phone") || s.source === "website_voice" ? "voice" : "chat",
+    /* Not in the queue means the assistant finished it itself. */
+    state: "closed",
+    since,
+    startedAt: since - 8 * MIN,
+    lastSeenAt: since,
+    takenBy: null,
+    pageUrl: "https://onlinemarketinghelp.co.uk/",
+    name: s.name,
+    sourceChannel: s.source,
+    service: s.service,
+    hot: s.hot,
+    leadId: `demo-lead-${idx + 1}`,
+    email: s.email,
+    phone: s.phone,
+    company: s.company,
+    /* Nothing was escalated, so there is no question and no reason. The
+       queue rows infer these as strings, so they say so in words rather than
+       carrying a null the caller has to guess at. */
+    reason: "finished without a person",
+    question: "",
+    openQuestions: 0,
+    lastRole: "assistant",
+    lastText: "Thanks, that is all booked in.",
+    lastAt: since,
+    awaitingReply: false,
+  };
+}
+
 /* One handed-over conversation, in full.
 
    The queue is only half of this screen. The other half is the thread beside
@@ -1104,7 +1150,7 @@ export function demoInboxQueue() {
    not allowed to invent, which is what a real escalation looks like. */
 export function demoThread(sessionId: string): Thread | null {
   const q = demoInboxQueue();
-  const row = q.rows.find((r) => r.sessionId === sessionId);
+  const row = q.rows.find((r) => r.sessionId === sessionId) ?? fromLead(sessionId);
   if (!row) return null;
 
   const t = now();

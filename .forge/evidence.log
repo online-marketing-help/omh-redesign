@@ -13,3 +13,6 @@
 2026-11-10T14:54:48Z	build	pass	cd /Users/rafiulislam/Work/n8n/OHM/website && npx tsc --noEmit 2>&1|head -3; npx eslint components/dashboard/Allocation.tsx widget/gates app/lead-dashboard/page.tsx lib/dashboard 2>&1 | tail -3; echo "---"; cd widget/tests && ./run.sh 2>&1 | grep -E "FAIL|every suite|SOME"; ./run.sh 2>&1 | grep -c "^  ok "	572
 2026-11-10T14:56:06Z	browser	pass	Overview at ?demo=1, 1440 and 390	Channel allocation section renders: 5 labelled dots no collision, categories not superlatives, totals 329 leads / 93 booked / spend known 4 of 15. No overflow, no console errors. Table fits 390 withou
 2026-11-10T14:56:06Z	cmd	pass	widget/tests/run.sh	every suite passed, 572 assertions
+2026-11-10T15:32:59Z	lint	pass	cd /Users/rafiulislam/Work/n8n/OHM/website && npx eslint components app lib widget/gates 2>&1 | grep -E "^/Users|problems" | sed 's#.*/website/##' | head -5; cd widget/tests && ./run.sh 2>&1 | grep -E "FAIL|every suite|SOME"; ./run.sh 2>&1 | grep -c "^  ok "	585
+2026-11-10T15:35:42Z	browser	pass	conversations/demo-70?demo=1	Outcome picker opens, 5 options, picking Quoted updates the control and says 'Example data. Nothing was saved.'
+2026-11-10T15:35:42Z	cmd	pass	widget/tests/run.sh	every suite passed, 585 assertions
