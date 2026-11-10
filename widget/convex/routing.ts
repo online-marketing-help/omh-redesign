@@ -36,8 +36,14 @@ const RETRY_MS = 5 * 60 * 1000;
 
 /* ---------------------------------------------------------------- helpers */
 
+/* Asked of ROUTES rather than of a list written out here.
+
+   The list was A to F, and route G existed, was tested and was unreachable:
+   every enrol answered "unknown_route". A hand-written copy of the route
+   letters is a second source of truth for something the routes themselves
+   already know, and it drifted the first time one was added. */
 const isRoute = (s: string): s is RouteId =>
-  s === "A" || s === "B" || s === "C" || s === "D" || s === "E" || s === "F";
+  Object.prototype.hasOwnProperty.call(ROUTES, s);
 
 /** The `settings` row for a key, or undefined. */
 async function setting(ctx: QueryCtx, key: string) {

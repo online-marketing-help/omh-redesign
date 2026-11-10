@@ -1,11 +1,13 @@
 import { Shell } from "@/components/dashboard/Shell";
+import { NoShowButton } from "@/components/dashboard/NoShowButton";
 import { DataTable, type Row } from "@/components/dashboard/DataTable";
-import { Empty } from "@/components/dashboard/ui";
+import { Empty, Pill } from "@/components/dashboard/ui";
 import { Kpi } from "@/components/dashboard/Stats";
 import { IconCalendar, IconCheck, IconPhone } from "@/components/dashboard/icons";
 import { getWidgetData, fmtDate } from "@/lib/dashboard/convex";
 import { Card } from "@/components/dashboard/ui";
 import { sourceLabel } from "@/lib/dashboard/channels";
+import { canWrite } from "@/lib/dashboard/routing";
 import { isDemo, demoWidgetData } from "@/lib/dashboard/demo";
 import { londonToday } from "@/lib/dashboard/day";
 
@@ -81,7 +83,21 @@ export default async function Bookings({
       /* Which channel produced this appointment. Without it the diary and
          the channel report describe the same booking and never agree. */
       { t: "text", v: sourceLabel(sourceOf(b.sessionId)) },
-      { t: "pill", v: b.status },
+      {
+        t: "node" as const,
+        v: (
+          <span className="flex flex-wrap items-center gap-1.5">
+            <Pill kind={b.status}>{b.status.replace(/_/g, " ")}</Pill>
+            {/* Only once the slot has passed. Offering it on tomorrow's
+                booking invites somebody to mark a no-show for an
+                appointment that has not happened, and there is no undo
+                that puts the chase back in the box. */}
+            {b.preferredDate < todayIso && b.status !== "cancelled" && b.status !== "no_show" && (
+              <NoShowButton reference={b.reference} canWrite={canWrite && !demo} demo={demo} />
+            )}
+          </span>
+        ),
+      },
       { t: "text", v: fmtDate(b.at), nowrap: true },
     ],
   }));

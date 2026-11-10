@@ -301,6 +301,21 @@ export const stopCampaign = (campaignId: string, by?: string) =>
     by,
   });
 
+/** Cancel, move, or record that somebody did not turn up. */
+export const manageBooking = (reference: string, action: string) =>
+  call<{ ok: boolean; reference?: string; status?: string; sessionId?: string; phone?: string }>(
+    "/manageBooking",
+    { reference, action },
+  );
+
+/** Put somebody on a route. The atomic half stays in Convex. */
+export const enrol = (leadId: string, route: string, sessionId?: string) =>
+  call<{ enrolled: boolean; why?: string; sequenceId?: string }>("/router/enrol", {
+    leadId,
+    route,
+    sessionId,
+  });
+
 export const stopSequence = (leadId: string, reason = "manual") =>
   call<{ stopped: number }>("/sequence/stop", { leadId, reason });
 

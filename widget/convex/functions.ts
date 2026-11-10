@@ -613,7 +613,7 @@ export const bookAppointment = mutation({
 export const manageBooking = mutation({
   args: {
     reference: v.string(),
-    action: v.string(),         // cancel | move | lookup
+    action: v.string(),         // cancel | move | lookup | no_show
     preferredDate: v.optional(v.string()),
     preferredTime: v.optional(v.string()),
   },
@@ -634,6 +634,32 @@ export const manageBooking = mutation({
         status: b.status,
       };
     }
+    /* They did not turn up.
+
+       Deliberately not the same as "cancelled". A cancellation is something
+       somebody told us about; a no-show is something they did not, and the
+       difference is the whole reason to chase one and leave the other. With
+       only four statuses the diary could not tell a kept appointment from an
+       empty hour, and the channel report counted a no-show as a success.
+
+       Nothing is chased from here. What happens next is route G, started by
+       the person who marked it, so it passes the same consent gate, the same
+       quiet hours and the same lease as every other message. */
+    if (a.action === "no_show") {
+      await ctx.db.patch(b._id, { status: "no_show" });
+      /* The session and the number come back so the caller can find the
+         lead and chase it. A booking carries a session id rather than a
+         lead id: it is made mid-conversation, before anybody has decided
+         the conversation produced a lead. */
+      return {
+        ok: true,
+        reference: b.reference,
+        status: "no_show",
+        sessionId: b.sessionId,
+        phone: b.phone,
+      };
+    }
+
     if (a.action === "cancel") {
       await ctx.db.patch(b._id, { status: "cancelled" });
       return { ok: true, reference: b.reference, status: "cancelled" };

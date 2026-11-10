@@ -44,3 +44,32 @@ export async function setOutbound(enabled: boolean): Promise<Result> {
       : "Stopped. Nothing automated will be sent until this is switched back on.",
   };
 }
+
+/* What a channel costs per month.
+
+   The only figure on this dashboard a person has to supply. Everything else
+   is observed; this is told, and without it the allocation section can rank
+   channels by how well they convert but not by what they cost. */
+export async function saveChannelSpend(
+  channel: string,
+  pounds: number | null,
+): Promise<Result> {
+  const auth = await assertCanWrite();
+  if (!auth.ok) return { ok: false, message: auth.why };
+
+  const res = await routing.setChannelSpend(channel, pounds, auth.who);
+  if (!res) return { ok: false, message: "Could not reach the settings store." };
+  if (!res.ok) {
+    return {
+      ok: false,
+      message: res.why === "not_a_cost" ? "That is not a monthly cost." : "That did not save.",
+    };
+  }
+
+  /* The allocation section on the Overview reads this, and so does the
+     Channels report. Both are stale the moment a figure changes. */
+  revalidatePath("/lead-dashboard");
+  revalidatePath("/lead-dashboard/channels");
+  revalidatePath("/lead-dashboard/settings");
+  return { ok: true };
+}

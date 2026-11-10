@@ -255,7 +255,7 @@ export default defineSchema({
     preferredTime: v.string(),  // HH:mm, Europe/London
     notes: v.optional(v.string()),
     channel: v.string(),
-    status: v.string(),         // requested | confirmed | cancelled | moved
+    status: v.string(),         // requested | confirmed | cancelled | moved | no_show
     calendarEventId: v.optional(v.string()),
     calendarSyncedAt: v.optional(v.number()),
     at: v.number(),

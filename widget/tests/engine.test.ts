@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { ctx, INDEXES } from "./convex-mock.ts";
 import * as R from "../convex/routing.ts";
+import * as F from "../convex/functions.ts";
 import { ROUTES } from "../gates/routes.ts";
 import { londonInstant } from "../gates/clock.ts";
 
@@ -784,6 +785,47 @@ console.log("\n== what came of a lead, set by a person ==");
   eq("a reopened lead is not closed", back.status, "contacted");
   eq("and carries no lost reason", back.lostReason, undefined);
 }
+console.log("\n== somebody booked and did not turn up ==");
+{
+  /* A booking was requested, confirmed, cancelled or moved. Somebody who
+     simply did not arrive left no trace at all, so the diary could not tell
+     a kept appointment from an empty hour and the channel report counted the
+     no-show as a success. */
+  const { db, ctx: c } = ctx();
+  const leadId = await makeLead(db, { sessionId: "smoke-ns" });
+  await db.insert("bookings", {
+    reference: "OMH-NS01", sessionId: "smoke-ns", name: "Sarah", phone: "+447700900123",
+    service: "Consultation", preferredDate: "2026-12-01", preferredTime: "10:00",
+    channel: "chat", status: "confirmed", at: Date.now() - 3600000,
+  });
+
+  const r = await call(F.manageBooking, c, { reference: "OMH-NS01", action: "no_show" });
+  eq("it is recorded", r.status, "no_show");
+  const after = (await db.query("bookings").collect())[0] as any;
+  eq("on the booking", after.status, "no_show");
+
+  /* It is not a cancellation. A cancelled appointment is one somebody told
+     us about; a no-show is one they did not, and the difference is the
+     whole reason to chase one and not the other. */
+  ok("and distinct from cancelled", after.status !== "cancelled");
+
+  /* Chasing it is route G, which goes through the same gate, the same quiet
+     hours and the same lease as everything else. A second scheduler would
+     not. */
+  const e = await call(R.enrol, c, { leadId, route: "G", sessionId: "smoke-ns" });
+  ok("the lead can be chased on route G", e.enrolled === true, JSON.stringify(e));
+  const seq = (await db.query("sequences").collect())[0] as any;
+  eq("on route G", seq.route, "G");
+  /* Nothing goes out at the appointment time: people are late. */
+  eq("and nothing is sent immediately", (e.immediate ?? []).length, 0);
+}
+{
+  /* An unknown reference does not quietly succeed. */
+  const { ctx: c } = ctx();
+  const r = await call(F.manageBooking, c, { reference: "OMH-NOPE", action: "no_show" });
+  ok("an unknown booking is refused", r.ok !== true, JSON.stringify(r));
+}
+
 console.log("\n== every outcome change leaves a record ==");
 {
   /* Before this, "who marked this won, and when" had no answer at all. The

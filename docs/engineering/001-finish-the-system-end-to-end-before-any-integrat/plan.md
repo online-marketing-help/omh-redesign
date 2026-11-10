@@ -50,12 +50,12 @@ thing live, not merely written: a workflow on `srv1836598`, a function on
     same second both see the slot free and only a check in the same breath as
     the write refuses the second.
 
-- [ ] **T5** - `no_show` status and the chase route
+- [x] **T5** - `no_show` status and the chase route
   - Files: `widget/convex/schema.ts`, `widget/gates/routes.ts`, `app/lead-dashboard/bookings/page.tsx`
   - Test first: `widget/tests/routes.test.ts` extended, asserting the no-show chase is on a route that cannot dial and carries an opt-out
   - Verify: `widget/tests/run.sh` passes; the Appointments screen marks one and the figure moves
 
-- [ ] **T6** - Spend per channel, so cost per booked appointment can be shown
+- [x] **T6** - Spend per channel, so cost per booked appointment can be shown
   - Files: `widget/convex/routing.ts` (settings read/write), `app/lead-dashboard/settings/page.tsx`, `app/lead-dashboard/channels/page.tsx`
   - Test first: `widget/tests/spend.test.ts`, asserting a channel with no spend reads "not set" rather than £0, and that cost per booking is absent rather than infinite when nothing booked
   - Verify: `npx tsc --noEmit` clean; the Channels screen shows a figure after typing one in, and "not set" before
