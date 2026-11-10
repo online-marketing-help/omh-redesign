@@ -72,7 +72,7 @@ in this workstream.
     and the picker opens; on live data it saves and the value survives a
     reload
 
-- [ ] **A7** - Update the specs
+- [x] **A7** - Update the specs
   - Files: `OHM/DASHBOARD-SPEC.md`, `OHM/IMPLEMENTATION-PLAN.md`, `app/lead-dashboard/README.md`
   - Verify: the new section and the spend input are described, and the README's "backend missing" list no longer claims spend is missing
 
