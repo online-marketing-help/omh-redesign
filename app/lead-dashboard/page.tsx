@@ -13,9 +13,11 @@ import {
 import { getWidgetData, temperature, fmtDate } from "@/lib/dashboard/convex";
 import { getInbox } from "@/lib/dashboard/handover";
 import { londonToday } from "@/lib/dashboard/day";
-import { isDemo, demoWidgetData, demoCalls, demoSequenceBoard } from "@/lib/dashboard/demo";
-import { getSequenceBoard, sourceLabel, when, canonicalSource } from "@/lib/dashboard/routing";
+import { isDemo, demoWidgetData, demoCalls, demoSequenceBoard, demoChannelFacts, demoSpend } from "@/lib/dashboard/demo";
+import { isTestRow } from "@/lib/dashboard/test-rows";
+import { getSequenceBoard, sourceLabel, when, canonicalSource, getChannelFacts, getChannelSpend } from "@/lib/dashboard/routing";
 import { BarCompare } from "@/components/dashboard/BarCompare";
+import { Allocation } from "@/components/dashboard/Allocation";
 import { IconRoute } from "@/components/dashboard/icons";
 
 export const dynamic = "force-dynamic";
@@ -63,6 +65,15 @@ export default async function Overview({
     label: sourceLabel(key),
     value,
   }));
+
+  /* What each channel produced and what it costs. Read here rather than in
+     the component, so the component stays a pure function of its props. */
+  const [factsRaw, spendRaw] = demo
+    ? ([demoChannelFacts(), { spend: demoSpend() }] as const)
+    : await Promise.all([getChannelFacts(undefined, 1000), getChannelSpend()]);
+  const allFacts = factsRaw?.rows ?? [];
+  const facts = demo ? allFacts : allFacts.filter((r) => !isTestRow(r));
+  const factsHidden = allFacts.length - facts.length;
 
   const day = today(calls);
   const week = windowOf(calls, WEEK);
@@ -287,6 +298,11 @@ export default async function Overview({
           the pair either side of the gutter land within a row of each other.
           The caps are not arbitrary: an overview is a glance, and the full
           list is one click away on every one of them. */}
+      {/* Under the day's figures and above the detail. Everything above this
+          says what happened; this is the first block that says what to do
+          about it. */}
+      <Allocation facts={facts} spend={spendRaw?.spend ?? {}} demo={demo} hidden={factsHidden} />
+
       <div className="mt-3 grid gap-3 xl:grid-cols-12">
         <Card
           className="xl:col-span-7"

@@ -2,12 +2,15 @@ import { ROUTES, dueAt, nextStep, channelsUsed, stepAt } from "../gates/routes.t
 import { londonWall, londonInstant, isSendableHour } from "../gates/clock.ts";
 
 let pass = 0, fail = 0;
+function ok(label: string, cond: boolean, detail = "") {
+  eq(label + (cond || !detail ? "" : ` [${detail}]`), cond, true);
+}
 function eq(label: string, got: unknown, want: unknown) {
   const ok = JSON.stringify(got) === JSON.stringify(want);
   if (ok) { pass++; console.log("  ok   " + label); }
   else { fail++; console.log("  FAIL " + label + "\n         got  " + JSON.stringify(got) + "\n         want " + JSON.stringify(want)); }
 }
-const ids = ["A","B","C","D","E","F"] as const;
+const ids = ["A","B","C","D","E","F","G"] as const;
 
 console.log("\n== THE COMPLIANCE PROPERTY: an automated call is unreachable outside B and E ==");
 for (const id of ids) {
@@ -19,6 +22,38 @@ eq("the only marketing route is F",
 // The two together are the actual guarantee: nothing that is marketing can dial.
 eq("no marketing route can dial",
    ids.filter((i) => ROUTES[i].marketing && channelsUsed(i as any).includes("call")), []);
+
+console.log("\n== route G: somebody who booked and did not turn up ==");
+{
+  /* A no-show is not a lead going cold. They chose a time, so the follow-up
+     is a reply to their own booking rather than a chase, and it stops
+     quickly: two messages and done. */
+  eq("G exists", ROUTES.G?.id, "G");
+  eq("G is not marketing", ROUTES.G.marketing, false);
+
+  /* THE LINE THIS ROUTE MUST NOT CROSS.
+     A missed appointment is a reasonable thing to ring about, and that is
+     exactly why it is worth writing down that we do not. The property
+     asserted above is that an automated call exists only where the person
+     rang us or asked us to ring. Somebody who booked and forgot did neither
+     at the moment we would be dialling, and a route that quietly joined B
+     and E would weaken the one guarantee this system makes structurally. */
+  eq("G never dials", channelsUsed("G").includes("call"), false);
+  eq("G is text and email only", channelsUsed("G"), ["sms", "email"]);
+
+  /* Nothing is sent at the appointment time: people are late. */
+  eq("nothing immediate", ROUTES.G.immediate.length, 0);
+  const first = ROUTES.G.steps[0];
+  ok("the first message waits",
+     (first.when as any).afterMs >= 10 * 60 * 1000, JSON.stringify(first.when));
+  eq("it is a text", first.channel, "sms");
+
+  eq("it ends after two", ROUTES.G.steps.length, 2);
+  /* Every step is gated on no reply: the moment they answer, or rebook,
+     the chase stops like any other route. */
+  eq("every step stops on a reply",
+     ROUTES.G.steps.map((s) => s.gate), ["no_reply", "no_reply"]);
+}
 
 console.log("\n== route A starts nothing ==");
 eq("A has no immediate touch", ROUTES.A.immediate.length, 0);

@@ -1199,6 +1199,23 @@ export function demoThread(sessionId: string): Thread | null {
   };
 }
 
+/* What each channel costs per month, for the allocation section.
+
+   Not every channel has a figure, and that is the point rather than an
+   oversight: a real client types in the ad platforms and leaves the organic
+   ones blank. The section has to show "add spend" for those rather than a
+   cost per booking of nothing, and it cannot show that unless the example
+   data has some. */
+export function demoSpend(): Record<string, number> {
+  return {
+    facebook_ads: 2400,
+    google_ads: 3100,
+    instagram_ads: 900,
+    /* A click-to-WhatsApp budget, small. */
+    whatsapp: 350,
+  };
+}
+
 /* ------------------------------------------------------------- campaigns
 
    A reactivation run is the one capability where the interesting number is

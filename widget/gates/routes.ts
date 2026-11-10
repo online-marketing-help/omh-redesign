@@ -75,7 +75,7 @@ export type Route = {
   steps: Step[];
 };
 
-export type RouteId = "A" | "B" | "C" | "D" | "E" | "F";
+export type RouteId = "A" | "B" | "C" | "D" | "E" | "F" | "G";
 
 /* ------------------------------------------------------------------------ */
 
@@ -327,6 +327,43 @@ export const ROUTES: Record<RouteId, Route> = {
        marketing consent does not cover it and neither does consent for live
        calls. A live person makes those calls, from the dashboard, after a TPS
        screen. So there is nothing here for the worker to dial. */
+  },
+  /* --------------------------------------------------------------------- */
+
+  G: {
+    id: "G",
+    name: "Booked and did not turn up",
+    intent: "They chose a time. Something came up, or they forgot.",
+    rule: "Two messages, then leave it. They are not a lead going cold.",
+    marketing: false,
+    /* Nothing at the appointment time. People are late, and a text saying
+       "sorry we missed you" to somebody parking outside is worse than
+       silence. */
+    immediate: [],
+    steps: [
+      {
+        key: "g_sms_missed",
+        when: { afterMs: 20 * 60 * 1000 },
+        channel: "sms",
+        gate: "no_reply",
+        label: "We missed you, shall we rebook",
+        why: "Twenty minutes is long enough to be sure, short enough that the appointment is still the thing they are thinking about.",
+      },
+      {
+        key: "g_email_next_day",
+        when: { addDays: 1, hour: 10 },
+        channel: "email",
+        gate: "no_reply",
+        label: "One email the next day, then stop",
+        why: "A second text the same day reads as nagging somebody who already feels bad about missing it. The next morning, in writing, with a link, is easier to act on.",
+      },
+    ],
+    /* NO CALL STEP, and the omission is the point.
+       A missed appointment is a reasonable thing to ring about, which is
+       exactly why it is worth writing down that we do not. The guarantee
+       this system makes structurally is that an automated call exists only
+       where the person rang us or asked us to ring. Somebody who booked and
+       forgot did neither at the moment we would be dialling. */
   },
 };
 

@@ -904,6 +904,62 @@ export const setOutbound = mutation({
  * leaves the reader to interleave them, which is why "what did we actually do
  * about this lead" is currently hard to answer.
  */
+/* ---------------------------------------------------------------- spend
+
+   What each channel costs, per month, typed in by a person.
+
+   Crude on purpose. The Google Ads and Meta Marketing APIs are the accurate
+   version and a project of their own; until one exists, a number somebody
+   types once a month is the difference between a dashboard that ranks
+   channels by volume and one that ranks them by what they cost.
+
+   Absent is not zero. A channel with no figure reports `null` all the way to
+   the screen, which prints "add spend" rather than a cost per booking of
+   nothing. A zero here would read as "it cost us nothing", and that is the
+   sentence that gets repeated in a client meeting.
+   ========================================================================= */
+
+export const channelSpend = query({
+  args: {},
+  handler: async (ctx) => {
+    const row = await setting(ctx, "spend");
+    const v = (row?.value ?? {}) as Record<string, unknown>;
+    const out: Record<string, number> = {};
+    for (const [k, n] of Object.entries(v)) {
+      const num = Number(n);
+      if (Number.isFinite(num) && num > 0) out[k] = num;
+    }
+    return { spend: out, updatedAt: row?.updatedAt ?? null, updatedBy: row?.updatedBy ?? null };
+  },
+});
+
+export const setChannelSpend = mutation({
+  args: {
+    channel: v.string(),
+    /* Null clears it, which is how a channel goes back to "not set" rather
+       than being stuck at a figure somebody typed by accident. */
+    pounds: v.union(v.number(), v.null()),
+    by: v.optional(v.string()),
+  },
+  handler: async (ctx, { channel, pounds, by }) => {
+    const key = channel.trim();
+    if (!key) return { ok: false, why: "no_channel" };
+    if (pounds !== null && (!Number.isFinite(pounds) || pounds < 0)) {
+      return { ok: false, why: "not_a_cost" };
+    }
+
+    const row = await setting(ctx, "spend");
+    const value = { ...((row?.value ?? {}) as Record<string, number>) };
+    if (pounds === null || pounds === 0) delete value[key];
+    else value[key] = pounds;
+
+    const at = Date.now();
+    if (row) await ctx.db.patch(row._id, { value, updatedAt: at, updatedBy: by });
+    else await ctx.db.insert("settings", { key: "spend", value, updatedAt: at, updatedBy: by });
+    return { ok: true, channel: key, pounds: pounds === 0 ? null : pounds, at };
+  },
+});
+
 export const leadTimeline = query({
   args: { leadId: v.id("leads"), limit: v.optional(v.number()) },
   handler: async (ctx, { leadId, limit }) => {

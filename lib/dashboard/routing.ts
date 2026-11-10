@@ -219,6 +219,22 @@ export type InboxItem = {
 export const getInboxFeed = (limit = 120) =>
   call<{ items: InboxItem[]; since: number }>("/inbox/feed", { limit });
 
+/* What each channel costs per month, as somebody typed it.
+
+   An empty object is "nobody has typed any", which is a different fact from
+   "it costs nothing" and stays different all the way to the screen. */
+export const getChannelSpend = () =>
+  call<{ spend: Record<string, number>; updatedAt: number | null; updatedBy: string | null }>(
+    "/settings/spend",
+    {},
+  );
+
+export const setChannelSpend = (channel: string, pounds: number | null, by?: string) =>
+  call<{ ok: boolean; why?: string; channel?: string; pounds?: number | null }>(
+    "/settings/spend",
+    { channel, pounds, by },
+  );
+
 export const getLeadTimeline = (leadId: string, limit = 300) =>
   call<LeadTimeline>("/lead/timeline", { leadId, limit });
 

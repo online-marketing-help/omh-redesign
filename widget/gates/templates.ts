@@ -263,6 +263,27 @@ const TEMPLATES: Record<string, Template> = {
       `. Any questions, reply to this text or ring ${PHONE}.`,
   }),
 
+  /* ---- Route G: booked and did not turn up ---------------------------- */
+
+  g_sms_missed: (c) => ({
+    body:
+      `${hello(c.name)} we had you down for a call with ${TEAM}` +
+      when_(c) +
+      ` and could not reach you. No problem at all. ` +
+      `Reply with a day that suits and we will put it back in, or ring ${PHONE}.`,
+  }),
+
+  g_email_next_day: (c) => ({
+    subject: "Shall we find another time?",
+    body:
+      `${hello(c.name)}\n\n` +
+      `We missed each other yesterday. These things happen.\n\n` +
+      `If you would still like to talk${c.service ? ` about ${c.service}` : ""}, ` +
+      `pick a time that suits you here: ${BOOK}\n\n` +
+      `If the timing is wrong, no need to reply. We will leave it with you.\n\n` +
+      `${TEAM}\n${PHONE}`,
+  }),
+
   /* ---- Replies to an inbound. Sent once, immediately. ----------------- */
 
   optout_confirmed: () => ({

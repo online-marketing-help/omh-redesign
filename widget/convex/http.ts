@@ -872,4 +872,24 @@ http.route({
   ),
 });
 
+http.route({
+  path: "/settings/spend",
+  method: "POST",
+  handler: route(async (ctx, b) => {
+    /* One route for both, like /settings/outbound: the dashboard reads it on
+       every render of the allocation section and writes it from one cell. */
+    if (b.channel !== undefined) {
+      return await ctx.runMutation(api.routing.setChannelSpend, {
+        channel: String(b.channel),
+        pounds:
+          b.pounds === null || b.pounds === "" || b.pounds === undefined
+            ? null
+            : Number(b.pounds),
+        by: b.by || undefined,
+      });
+    }
+    return await ctx.runQuery(api.routing.channelSpend, {});
+  }),
+});
+
 export default http;
