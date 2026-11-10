@@ -12,7 +12,7 @@ export async function InstagramFeed() {
   return (
     <section className="section-md bg-inverse text-oninverse">
       <h2 className="container-omh text-center font-sans text-h2 font-semibold">
-        Latest reels from <span className="text-[#7d5c33]">our Instagram</span>
+        Latest reels from <span className="bg-[linear-gradient(135deg,oklch(80%_.16_75),oklch(68%_.23_30),oklch(62%_.26_0),oklch(55%_.25_320))] bg-clip-text text-transparent">our Instagram</span>
       </h2>
       {/* Outside the container, so on phones the side cards run to the screen edge instead of being cut at the gutter. */}
       <InstagramCarousel reels={reels} profileUrl={profileUrl} handle={handle} />
