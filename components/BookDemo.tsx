@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useId, useMemo, useState, useSyncExternalStore, type ComponentProps, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useId, useMemo, useRef, useState, useSyncExternalStore, type ComponentProps, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
 import { flushSync } from "react-dom";
 import { Calendar, Check, Clock, MapPin, Phone, PhoneIncoming } from "lucide-react";
 import { ArrowRight } from "@/components/ui/Button";
@@ -195,6 +195,10 @@ export function BookDemo({ id, eyebrow, heading, thingsToTry = defaultThingsToTr
   const [doneName, setDoneName] = useState<string | null>(null);
   const [started, setStarted] = useState(false);
   const booking = useChecks();
+  /* Whether the enquiry has already reached OMH in this sitting. A ref,
+     not state: nothing on screen depends on it, and it must survive the
+     re-render that sending causes. */
+  const leadSent = useRef(false);
 
   /* What the calendar said about one day, carrying the date it was about.
      Holding the date alongside the answer is what lets everything below be
@@ -246,13 +250,33 @@ export function BookDemo({ id, eyebrow, heading, thingsToTry = defaultThingsToTr
   async function submitBooking(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
-    if (!day || !picked || !booking.validate(form)) return track("demo_form_error", { form: "Demo booking", step: !day || !picked ? "slot" : "details" });
+    if (!day || !picked) {
+      /* The slot went while they were filling in their details: the diary
+         answered mid-form and `picked` is now null. Returning quietly here
+         meant pressing "Request this demo" did nothing at all, with no
+         explanation, because the slot message lives on the step they are
+         not looking at. Send them back and say so. */
+      track("demo_form_error", { form: "Demo booking", step: "slot" });
+      setStep(1);
+      setSendError(
+        day
+          ? "That time went while you were typing. Pick another and it is yours."
+          : "Pick a day and a time to carry on.",
+      );
+      return;
+    }
+    if (!booking.validate(form)) return track("demo_form_error", { form: "Demo booking", step: "details" });
     setSending(true);
     setSendError(null);
     const data = new FormData(form);
     const field = (name: string) => String(data.get(name) ?? "").trim();
+    /* On a retry after a lost slot the enquiry has already been sent and
+       accepted. Sending it again would put the same person in the lead
+       table twice for one booking, which is worse than the race was. */
     const [lead, calendar] = await Promise.all([
-      sendEnquiry(form, "Demo booking"),
+      leadSent.current
+        ? Promise.resolve({ ok: true, message: "" })
+        : sendEnquiry(form, "Demo booking"),
       fetch("/api/book-demo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -274,6 +298,7 @@ export function BookDemo({ id, eyebrow, heading, thingsToTry = defaultThingsToTr
       ),
     ]);
     setSending(false);
+    if (lead.ok) leadSent.current = true;
 
     /* 409: the slot went in the seconds between this form opening and being
        submitted. The lock in the Apps Script caught it, which is the only
@@ -382,7 +407,7 @@ export function BookDemo({ id, eyebrow, heading, thingsToTry = defaultThingsToTr
                   </p>
                   <div role="radiogroup" aria-labelledby={`${uid}-day`} className="mt-2 grid min-h-[60px] grid-cols-3 gap-2 sm:grid-cols-5">
                     {days.map((d, i) => (
-                      <Radio key={d.iso} index={i} checked={day?.iso === d.iso} first={!day && i === 0} onPick={(to) => setDay(days[to])} className="min-h-[60px] flex-col">
+                      <Radio key={d.iso} index={i} checked={day?.iso === d.iso} first={!day && i === 0} onPick={(to) => { setDay(days[to]); setTime(null); }} className="min-h-[60px] flex-col">
                         <span className="text-[14px] font-semibold opacity-75">{d.short}</span>
                         <span className="font-sans text-[17px] font-semibold">{d.date}</span>
                       </Radio>
@@ -413,6 +438,17 @@ export function BookDemo({ id, eyebrow, heading, thingsToTry = defaultThingsToTr
                   {slotError && !slot && (
                     <p role="alert" className="mt-3 text-bsm font-semibold text-error">
                       Pick a day and a time to carry on.
+                    </p>
+                  )}
+                  {/* The lost-the-race message belongs HERE as well as on
+                      step two. The 409 branch sends the visitor back to this
+                      step, and the only copy of this used to live inside the
+                      step-two fieldset, which is `hidden` by then: they
+                      submitted, the spinner stopped, their time quietly
+                      deselected, and nothing said why. */}
+                  {sendError && (
+                    <p role="alert" className="mt-3 text-bsm font-semibold text-error">
+                      {sendError}
                     </p>
                   )}
                   <button
@@ -490,8 +526,8 @@ export function BookDemo({ id, eyebrow, heading, thingsToTry = defaultThingsToTr
                       <ArrowRight className="size-4 rotate-180" />
                       Back
                     </button>
-                    <button type="submit" disabled={sending} data-event="book_demo_submit" className={`${btnPrimary} sm:flex-1`}>
-                      {sending ? "Sending…" : "Request this demo"}
+                    <button type="submit" disabled={sending || checking} data-event="book_demo_submit" className={`${btnPrimary} sm:flex-1`}>
+                      {sending ? "Sending…" : checking ? "Checking the diary…" : "Request this demo"}
                     </button>
                   </div>
                 </fieldset>

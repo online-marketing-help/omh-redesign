@@ -278,7 +278,19 @@ export const hello = mutation({
 
     if (s) {
       const patch: Record<string, unknown> = { lastSeenAt: now() };
-      if (s.visitorId !== a.visitorId) patch.visitorId = a.visitorId;
+      /* A session keeps the visitor that started it, and only gains one if
+         it had none.
+
+         It used to be re-pointed at whatever visitor id the caller sent,
+         which is a public route taking two strings: send somebody else's
+         session id with your own visitor id and the session became yours,
+         and with it everything said in it. Guessing a session id is then
+         enough to read a stranger's conversation.
+
+         The honest case this was for, a visitor whose localStorage was
+         cleared mid-visit, is served by the `!s.visitorId` arm. The case
+         it was not for is the one above. */
+      if (!s.visitorId && a.visitorId) patch.visitorId = a.visitorId;
       /* Only if the session has none. A second page view on the same visit
          carries no gclid and would otherwise overwrite the one that did. */
       if (!s.sourceChannel) patch.sourceChannel = sourceChannel;
@@ -389,6 +401,10 @@ export const profileForSession = query({
    worth sending over a phone connection before they have typed anything. */
 const HISTORY_LIMIT = 60;
 
+/* How many of a visitor's visits are looked at. Fixed, because how many
+   sessions a visitor has is decided by whoever calls `hello`, not by us. */
+const MAX_SESSIONS = 10;
+
 /**
  * Everything this visitor has said to us, and we to them, oldest first.
  *
@@ -405,20 +421,47 @@ const HISTORY_LIMIT = 60;
  * on a session id the same way.
  */
 export const historyForVisitor = query({
-  args: { visitorId: v.string(), limit: v.optional(v.number()) },
-  handler: async (ctx, { visitorId, limit }) => {
-    const empty = { messages: [], sessions: 0, lastAt: null, trimmed: false };
+  args: { visitorId: v.string(), sessionId: v.string() },
+  handler: async (ctx, { visitorId, sessionId }) => {
+    const empty = { messages: [], sessions: 0, sessionsRead: 0, lastAt: null, trimmed: false };
     /* An empty id must return nothing rather than everything. It is the
        value a browser with no localStorage sends. */
-    if (!visitorId) return empty;
+    if (!visitorId || !sessionId) return empty;
 
+    /* **Both halves, and they must agree.**
+
+       This used to read on the visitor id alone, while the shared guard in
+       http.ts only checked that a session id was PRESENT. Presenting
+       somebody else's visitor id therefore returned their whole
+       conversation, and a comment in http.ts claimed the opposite.
+
+       Requiring the pair means a reader has to hold a session id that is
+       already attached to that visitor: the two values the visitor's own
+       browser holds, together. Neither alone is enough. */
+    const own = await ctx.db
+      .query("sessions")
+      .withIndex("by_session", (i) => i.eq("sessionId", sessionId))
+      .first();
+    if (!own || own.visitorId !== visitorId) return empty;
+
+    /* Newest visits only, and a fixed number of them.
+
+       `hello` is public and writes a session row per (session, visitor)
+       pair, so how many sessions a visitor has is decided by whoever is
+       calling. Fanning out over all of them is a read that eventually
+       exceeds what Convex will do in one query and throws, which breaks
+       the panel for that person permanently rather than briefly. */
     const sessions = await ctx.db
       .query("sessions")
       .withIndex("by_visitor", (i) => i.eq("visitorId", visitorId))
-      .collect();
+      .order("desc")
+      .take(MAX_SESSIONS);
     if (!sessions.length) return empty;
 
-    const take = Math.min(limit ?? HISTORY_LIMIT, 200);
+    /* Not a caller argument. It was one, capped at 200, which multiplied
+       by the session fan-out is the read limit again; and an
+       unauthenticated caller has no business sizing our queries. */
+    const take = HISTORY_LIMIT;
 
     /* The recent end of each conversation, then the recent end of all of
        them together. Taking the newest from each session first bounds the
@@ -465,6 +508,9 @@ export const historyForVisitor = query({
     return {
       messages,
       sessions: sessions.length,
+      /* How many visits were actually read. Returned so a test can hold
+         the bound rather than trusting the comment above it. */
+      sessionsRead: sessions.length,
       lastAt: messages.length ? messages[messages.length - 1].at : null,
       /* So the panel can say "earlier messages are not shown" rather than
          implying this is everything that was ever said. */

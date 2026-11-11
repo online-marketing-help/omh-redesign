@@ -334,15 +334,22 @@ http.route({
 
 /* --------------------------------------------------- handover, visitor side */
 
-/* The two routes below are the only ones with no secret, because the caller is
-   the visitor's own browser and a secret shipped to a browser is not a secret.
-   They are scoped to one session id, which the widget generated itself and
-   keeps in its own sessionStorage: the visitor's capability for the visitor's
-   own conversation. Neither route can read another session, list sessions, or
-   return the visitor's own messages back to them.
+/* The routes below carry no secret, because the caller is the visitor's own
+   browser and a secret shipped to a browser is not a secret. What stands in
+   for one is the pair of random ids that browser holds: the session id in
+   sessionStorage and the visitor id in localStorage, both now 16 bytes from
+   `crypto.getRandomValues`.
 
-   CORS is pinned to the sites the widget is installed on. A browser will not
-   hand the response to any other origin. */
+   `publicRoute` only checks that a session id is PRESENT. It cannot know
+   whose it is, so **every handler below is responsible for its own scoping**
+   and the ones that read anything check the pair. `/visitor/history` was
+   written against this comment rather than against that fact: it read on
+   the visitor id alone, and presenting somebody else's returned their whole
+   conversation. See visitors.historyForVisitor and visitor-auth.test.ts.
+
+   CORS is not a control here. It stops a BROWSER on another origin reading
+   the reply; the handler still runs, and curl is not a browser. Anything
+   these routes must not give away has to be refused by the handler. */
 const ALLOWED = [
   "https://onlinemarketinghelp.co.uk",
   "https://www.onlinemarketinghelp.co.uk",
@@ -448,6 +455,10 @@ http.route({
   handler: publicRoute(async (ctx, b) =>
     ctx.runQuery(api.visitors.historyForVisitor, {
       visitorId: String(b.visitorId ?? b.visitor_id ?? ""),
+      /* Passed through and CHECKED against the visitor id, in the query.
+         The guard below only ensures a session id is present; it does not
+         and cannot know whose it is. */
+      sessionId: String(b.sessionId ?? b.session_id ?? ""),
     }),
   ),
 });
@@ -917,16 +928,22 @@ http.route({
 
 /* ------------------------------------------------------- attachments
 
-   Two doors, one store.
+   One door today, two planned.
 
    The widget uploads bytes straight to Convex storage with a short-lived
-   URL, so a photo never passes through n8n or this file. Meta sends a URL
-   and `10-meta` fetches it, checks it against gates/attachments.js and
-   posts the bytes here.
+   URL, so a photo never passes through n8n or this file. The file is then
+   judged on the bytes that actually arrived, in attachments.ts, which is
+   the only check that counts: the browser-side one is advice, and the
+   upload URL is an ordinary endpoint anyone can PUT to.
 
-   Nothing is stored before it has been judged. The rules live in
-   gates/attachments.js and are asserted by 44 assertions, because an upload
-   box on a public page is the widest door in the system. */
+   **The Meta door is not built.** `checkRemote` in gates/attachments.js
+   has its assertions, including the SSRF host check, and nothing calls it:
+   there is no `10-meta` workflow, because there is no Meta app yet. The
+   route below (`/attachment/url`, secret-gated) is what that workflow will
+   use and has no caller today. Both are kept rather than deleted because
+   the assertions are the design and re-deriving them later is how the host
+   check gets left out. Neither is a shipped path, and this comment used to
+   describe them as though they were. */
 
 http.route({
   path: "/attachment/url",

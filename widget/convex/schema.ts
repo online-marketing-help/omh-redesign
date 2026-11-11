@@ -140,7 +140,14 @@ export default defineSchema({
     at: v.number(),
   })
     .index("by_session", ["sessionId"])
-    .index("by_session_at", ["sessionId", "at"]),
+    .index("by_session_at", ["sessionId", "at"])
+    /* One stored file, one message.
+
+       Without this, `attach` was a replay: a single uploaded file could be
+       posted into any conversation as many times as anyone liked, carrying
+       two thousand characters of their text each time. This index is how a
+       second attempt is recognised as a second attempt. */
+    .index("by_attachment", ["attachment.storageId"]),
 
   /* What we have learned about this visitor, carried between chat and voice
      so a caller never repeats themselves. */

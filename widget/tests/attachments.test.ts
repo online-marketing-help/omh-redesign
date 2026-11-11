@@ -254,5 +254,40 @@ console.log("\n== what storage actually received ==");
        .attachment?.name, "attachment");
 }
 
+/* =========================================================================
+   The two signatures a review called too loose to be signatures.
+   ========================================================================= */
+console.log("\n== a signature has to actually identify something ==");
+{
+  /* An MPEG frame sync is eleven set bits. On its own that matches a great
+     deal of arbitrary data, so the reserved fields beside it are checked
+     too: a file is not an mp3 because its first eleven bits happen to be
+     ones. */
+  const sync = (b1: number, b2: number) => {
+    const b = new Uint8Array(1024);
+    b.set([0xff, b1, b2, 0x00], 0);
+    return sniff(b);
+  };
+  eq("a real mp3 frame header is audio", sync(0xfb, 0x90), "audio/mpeg");
+  eq("a reserved MPEG version is not", sync(0xeb, 0x90), null);
+  eq("a reserved layer is not", sync(0xf9, 0x90), null);
+  eq("an invalid bitrate index is not", sync(0xfb, 0xf0), null);
+  eq("a reserved sample rate is not", sync(0xfb, 0x9c), null);
+
+  /* An ISO base media file says what it is in its brand. Without reading
+     it, an mp4 video and a HEIC photo were both stored as voice notes and
+     rendered in an <audio> element that plays nothing. */
+  const ftyp = (brand: string) => {
+    const b = new Uint8Array(1024);
+    b.set([0, 0, 0, 0x20, 0x66, 0x74, 0x79, 0x70], 0);
+    for (let i = 0; i < 4; i++) b[8 + i] = brand.charCodeAt(i);
+    return sniff(b);
+  };
+  eq("an M4A voice note is audio", ftyp("M4A "), "audio/mp4");
+  eq("a HEIC photo is not a voice note", ftyp("heic"), null);
+  eq("nor is an AVIF", ftyp("avif"), null);
+  eq("nor a QuickTime movie", ftyp("qt  "), null);
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

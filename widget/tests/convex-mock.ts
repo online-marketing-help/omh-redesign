@@ -51,6 +51,10 @@ export const INDEXES: Record<string, Record<string, string[]>> = {
   messages: {
     by_session: ["sessionId"],
     by_session_at: ["sessionId", "at"],
+    by_attachment: ["attachment.storageId"],
+  },
+  limits: {
+    by_key: ["key"],
   },
   suppressions: { by_key: ["key"] },
   settings: { by_key: ["key"] },
@@ -72,8 +76,22 @@ class RangeBuilder {
   gte(field: string, value: any) { this.constraints.push({ op: "gte", field, value }); return this; }
 }
 
+/* Convex indexes can name a nested field with a dot, as `messages` does
+   for `attachment.storageId`. Reading it as a flat key would silently
+   match nothing, and an index that silently matches nothing is how a
+   uniqueness check passes while enforcing nothing. */
+function at(row: Row, field: string): any {
+  if (field.indexOf(".") === -1) return row[field];
+  let v: any = row;
+  for (const part of field.split(".")) {
+    if (v === null || v === undefined) return undefined;
+    v = v[part];
+  }
+  return v;
+}
+
 function matches(row: Row, c: Constraint): boolean {
-  const v = row[c.field];
+  const v = at(row, c.field);
   switch (c.op) {
     case "eq": return v === c.value;
     /* Convex excludes rows missing the field from a range bound, which matters:
@@ -88,7 +106,7 @@ function matches(row: Row, c: Constraint): boolean {
 function cmpBy(fields: string[]) {
   return (a: Row, b: Row) => {
     for (const f of fields) {
-      const x = a[f], y = b[f];
+      const x = at(a, f), y = at(b, f);
       if (x === y) continue;
       if (x === undefined) return -1;
       if (y === undefined) return 1;

@@ -15,6 +15,11 @@ import { historyForVisitor } from "../convex/visitors";
    history disappears exactly when somebody closes the browser and comes
    back tomorrow, which is the case it exists for.
 
+   Read on the PAIR: the visitor id and a session id that belongs to it.
+   The visitor id alone used to be enough, which meant presenting somebody
+   else's returned their conversation. See visitor-auth.test.ts, which
+   holds that line; this file is about the shaping.
+
    Three properties worth holding:
 
      - one timeline, in order, across however many visits it took;
@@ -53,7 +58,7 @@ console.log("\n== one timeline across every visit ==");
 {
   const { db, ctx: c } = ctx();
   seed(c, db);
-  const r = await call(historyForVisitor, c, { visitorId: "v1" });
+  const r = await call(historyForVisitor, c, { visitorId: "v1", sessionId: "s2" });
 
   eq("both visits are in it", r.messages.length, 4);
   eq("oldest first, so it reads like a conversation",
@@ -68,8 +73,8 @@ console.log("\n== one visitor's conversation is their own ==");
 {
   const { db, ctx: c } = ctx();
   seed(c, db);
-  const mine = await call(historyForVisitor, c, { visitorId: "v1" });
-  const theirs = await call(historyForVisitor, c, { visitorId: "v2" });
+  const mine = await call(historyForVisitor, c, { visitorId: "v1", sessionId: "s2" });
+  const theirs = await call(historyForVisitor, c, { visitorId: "v2", sessionId: "s3" });
 
   ok("nothing of v2's is in v1's history",
      !JSON.stringify(mine.messages).includes("Private to v2"));
@@ -78,9 +83,9 @@ console.log("\n== one visitor's conversation is their own ==");
 
   /* The one that matters if the id is ever mistyped or empty. */
   eq("an unknown visitor gets nothing, not everything",
-     (await call(historyForVisitor, c, { visitorId: "nobody" })).messages.length, 0);
+     (await call(historyForVisitor, c, { visitorId: "nobody", sessionId: "s1" })).messages.length, 0);
   eq("an empty visitor id gets nothing",
-     (await call(historyForVisitor, c, { visitorId: "" })).messages.length, 0);
+     (await call(historyForVisitor, c, { visitorId: "", sessionId: "s1" })).messages.length, 0);
 }
 
 console.log("\n== a panel is not an archive ==");
@@ -91,7 +96,7 @@ console.log("\n== a panel is not an archive ==");
     db.insert("messages", { sessionId: "big", role: i % 2 ? "user" : "assistant", text: `line ${i}`, channel: "chat", at: i });
   }
 
-  const r = await call(historyForVisitor, c, { visitorId: "v9" });
+  const r = await call(historyForVisitor, c, { visitorId: "v9", sessionId: "big" });
   ok("it is capped", r.messages.length < 300);
   eq("at the documented cap", r.messages.length, 60);
   /* Which end is kept is the whole question. The RECENT end: what was said
@@ -110,7 +115,7 @@ console.log("\n== an attachment survives the round trip ==");
     sessionId: "sa", role: "user", text: "Sent a photo", channel: "chat", at: 5,
     attachment: { storageId: "st1", kind: "image", type: "image/png", name: "roof.png", size: 2048 },
   });
-  const r = await call(historyForVisitor, c, { visitorId: "v3" });
+  const r = await call(historyForVisitor, c, { visitorId: "v3", sessionId: "sa" });
   eq("the kind is there, so the bubble knows what to draw", r.messages[0].attachment.kind, "image");
   eq("and a url was resolved for it", typeof r.messages[0].attachment.url, "string");
   ok("the storage id is NOT handed to the browser",

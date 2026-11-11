@@ -164,7 +164,7 @@ import { checkAttachment, LIMITS } from "../../../gates/attachments.js";
     try {
       var found = localStorage.getItem("ohm_visitor");
       if (found) return found;
-      var made = "p-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
+      var made = "p-" + token(16);
       localStorage.setItem("ohm_visitor", made);
       return made;
     } catch (e) {
@@ -232,6 +232,31 @@ import { checkAttachment, LIMITS } from "../../../gates/attachments.js";
     return a;
   }
 
+  /* Random that is actually random.
+
+     Both ids below are bearer tokens: presenting one is how the server
+     knows which conversation is yours, and the history route hands back a
+     transcript to whoever holds the pair. They were built from
+     `Date.now()` and `Math.random()`, which is a known prefix plus about
+     forty bits from a generator that is not meant for this and is
+     predictable from a few samples. `crypto.getRandomValues` is in every
+     browser this widget supports.
+
+     The fallback is kept for the browser that somehow has no crypto:
+     weaker, but it must not be a crash. */
+  function token(bytes) {
+    var out = "";
+    try {
+      var a = new Uint8Array(bytes);
+      (window.crypto || window.msCrypto).getRandomValues(a);
+      for (var i = 0; i < a.length; i++) out += (a[i] + 256).toString(16).slice(1);
+      return out;
+    } catch (e) {
+      for (var j = 0; j < bytes * 2; j++) out += Math.floor(Math.random() * 16).toString(16);
+      return out;
+    }
+  }
+
   function sessionId() {
     try {
       var found = sessionStorage.getItem("ohm_assistant_session");
@@ -239,8 +264,7 @@ import { checkAttachment, LIMITS } from "../../../gates/attachments.js";
     } catch (e) {
       /* private window, or the host blocks storage: fall through to a fresh id */
     }
-    var id =
-      "web-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
+    var id = "web-" + token(16);
     try {
       sessionStorage.setItem("ohm_assistant_session", id);
     } catch (e) {
@@ -796,6 +820,8 @@ button,input{font:inherit;color:inherit;margin:0}
     fetch(HISTORY_URL, {
       method: "POST",
       headers: { "content-type": "application/json" },
+      /* Both, and the server checks that the session belongs to the
+         visitor. Either one alone is not enough to read a transcript. */
       body: JSON.stringify({ sessionId: sess, visitorId: visitor }),
     })
       .then(function (r) { return r.ok ? r.json() : null; })

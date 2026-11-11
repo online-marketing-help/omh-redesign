@@ -31,15 +31,35 @@ function script() {
  * stale answer, and "free" computed from a stale answer is the double
  * booking this is here to prevent.
  *
- * **An empty list is a real answer, and so is a failure.** If the calendar
- * cannot be reached, this returns `times: []` with `asked: false`, and the
- * form says it cannot check rather than offering everything. The failure
- * mode of the other choice is a day where every slot looks open.
+ * **`asked: false` means we could not ask, and the form then offers every
+ * time, exactly as it did before this route existed.** That is failing
+ * open, deliberately: the authoritative check is the lock in the Apps
+ * Script, which runs in the same breath as the write and refuses the
+ * second booking whatever this route said. A form that offers nothing
+ * because a Google script timed out turns away real customers to prevent
+ * a clash that is already prevented.
+ *
+ * What must never happen is the reverse: an answer we could not understand
+ * being reported as `asked: true` with an empty list, which reads as "fully
+ * booked" and silently closes the diary. So the shape of the reply is
+ * checked, not just its `ok` flag.
  */
 export async function GET(request: Request) {
   const date = new URL(request.url).searchParams.get("date") ?? "";
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     return NextResponse.json({ error: "A date is required." }, { status: 400 });
+  }
+
+  /* The same window the POST enforces: a weekday, inside three weeks. The
+     POST had it and the GET did not, which left a public, uncached,
+     unlimited oracle over the agency's diary for any date anyone typed,
+     and a cheap way to exhaust the Apps Script's daily quota. Exhausting
+     it matters more than it sounds: every visitor then falls to the
+     `asked: false` path, where all six times are offered. */
+  const day = new Date(`${date}T12:00:00Z`);
+  const ahead = (day.getTime() - Date.now()) / DAY;
+  if (day.getUTCDay() % 6 === 0 || !(ahead > -1 && ahead < 21)) {
+    return NextResponse.json({ asked: true, times: [], reason: "outside the window" });
   }
 
   const cfg = script();
@@ -58,12 +78,20 @@ export async function GET(request: Request) {
     });
     const d = (await response.json()) as { ok?: boolean; busy?: unknown; allDay?: boolean };
     if (!d?.ok) throw new Error("the script did not answer with ok");
+    /* `freeSlots` returns nothing for a `busy` that is not an array, which
+       is the right default for it and the wrong thing to label `asked:
+       true` here: an older script, a renamed field or a typo would print
+       "nothing free" on a completely empty day. An answer we cannot read
+       is not an answer. */
+    if (!Array.isArray(d.busy)) throw new Error("the script answered without a busy list");
+
     /* A day blocked out as all-day is "away", so nothing on it is offered,
-       whatever the half-hour blocks say. */
-    const busy = d.allDay ? null : d.busy;
+       whatever the half-hour blocks say. That IS an authoritative empty. */
+    if (d.allDay) return NextResponse.json({ asked: true, times: [], reason: "away" });
+
     return NextResponse.json({
       asked: true,
-      times: freeSlots(date, busy as never, demoTimes, Date.now()),
+      times: freeSlots(date, d.busy as never, demoTimes, Date.now()),
     });
   } catch (error) {
     console.error("Could not read availability from Google Calendar:", error);

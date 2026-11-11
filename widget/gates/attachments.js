@@ -67,10 +67,31 @@ function sniff(buf) {
 
   if (at(0) === 0x4f && at(1) === 0x67 && at(2) === 0x67 && at(3) === 0x53) return "audio/ogg";
   if (at(0) === 0x49 && at(1) === 0x44 && at(2) === 0x33) return "audio/mpeg";
-  if (at(0) === 0xff && (at(1) & 0xe0) === 0xe0) return "audio/mpeg";
+  /* A bare MPEG frame sync, for an mp3 with no ID3 tag. Eleven set bits is
+     a weak signature: plenty of unrelated files start FF Ex. The next two
+     fields are checked as well, because "reserved" values are exactly what
+     arbitrary data lands on, and this is the one branch where a file with
+     no real structure could otherwise be stored. */
+  if (at(0) === 0xff && (at(1) & 0xe0) === 0xe0) {
+    var version = (at(1) >> 3) & 0x03;   // 01 is reserved
+    var layer = (at(1) >> 1) & 0x03;     // 00 is reserved
+    var bitrate = (at(2) >> 4) & 0x0f;   // 1111 is invalid
+    var rate = (at(2) >> 2) & 0x03;      // 11 is reserved
+    if (version !== 1 && layer !== 0 && bitrate !== 0x0f && rate !== 3) return "audio/mpeg";
+    return null;
+  }
   if (at(0) === 0x1a && at(1) === 0x45 && at(2) === 0xdf && at(3) === 0xa3) return "audio/webm";
+  /* An ISO base media file. The brand decides what KIND of one: without
+     reading it, an mp4 video or a HEIC photo off an iPhone was stored as a
+     voice note and rendered in an <audio> element that plays nothing. */
   if (b.length >= 12 && at(4) === 0x66 && at(5) === 0x74 && at(6) === 0x79 && at(7) === 0x70) {
-    return "audio/mp4";
+    var brand = String.fromCharCode(at(8), at(9), at(10), at(11));
+    /* The audio-only brands. M4A is what a phone records a voice note as. */
+    if (brand === "M4A " || brand === "M4B " || brand === "mp42" || brand === "isom" ||
+        brand === "iso2" || brand === "mp41") {
+      return "audio/mp4";
+    }
+    return null;
   }
 
   /* Anything else, including "<svg", "<!DOCTYPE" and a zip, is not a thing
