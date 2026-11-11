@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as attachments from "../attachments.js";
 import type * as campaigns from "../campaigns.js";
 import type * as functions from "../functions.js";
 import type * as handover from "../handover.js";
@@ -22,6 +23,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  attachments: typeof attachments;
   campaigns: typeof campaigns;
   functions: typeof functions;
   handover: typeof handover;

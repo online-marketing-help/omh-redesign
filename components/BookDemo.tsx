@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useId, useMemo, useState, useSyncExternalStore, type ComponentProps, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useId, useMemo, useState, useSyncExternalStore, type ComponentProps, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
 import { flushSync } from "react-dom";
 import { Calendar, Check, Clock, MapPin, Phone, PhoneIncoming } from "lucide-react";
 import { ArrowRight } from "@/components/ui/Button";
@@ -155,16 +155,21 @@ function Control({ label, error, options, ...props }: { label: string; error?: s
   );
 }
 
-function Radio({ checked, first, index, onPick, className, children }: { checked: boolean; first: boolean; index: number; onPick: (to: number) => void; className: string; children: ReactNode }) {
+function Radio({ checked, first, index, onPick, className, children, taken = false }: { checked: boolean; first: boolean; index: number; onPick: (to: number) => void; className: string; children: ReactNode; /** Already in the diary. Still rendered, and still readable, so the row does not reflow as the calendar answers. */ taken?: boolean }) {
   return (
     <button
       type="button"
       role="radio"
       aria-checked={checked}
+      /* `aria-disabled` rather than `disabled`: a disabled button is skipped
+         by the roving tab index and a keyboard user would never learn the
+         slot was there. This way it is announced, and reads as taken. */
+      aria-disabled={taken || undefined}
+      aria-label={taken ? "Taken" : undefined}
       tabIndex={checked || first ? 0 : -1}
-      onClick={() => onPick(index)}
+      onClick={() => { if (!taken) onPick(index); }}
       onKeyDown={(e) => roving(e, index, onPick)}
-      className={`${slotCls} ${className}`}
+      className={`${slotCls} ${className} ${taken ? "cursor-not-allowed line-through opacity-45" : ""}`}
     >
       {children}
     </button>
@@ -191,15 +196,57 @@ export function BookDemo({ id, eyebrow, heading, thingsToTry = defaultThingsToTr
   const [started, setStarted] = useState(false);
   const booking = useChecks();
 
+  /* What the calendar said about one day, carrying the date it was about.
+     Holding the date alongside the answer is what lets everything below be
+     derived: "have we got an answer for the day that is selected right now"
+     is a comparison, not another piece of state to keep in step.
 
-  const slot = day && time ? `${day.long} at ${time}` : null;
-  const summary = slot ?? (day ? `${day.long}, pick a time` : time ? `${time}, pick a day` : "Pick a day and time");
+     `asked: false` means the calendar could not be reached. Every time is
+     then offered exactly as it was before this existed, because the booking
+     POST is still guarded by a lock in the Apps Script: the worst case is
+     the behaviour the form has always had, not a form nobody can use. */
+  const [answer, setAnswer] = useState<{ date: string; asked: boolean; times: string[] } | null>(null);
+  /* Bumped to ask again about the same day. Setting `day` to the value it
+     already holds would not do it: the effect compares references and the
+     reference has not changed. */
+  const [recheck, setRecheck] = useState(0);
+
+  useEffect(() => {
+    if (!day) return;
+    const date = day.iso;
+    let gone = false;
+    fetch(`/api/book-demo?date=${date}`, { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d: { asked?: boolean; times?: string[] }) => {
+        if (gone) return;
+        setAnswer(
+          d?.asked && Array.isArray(d.times)
+            ? { date, asked: true, times: d.times }
+            : { date, asked: false, times: [] },
+        );
+      })
+      .catch(() => { if (!gone) setAnswer({ date, asked: false, times: [] }); });
+    return () => { gone = true; };
+  }, [day, recheck]);
+
+  /* All derived, so there is no render in which the form is showing a slot
+     it already knows cannot be booked. */
+  const current = day && answer?.date === day.iso ? answer : null;
+  const checking = Boolean(day) && !current;
+  const free = current?.asked ? current.times : null;
+  /* Unknown is not taken: while there is no answer, nothing is struck out. */
+  const taken = (t: string) => free !== null && !free.includes(t);
+  /* The selected time, unless the diary says it has gone since. */
+  const picked = time && !taken(time) ? time : null;
+
+  const slot = day && picked ? `${day.long} at ${picked}` : null;
+  const summary = slot ?? (day ? `${day.long}, pick a time` : picked ? `${picked}, pick a day` : "Pick a day and time");
   const done = doneName !== null;
 
   async function submitBooking(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
-    if (!day || !time || !booking.validate(form)) return track("demo_form_error", { form: "Demo booking", step: !day || !time ? "slot" : "details" });
+    if (!day || !picked || !booking.validate(form)) return track("demo_form_error", { form: "Demo booking", step: !day || !picked ? "slot" : "details" });
     setSending(true);
     setSendError(null);
     const data = new FormData(form);
@@ -211,7 +258,7 @@ export function BookDemo({ id, eyebrow, heading, thingsToTry = defaultThingsToTr
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           date: day.iso,
-          time,
+          time: picked,
           name: field("Your name"),
           business: field("Business name"),
           industry: field("Industry"),
@@ -222,17 +269,31 @@ export function BookDemo({ id, eyebrow, heading, thingsToTry = defaultThingsToTr
           hp: field("hp"),
         }),
       }).then(
-        (r) => r.ok,
-        () => false,
+        (r) => ({ ok: r.ok, status: r.status }),
+        () => ({ ok: false, status: 0 }),
       ),
     ]);
     setSending(false);
+
+    /* 409: the slot went in the seconds between this form opening and being
+       submitted. The lock in the Apps Script caught it, which is the only
+       place it can be caught. Send them back to step one with the diary
+       re-read, because the useful thing now is the times that are left, not
+       an apology. */
+    if (calendar.status === 409) {
+      track("demo_form_slot_taken", { form: "Demo booking", slot: `${day.iso} ${picked}` });
+      setTime(null);
+      setStep(1);
+      setRecheck((n) => n + 1);
+      return setSendError("That time has just been taken. Pick another and it is yours.");
+    }
+
     // Either one landing means OMH has the request.
-    if (!lead.ok && !calendar) {
+    if (!lead.ok && !calendar.ok) {
       track("demo_form_send_error", { form: "Demo booking" });
       return setSendError(lead.message);
     }
-    track("demo_request_submitted", { industry: field("Industry"), city: field("Where you're based"), plan: field("Plan interest"), slot: `${day.iso} ${time}` });
+    track("demo_request_submitted", { industry: field("Industry"), city: field("Where you're based"), plan: field("Plan interest"), slot: `${day.iso} ${picked}` });
     setDoneName(field("Your name").split(" ")[0]);
   }
 
@@ -330,14 +391,24 @@ export function BookDemo({ id, eyebrow, heading, thingsToTry = defaultThingsToTr
 
                   <p id={`${uid}-time`} className="mt-5 text-[14px] font-semibold text-muted">
                     Time
+                    {day && checking && <span className="ml-2 font-normal">checking the diary…</span>}
                   </p>
-                  <div role="radiogroup" aria-labelledby={`${uid}-time`} className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-6">
+                  <div role="radiogroup" aria-labelledby={`${uid}-time`} aria-busy={checking || undefined} className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-6">
                     {demoTimes.map((t, i) => (
-                      <Radio key={t} index={i} checked={time === t} first={!time && i === 0} onPick={(to) => setTime(demoTimes[to])} className="min-h-12 font-sans text-[17px] font-semibold tabular-nums">
+                      <Radio key={t} index={i} checked={picked === t} first={!picked && i === 0} taken={taken(t)} onPick={(to) => setTime(demoTimes[to])} className="min-h-12 font-sans text-[17px] font-semibold tabular-nums">
                         {t}
                       </Radio>
                     ))}
                   </div>
+                  {/* Only when the calendar actually answered and said none.
+                      Silence would leave six struck-through times and no
+                      explanation. */}
+                  {day && free !== null && free.length === 0 && (
+                    <p role="status" className="mt-3 text-bsm text-muted">
+                      Nothing free on {day.long}. Try another day, or call us and we
+                      will find a time.
+                    </p>
+                  )}
 
                   {slotError && !slot && (
                     <p role="alert" className="mt-3 text-bsm font-semibold text-error">

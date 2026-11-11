@@ -27,6 +27,13 @@
              data-position="left"></script>
    ========================================================================= */
 
+/* The same file the tests assert and the n8n Code node runs, bundled in here
+   by build.mjs rather than copied. What a photo is allowed to be has to be
+   one answer in one place: the copy in the browser being a little out of
+   date from the copy on the server is precisely how something gets accepted
+   on one side and refused on the other. */
+import { checkAttachment, LIMITS } from "../../../gates/attachments.js";
+
 (function () {
   "use strict";
 
@@ -54,6 +61,9 @@
   var POLL_URL = CONVEX_SITE + "/visitorPoll";
   var SAY_URL = CONVEX_SITE + "/visitorSay";
   var HELLO_URL = CONVEX_SITE + "/visitorHello";
+  var UPLOAD_URL = CONVEX_SITE + "/visitor/attachment/url";
+  var ATTACH_URL = CONVEX_SITE + "/visitor/attachment/attach";
+  var HISTORY_URL = CONVEX_SITE + "/visitor/history";
   var SIDE = data.position === "left" ? "left" : "right";
   /* The ESM build, not the UMD one. retell-client-js-sdk's UMD file leaves
      eventemitter3 and livekit-client as externals, so loading it from a CDN in
@@ -74,6 +84,20 @@
     "what each one includes, packages and prices. I can also book you a free " +
     "30 minute consultation.";
 
+  /* What somebody who has been here before sees instead. It REPLACES the
+     opener rather than sitting above it: two greetings in a row is not a
+     warmer welcome, it is a wall of text before they have said anything,
+     and the list of what the assistant can do is the part a returning
+     visitor has already read.
+
+     Still not "Welcome back, Monzur". Being named by a website you did not
+     log into unsettles people. The assistant knows who they are and will
+     not ask again for details it already holds; it does not need to prove
+     that in the first sentence. */
+  var OPENER_BACK =
+    "Welcome back. I still have your details, so we can pick up where we " +
+    "left off. What can I help you with?";
+
   var CHIPS = [
     "What do you do?",
     "How much is SEO?",
@@ -88,6 +112,10 @@
     tab: "chat",
     msgs: [{ role: "assistant", text: OPENER }],
     sending: false,
+    /* Kept apart from `sending`: a file going up does not stop someone
+       typing the next sentence, it only stops them starting a second
+       upload. */
+    uploading: false,
     voice: "idle", // idle | connecting | live | error
     note: "",
     secs: 0,
@@ -243,6 +271,9 @@
     send:
       "<svg " + SVG + ' width="17" height="17">' +
       '<path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg>',
+    clip:
+      "<svg " + SVG + ' width="18" height="18">' +
+      '<path d="M21.4 11.1l-8.5 8.5a5 5 0 0 1-7.1-7.1l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4l7.8-7.8"/></svg>',
   };
 
   /* ------------------------------------------------------------- styles */
@@ -363,6 +394,25 @@ button,input{font:inherit;color:inherit;margin:0}
   display:grid;place-items:center;background:var(--color-amber,#d79a37);color:#fff}
 .compose button:hover:not(:disabled){background:var(--color-amber-deep,#8f5a0e)}
 .compose button:disabled{opacity:.4;cursor:not-allowed}
+/* The paperclip is not the primary action, so it is not amber. Same 46px box
+   as the send button, because both are touch targets and 44 is the floor. */
+.compose button.clip{background:transparent;color:var(--color-muted,#667085);
+  border:1px solid var(--color-line,#d9ddd8)}
+.compose button.clip:hover:not(:disabled){background:var(--color-warm,#f7f6f2);
+  color:var(--color-ink,#101828)}
+.compose input[type=file]{display:none}
+
+/* A photo or a voice note in the thread. Width is capped rather than set, so
+   a tall phone photo does not take over the panel. */
+.bub.att{padding:6px}
+.bub img.shot{display:block;max-width:100%;max-height:230px;width:auto;height:auto;
+  border-radius:9px}
+.bub audio{display:block;width:230px;max-width:100%}
+.bub .fname{display:block;margin:5px 3px 1px;font-size:11.5px;opacity:.75;
+  word-break:break-all}
+/* While it is going up. The bubble is already there, so the visitor can see
+   their photo was taken even before it has arrived. */
+.bub.att.pending{opacity:.55}
 
 .voice{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;
   align-items:center;justify-content:center;text-align:center;padding:24px 26px;gap:3px}
@@ -447,6 +497,12 @@ button,input{font:inherit;color:inherit;margin:0}
         "</div>" +
         '<div class="chips"></div>' +
         '<form class="compose">' +
+          '<button type="button" class="clip" aria-label="Attach a photo or a voice note">' +
+            ICON.clip + "</button>" +
+          '<input type="file" class="file" ' +
+                 'accept="image/jpeg,image/png,image/gif,image/webp,' +
+                         'audio/ogg,audio/mpeg,audio/mp4,audio/webm,audio/aac,audio/amr" ' +
+                 'aria-hidden="true" tabindex="-1">' +
           '<input type="text" placeholder="Type your question…" aria-label="Your message" ' +
                  'autocomplete="off">' +
           '<button type="submit" aria-label="Send" disabled>' + ICON.send + "</button>" +
@@ -471,8 +527,12 @@ button,input{font:inherit;color:inherit;margin:0}
   var thread = $(".thread");
   var chips = $(".chips");
   var form = $(".compose");
-  var input = $(".compose input");
-  var sendBtn = $(".compose button");
+  var input = $(".compose input[type=text]");
+  /* Anchored to the submit button specifically. It used to be ".compose
+     button", which became the paperclip the moment a second button existed. */
+  var sendBtn = $(".compose button[type=submit]");
+  var clipBtn = $(".compose button.clip");
+  var fileInput = $(".compose input[type=file]");
   var paneChat = $(".pane-chat");
   var handoff = $(".handoff");
   var handoffText = $(".handoff-text");
@@ -523,6 +583,43 @@ button,input{font:inherit;color:inherit;margin:0}
       }
       var d = document.createElement("div");
       d.className = "bub " + m.role;
+
+      /* A photo or a voice note the visitor sent. Built with createElement
+         and assignments rather than innerHTML, so the file name is text and
+         cannot be markup however it was named. */
+      if (m.att) {
+        d.className += " att" + (m.att.pending ? " pending" : "");
+        if (m.att.kind === "audio") {
+          var au = document.createElement("audio");
+          au.controls = true;
+          au.src = m.att.url;
+          d.appendChild(au);
+        } else {
+          var im = document.createElement("img");
+          im.className = "shot";
+          im.src = m.att.url;
+          /* Their own photo, which they are looking at: describing it is not
+             ours to do, and "image" would be noise to a screen reader. */
+          im.alt = m.att.name || "The photo you sent";
+          d.appendChild(im);
+        }
+        if (m.att.name) {
+          var fn = document.createElement("span");
+          fn.className = "fname";
+          fn.textContent = m.att.name;
+          d.appendChild(fn);
+        }
+        if (m.text) {
+          var cap = document.createElement("span");
+          cap.className = "fname";
+          cap.textContent = m.text;
+          d.appendChild(cap);
+        }
+        thread.appendChild(d);
+        lastRole = m.role;
+        return;
+      }
+
       /* textContent, never innerHTML: the reply is ours, but a knowledge base
          is edited by people and must never be able to inject markup. */
       d.textContent = m.text;
@@ -569,6 +666,7 @@ button,input{font:inherit;color:inherit;margin:0}
     }
     root.querySelectorAll(".chips button").forEach(function (b) { b.disabled = state.sending; });
     sendBtn.disabled = state.sending || !input.value.trim();
+    clipBtn.disabled = state.uploading;
     /* The suggested questions are the assistant's. While a person has the
        conversation they would send the visitor back round the model, so they
        go away until it is handed back. */
@@ -681,6 +779,202 @@ button,input{font:inherit;color:inherit;margin:0}
         pollNow();
       });
   }
+
+  /* ------------------------------------------------------- history */
+
+  /* Their own conversation, put back where they left it.
+
+     Until this existed the panel told a returning visitor "we can pick up
+     where we left off" and then showed them an empty box, which is a
+     promise the product did not keep. Everything said was already in the
+     database; nothing was reading it back.
+
+     Loaded on the visitor id rather than the session id, because the
+     session id is in sessionStorage and does not survive closing the tab,
+     which is exactly the case this is for. */
+  function loadHistory() {
+    fetch(HISTORY_URL, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ sessionId: sess, visitorId: visitor }),
+    })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.messages || !d.messages.length) return;
+
+        /* Only into a panel they have not started using. If they typed
+           while this was in flight, their message is the conversation now
+           and dropping an old transcript on top of it would be worse than
+           showing none. */
+        if (state.msgs.length !== 1) return;
+
+        var greeting = state.msgs[0];
+        var older = [];
+
+        if (d.trimmed) {
+          /* Said rather than implied. A panel that silently shows the last
+             sixty messages is claiming that is everything. */
+          older.push({ role: "system", text: "Earlier messages are not shown here." });
+        }
+
+        for (var i = 0; i < d.messages.length; i++) {
+          var m = d.messages[i];
+          var row = { role: m.role === "user" ? "user" : m.role, text: m.text };
+          /* A photo or a voice note they sent last time, still in the
+             thread. `url` is null when the file has gone from storage, and
+             then the text ("Sent a photo") stands on its own. */
+          if (m.attachment && m.attachment.url) {
+            row.att = {
+              url: m.attachment.url,
+              kind: m.attachment.kind,
+              name: m.attachment.name || "",
+            };
+            /* The caption is already the bubble; repeating the stand-in
+               text under it reads as a mistake. */
+            if (row.text === "Sent a photo" || row.text === "Sent a voice note") row.text = "";
+          }
+          older.push(row);
+        }
+
+        /* The greeting belongs at the bottom, under what was said before:
+           it is the newest thing in the panel, not the oldest. */
+        state.msgs = older.concat([greeting]);
+
+        /* So the handover poll asks for what is new rather than replaying
+           everything this just loaded. */
+        if (d.lastAt) state.seenAt = Math.max(state.seenAt, d.lastAt);
+        render();
+      })
+      .catch(function () {
+        /* No history is the normal case for most visitors, so a failure
+           here changes nothing they can see. */
+      });
+  }
+
+  /* --------------------------------------------------- attachments */
+
+  /* Why the refusal is a sentence and not a code: the visitor has just tried
+     to show us the thing they are asking about, which is the most useful
+     message they will send all conversation. "Refused" without a reason is
+     how that turns into them giving up. */
+  var MB = 1024 * 1024;
+  function refusal(why, limit) {
+    if (why === "too_big") {
+      return (
+        "That file is a little large to send here. Photos up to " +
+        Math.round((limit || LIMITS.image) / MB) +
+        "MB work best. If it is easier, email it to " + EMAIL + "."
+      );
+    }
+    if (why === "wrong_type" || why === "not_what_it_claims") {
+      return (
+        "I can take a photo (JPG, PNG, GIF or WebP) or a voice note. " +
+        "For anything else, email it to " + EMAIL + " and the team will pick it up."
+      );
+    }
+    if (why === "empty") return "That file came through empty. Could you try sending it again?";
+    if (why === "too_many") {
+      return "That is a few files in a short time. Email anything else to " + EMAIL + ".";
+    }
+    return "That did not upload. If it is important, email it to " + EMAIL + ".";
+  }
+
+  function note(text) {
+    state.msgs.push({ role: "system", text: text });
+    render();
+  }
+
+  function sendFile(file) {
+    if (!file || state.uploading) return;
+
+    /* Only the head is read, because that is all the sniffer looks at. The
+       alternative is pulling an eight megabyte photo into memory to check
+       its first four bytes. */
+    file.slice(0, 64).arrayBuffer().then(function (buf) {
+      var v = checkAttachment(file, new Uint8Array(buf));
+      if (!v.ok) { note(refusal(v.why, v.limit)); return; }
+
+      /* The bubble appears now, dimmed, with the local copy of the file in
+         it. A visitor who has just picked a photo should see it in the
+         thread immediately; waiting for a round trip reads as nothing having
+         happened, and they pick it again. */
+      var local = URL.createObjectURL(file);
+      var msg = {
+        role: "user",
+        text: "",
+        att: { url: local, kind: v.kind, name: v.name, pending: true },
+      };
+      state.msgs.push(msg);
+      state.uploading = true;
+      render();
+
+      var fail = function (why) {
+        /* The optimistic bubble goes, because it is now a claim that
+           something was sent when it was not. */
+        var i = state.msgs.indexOf(msg);
+        if (i !== -1) state.msgs.splice(i, 1);
+        URL.revokeObjectURL(local);
+        state.uploading = false;
+        note(refusal(why));
+      };
+
+      fetch(UPLOAD_URL, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ sessionId: sess, visitorId: visitor }),
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (!d || !d.ok || !d.url) throw new Error(d && d.error ? d.error : "no_url");
+          /* Straight to Convex storage. The file never passes through n8n or
+             the website's own server, so nothing in the middle has to be
+             sized for an eight megabyte body. */
+          return fetch(d.url, {
+            method: "POST",
+            headers: { "content-type": v.type },
+            body: file,
+          });
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (!d || !d.storageId) throw new Error("no_storage_id");
+          return fetch(ATTACH_URL, {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              sessionId: sess,
+              storageId: d.storageId,
+              kind: v.kind,
+              type: v.type,
+              name: v.name,
+              pageUrl: location.href,
+            }),
+          });
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          /* The server judged the bytes it actually received, and it is
+             allowed to disagree with the browser. If it does, the browser is
+             wrong. */
+          if (!d || d.ok !== true) throw new Error((d && d.why) || "refused");
+          msg.att.pending = false;
+          state.uploading = false;
+          render();
+        })
+        .catch(function (e) { fail(String((e && e.message) || "")); });
+    }).catch(function () {
+      note("I could not read that file. Could you try another?");
+    });
+  }
+
+  clipBtn.addEventListener("click", function () { fileInput.click(); });
+  fileInput.addEventListener("change", function () {
+    var f = fileInput.files && fileInput.files[0];
+    /* Cleared on purpose: without it, picking the same file twice in a row
+       fires no change event and nothing happens. */
+    fileInput.value = "";
+    if (f) sendFile(f);
+  });
 
   /* ------------------------------------------------------- handover */
 
@@ -997,17 +1291,17 @@ button,input{font:inherit;color:inherit;margin:0}
         }
 
         if (!d.returning) return;
-        /* Recognised, so say so once, in the thread, above the opener.
 
-           Deliberately not "Welcome back, Monzur". Being named by a website
-           you did not log into unsettles people, and it is the kind of thing
-           that gets screenshotted. The assistant still knows who they are and
-           will not ask for details it already holds. */
-        state.msgs.unshift({
-          role: "assistant",
-          text: "Welcome back. I still have your details, so we can pick up where we left off.",
-        });
-        render();
+        /* Recognised, so the greeting changes rather than a second one
+           arriving under it. Only while the opener is still the only thing
+           in the thread: this answer can land after a fast typist has
+           already sent something, and rewriting a greeting they have
+           replied to would make the conversation read backwards. */
+        if (state.msgs.length === 1 && state.msgs[0].text === OPENER) {
+          state.msgs[0] = { role: "assistant", text: OPENER_BACK };
+          render();
+        }
+        loadHistory();
       })
       .catch(function () {
         /* Not knowing them is the normal case, so a failure here changes

@@ -218,5 +218,14 @@ export function ctx() {
   const c: any = { db };
   c.runMutation = (fn: any, args: any) => fn._handler(c, args);
   c.runQuery = (fn: any, args: any) => fn._handler(c, args);
+  /* File storage. Enough of it to assert what a function does with an
+     attachment: that it resolves a URL at all, and which fields it passes
+     on. A real storage id is opaque, so a predictable fake one is more
+     useful here than a realistic one. */
+  c.storage = {
+    getUrl: async (id: string) => (id ? `https://files.test/${id}` : null),
+    generateUploadUrl: async () => "https://files.test/upload",
+    delete: async () => undefined,
+  };
   return { db, ctx: c };
 }

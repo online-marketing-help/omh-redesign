@@ -4,7 +4,7 @@ import { Card, Pill, Empty } from "@/components/dashboard/ui";
 import {
   IconBack, IconChat, IconMic, IconLead, IconCalendar, IconHandover,
 } from "@/components/dashboard/icons";
-import { getThread, getVisitorConversations } from "@/lib/dashboard/handover";
+import { getThread, getVisitorConversations, type MsgAttachment } from "@/lib/dashboard/handover";
 import { getCalls, getCall, fmtDuration, fmtWhen } from "@/lib/dashboard/retell";
 import { fmtDate } from "@/lib/dashboard/convex";
 
@@ -119,7 +119,13 @@ export default async function Conversation({
               >
                 <ol className="space-y-3 px-4 py-4 sm:px-5" aria-label="Chat transcript">
                   {messages.map((m, i) => (
-                    <Bubble key={i} role={m.role} text={m.text} at={m.at} />
+                    <Bubble
+                      key={i}
+                      role={m.role}
+                      text={m.text}
+                      at={m.at}
+                      attachment={m.attachment ?? null}
+                    />
                   ))}
                 </ol>
               </Card>
@@ -467,7 +473,17 @@ function Details({
 /** Four voices: the assistant, a person from the team, the visitor, and the
     system's own notes, which are a line rather than a bubble because nobody
     said them. */
-function Bubble({ role, text, at }: { role: string; text: string; at?: number }) {
+function Bubble({
+  role,
+  text,
+  at,
+  attachment = null,
+}: {
+  role: string;
+  text: string;
+  at?: number;
+  attachment?: MsgAttachment | null;
+}) {
   if (role === "system") {
     return (
       <li className="flex items-center gap-3 py-1">
@@ -487,7 +503,7 @@ function Bubble({ role, text, at }: { role: string; text: string; at?: number })
           {visitor ? "Them" : human ? "A person from the team" : "Assistant"}
           {at && <span className="ml-2 font-normal normal-case tracking-normal">{clock(at)}</span>}
         </p>
-        <p
+        <div
           className={`rounded-xl px-3.5 py-2.5 text-left text-[14.5px] leading-relaxed ${
             visitor
               ? "border border-[rgb(var(--accent-rgb)/.35)] bg-[rgb(var(--accent-rgb)/.18)]"
@@ -496,10 +512,63 @@ function Bubble({ role, text, at }: { role: string; text: string; at?: number })
                 : "bg-warm"
           }`}
         >
-          {text}
-        </p>
+          {attachment && <Attached att={attachment} />}
+          {text && <p className={attachment ? "mt-2" : undefined}>{text}</p>}
+        </div>
       </div>
     </li>
+  );
+}
+
+/* A photo or a voice note inside a bubble.
+
+   A plain <img>, not next/image: the file is on the assistant's Convex
+   deployment behind a URL that is generated per request, so there is nothing
+   for the image optimiser to cache and configuring it as a remote pattern
+   would be configuring a wildcard.
+
+   The height is capped rather than set. A photo off a phone is 3000px tall,
+   and a transcript where one message is four screens long is not a
+   transcript. */
+function Attached({ att }: { att: MsgAttachment }) {
+  if (!att.url) {
+    return (
+      <p className="text-[13px] italic text-muted">
+        {att.kind === "audio" ? "A voice note" : "A photo"} was sent here, and the
+        file is no longer in storage.
+      </p>
+    );
+  }
+
+  const label = att.name || (att.kind === "audio" ? "Voice note" : "Photo");
+
+  if (att.kind === "audio") {
+    return (
+      <div>
+        {/* No <track>: a customer's voice note arrives as audio and nothing
+            has transcribed it. Captioning it with the file name would be
+            worse than captioning it not at all. */}
+        <audio controls src={att.url} className="h-10 w-full max-w-[320px]" />
+        <p className="mt-1.5 break-all text-[11.5px] text-muted">{label}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <a href={att.url} target="_blank" rel="noopener noreferrer" className="block">
+        {/* eslint-disable-next-line @next/next/no-img-element -- see above. */}
+        <img
+          src={att.url}
+          alt={`Sent by them: ${label}`}
+          className="max-h-[260px] w-auto max-w-full rounded-lg border border-line"
+        />
+      </a>
+      <p className="mt-1.5 break-all text-[11.5px] text-muted">
+        {label}
+        {att.size ? ` · ${Math.max(1, Math.round(att.size / 1024))} KB` : ""}
+      </p>
+    </div>
   );
 }
 

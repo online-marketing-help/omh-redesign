@@ -99,7 +99,8 @@ http.route({
       channel: b.channel || undefined,
       pageUrl: b.pageUrl || undefined,
       retellCallId: b.retellCallId || undefined,
-    }),
+    
+      attachment: b.attachment || undefined,}),
   ),
 });
 
@@ -347,7 +348,14 @@ const ALLOWED = [
   "https://www.onlinemarketinghelp.co.uk",
   "https://ohm-assistant-online-marketing-help.vercel.app",
   "http://localhost:3000",
+  /* Where the site runs when 3000 is taken by another project. */
+  "http://localhost:3100",
   "http://localhost:3111",
+  /* web/embed/test/verify.mjs, which serves the built embed on a fixed port
+     so the widget can be driven in a real browser. n8n's own allow-list has
+     carried this one for a while; this list did not, so the harness could
+     reach the chat webhook and not the visitor routes. */
+  "http://localhost:4477",
 ];
 
 function cors(req: Request): Record<string, string> {
@@ -425,6 +433,21 @@ http.route({
       channel: b.channel || undefined,
       pageUrl: b.pageUrl || b.page_url || undefined,
       attribution: b.attribution || undefined,
+    }),
+  ),
+});
+
+/* Their own conversation, so a returning visitor opens the panel and finds
+   it where they left it. Keyed on the visitor id, which is what survives a
+   closed tab; see visitors.historyForVisitor for why that and not the
+   session. */
+http.route({ path: "/visitor/history", method: "OPTIONS", handler: preflight });
+http.route({
+  path: "/visitor/history",
+  method: "POST",
+  handler: publicRoute(async (ctx, b) =>
+    ctx.runQuery(api.visitors.historyForVisitor, {
+      visitorId: String(b.visitorId ?? b.visitor_id ?? ""),
     }),
   ),
 });
@@ -891,5 +914,60 @@ http.route({
     return await ctx.runQuery(api.routing.channelSpend, {});
   }),
 });
+
+/* ------------------------------------------------------- attachments
+
+   Two doors, one store.
+
+   The widget uploads bytes straight to Convex storage with a short-lived
+   URL, so a photo never passes through n8n or this file. Meta sends a URL
+   and `10-meta` fetches it, checks it against gates/attachments.js and
+   posts the bytes here.
+
+   Nothing is stored before it has been judged. The rules live in
+   gates/attachments.js and are asserted by 44 assertions, because an upload
+   box on a public page is the widest door in the system. */
+
+http.route({
+  path: "/attachment/url",
+  method: "POST",
+  handler: route(async (ctx) => ({ url: await ctx.storage.generateUploadUrl() })),
+});
+
+/* The visitor's door. No secret, because a public page cannot keep one, so
+   these two are rate limited and the file is judged on its real bytes after
+   it lands. See attachments.ts, which is where that happens. */
+http.route({ path: "/visitor/attachment/url", method: "OPTIONS", handler: preflight });
+http.route({
+  path: "/visitor/attachment/url",
+  method: "POST",
+  handler: publicRoute(async (ctx, b) =>
+    ctx.runMutation(api.attachments.uploadUrl, {
+      sessionId: String(b.sessionId ?? b.session_id),
+    }),
+  ),
+});
+
+http.route({ path: "/visitor/attachment/attach", method: "OPTIONS", handler: preflight });
+http.route({
+  path: "/visitor/attachment/attach",
+  method: "POST",
+  handler: publicRoute(async (ctx, b) =>
+    ctx.runAction(api.attachments.attach, {
+      sessionId: String(b.sessionId ?? b.session_id),
+      storageId: b.storageId,
+      kind: b.kind || undefined,
+      type: b.type || undefined,
+      name: b.name || undefined,
+      text: b.text || undefined,
+      pageUrl: b.pageUrl || b.page_url || undefined,
+    }),
+  ),
+});
+
+/* There is deliberately no route here for reading one back. The dashboard
+   gets a URL for each attachment from `/handover/thread`, which already
+   knows which messages have one; a second route per photo would be the same
+   answer, fetched again, behind the same secret. */
 
 export default http;

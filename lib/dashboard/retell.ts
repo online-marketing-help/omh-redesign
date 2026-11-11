@@ -41,13 +41,41 @@ export type Call = {
   status: string;
 };
 
-type RawCall = Record<string, any>;
+/* What we read out of a Retell call, declared rather than left as `any`.
+
+   Every field is optional and every one is checked at the point of use,
+   because this is someone else's JSON: the shape is their decision, it has
+   changed once already (the v2 list endpoints were retired), and a field
+   that quietly stops arriving should produce "Unknown agent" or a null, not
+   a crash halfway down a dashboard page. Declaring it this way means a typo
+   in a field name is a compile error here instead of an `undefined` on
+   screen, which is the whole reason for not writing `any`. */
+type RawCall = {
+  call_id?: string;
+  agent_name?: string;
+  start_timestamp?: number;
+  duration_ms?: number;
+  recording_url?: string | null;
+  disconnection_reason?: string | null;
+  call_status?: string;
+  transcript?: string;
+  call_cost?: { combined_cost?: number };
+  metadata?: { session_id?: string; page_url?: string };
+  call_analysis?: { call_summary?: string; call_successful?: boolean };
+  transcript_object?: RawTurn[];
+};
+
+type RawTurn = {
+  role?: string;
+  content?: string;
+  words?: { start?: number }[];
+};
 
 function toCall(c: RawCall): Call {
   const meta = c.metadata || {};
   const analysis = c.call_analysis || {};
   return {
-    callId: c.call_id,
+    callId: c.call_id || "",
     agentName: c.agent_name || "Unknown agent",
     sessionId: meta.session_id || null,
     startedAt: c.start_timestamp || 0,
@@ -99,11 +127,11 @@ export async function getCalls(agents: string[] = OMH_AGENTS, limit = 200): Prom
 
 /** One call with its transcript. The list endpoint does not carry it. */
 export async function getCall(callId: string) {
-  const c = await retell(`/v2/get-call/${callId}`);
+  const c: RawCall = await retell(`/v2/get-call/${callId}`);
   return {
     ...toCall(c),
-    transcript: (c.transcript as string) || "",
-    turns: ((c.transcript_object as any[]) || []).map((t) => ({
+    transcript: c.transcript || "",
+    turns: (c.transcript_object || []).map((t) => ({
       role: t.role === "agent" ? "agent" : "caller",
       text: String(t.content || ""),
       at: Number(t.words?.[0]?.start ?? 0),

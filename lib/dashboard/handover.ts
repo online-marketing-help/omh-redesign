@@ -41,7 +41,23 @@ export type InboxRow = {
   awaitingReply: boolean;
 };
 
-export type ThreadMsg = { role: string; text: string; at: number };
+/** A photo or a voice note on a message, with a URL already resolved by the
+    thread query. `url` is null when the file is no longer in storage, which
+    is shown as a missing file rather than a broken image. */
+export type MsgAttachment = {
+  kind: string;
+  type: string;
+  name: string | null;
+  size: number | null;
+  url: string | null;
+};
+
+export type ThreadMsg = {
+  role: string;
+  text: string;
+  at: number;
+  attachment?: MsgAttachment | null;
+};
 
 export type Thread = {
   sessionId: string;

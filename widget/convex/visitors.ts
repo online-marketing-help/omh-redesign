@@ -381,6 +381,98 @@ export const profileForSession = query({
 
 /** Every conversation this person has had, newest first. The dashboard reads
     it to show one person's whole history rather than one visit. */
+/* How much of their own conversation a returning visitor is shown.
+
+   A panel is not an archive. Sixty messages is a long conversation and
+   still scrolls in a second; the whole history of somebody who has been
+   back eight times is not something anybody reads, and it is not something
+   worth sending over a phone connection before they have typed anything. */
+const HISTORY_LIMIT = 60;
+
+/**
+ * Everything this visitor has said to us, and we to them, oldest first.
+ *
+ * Keyed on the visitor rather than the session on purpose. The session id
+ * lives in sessionStorage and dies when the tab closes; the visitor id lives
+ * in localStorage and survives. Keying this on the session would lose the
+ * history exactly when somebody closes the browser and comes back the next
+ * day, which is the case it exists for.
+ *
+ * Called from the widget without a secret, so it is scoped to the visitor id
+ * the caller presents and returns nothing for one it does not recognise. The
+ * id is a random value in that person's own browser, which makes it a bearer
+ * token in practice: the same trust model as `/visitorPoll`, which answers
+ * on a session id the same way.
+ */
+export const historyForVisitor = query({
+  args: { visitorId: v.string(), limit: v.optional(v.number()) },
+  handler: async (ctx, { visitorId, limit }) => {
+    const empty = { messages: [], sessions: 0, lastAt: null, trimmed: false };
+    /* An empty id must return nothing rather than everything. It is the
+       value a browser with no localStorage sends. */
+    if (!visitorId) return empty;
+
+    const sessions = await ctx.db
+      .query("sessions")
+      .withIndex("by_visitor", (i) => i.eq("visitorId", visitorId))
+      .collect();
+    if (!sessions.length) return empty;
+
+    const take = Math.min(limit ?? HISTORY_LIMIT, 200);
+
+    /* The recent end of each conversation, then the recent end of all of
+       them together. Taking the newest from each session first bounds the
+       read: somebody with forty visits is forty index reads, not a full
+       scan of every message they have ever sent.
+
+       `take + 1`, not `take`. With one session and exactly `take` read,
+       there is no way to tell a conversation of exactly sixty from one of
+       six hundred, so `trimmed` below would always have been false and the
+       panel would have claimed to be showing everything. One extra row is
+       what makes that answer knowable. */
+    const perSession = await Promise.all(
+      sessions.map((s) =>
+        ctx.db
+          .query("messages")
+          .withIndex("by_session_at", (i) => i.eq("sessionId", s.sessionId))
+          .order("desc")
+          .take(take + 1),
+      ),
+    );
+
+    const all = perSession.flat().sort((a, b) => a.at - b.at);
+    const kept = all.slice(-take);
+
+    const messages = await Promise.all(
+      kept.map(async (m) => ({
+        role: m.role,
+        text: m.text,
+        at: m.at,
+        /* The storage id is deliberately not included. The browser needs
+           something it can put in an <img>, and an id it could hand to
+           another route is not that. */
+        attachment: m.attachment
+          ? {
+              kind: m.attachment.kind,
+              type: m.attachment.type,
+              name: m.attachment.name ?? null,
+              url: await ctx.storage.getUrl(m.attachment.storageId),
+            }
+          : null,
+      })),
+    );
+
+    return {
+      messages,
+      sessions: sessions.length,
+      lastAt: messages.length ? messages[messages.length - 1].at : null,
+      /* So the panel can say "earlier messages are not shown" rather than
+         implying this is everything that was ever said. */
+      trimmed: all.length > kept.length,
+    };
+  },
+});
+
 export const conversationsForVisitor = query({
   args: { visitorId: v.string() },
   handler: async (ctx, { visitorId }) => {

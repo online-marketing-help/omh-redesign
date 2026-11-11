@@ -57,6 +57,29 @@ export function ReelPlayer() {
   const [full, setFull] = useState(false);
   const [showUi, setShowUi] = useState(true);
 
+  // Controls fade out after 2.5 s of no pointer movement while playing.
+  const wake = useCallback(() => {
+    setShowUi(true);
+    clearTimeout(idle.current);
+    idle.current = setTimeout(() => setShowUi(false), 2500);
+  }, []);
+
+  /* Playback started or stopped, called from the event that caused it.
+     This used to be an effect watching `playing`, which is the pattern React
+     19's compiler lint rejects, and rightly: a render reacting to a state
+     change it just performed is one render too many, and the fade timer
+     belongs to the event, not to the repaint. Pausing only cancels the
+     pending fade; it does not force the controls visible, because the `ui`
+     class below already reads `showUi || !playing`. */
+  const markPlaying = useCallback(
+    (on: boolean) => {
+      setPlaying(on);
+      if (on) wake();
+      else clearTimeout(idle.current);
+    },
+    [wake],
+  );
+
   // Open from any reel card on the page.
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
@@ -79,7 +102,7 @@ export function ReelPlayer() {
     const v = video.current;
     if (!item?.src || !v) return;
     ctl.current = {
-      play: () => void v.play().catch(() => setPlaying(false)),
+      play: () => void v.play().catch(() => markPlaying(false)),
       pause: () => v.pause(),
       seek: (t) => { v.currentTime = t; },
       mute: (m) => { v.muted = m; },
@@ -88,7 +111,10 @@ export function ReelPlayer() {
     };
     ctl.current.play();
     return () => { v.pause(); ctl.current = null; };
-  }, [item]);
+    /* markPlaying is stable, so listing it does not re-create the player on
+       every render; it is here because the lint rule is right that the effect
+       uses it. */
+  }, [item, markPlaying]);
 
   // YouTube: the IFrame API player, polled for the time since it has no timeupdate event.
   useEffect(() => {
@@ -122,7 +148,7 @@ export function ReelPlayer() {
           },
           // 1 playing, 2 paused, 0 ended
           onStateChange: (e: { data: number }) => {
-            setPlaying(e.data === 1);
+            markPlaying(e.data === 1);
             if (e.data === 1) setDuration(player!.getDuration());
             if (e.data === 0) { player!.seekTo(0, true); player!.pauseVideo(); }
           },
@@ -130,17 +156,8 @@ export function ReelPlayer() {
       });
     });
     return () => { gone = true; clearInterval(poll); player?.destroy(); mount.remove(); ctl.current = null; };
-  }, [item]);
+  }, [item, markPlaying]);
 
-  // Controls fade out after 2.5 s of no pointer movement while playing.
-  const wake = useCallback(() => {
-    setShowUi(true);
-    clearTimeout(idle.current);
-    idle.current = setTimeout(() => setShowUi(false), 2500);
-  }, []);
-  useEffect(() => {
-    if (!playing) { clearTimeout(idle.current); setShowUi(true); } else wake();
-  }, [playing, wake]);
 
   useEffect(() => {
     const onFs = () => setFull(document.fullscreenElement === frame.current);
@@ -184,7 +201,7 @@ export function ReelPlayer() {
     <dialog
       ref={dialog}
       aria-label={item?.title ?? "Video"}
-      onClose={() => { setItem(null); setPlaying(false); setTime(0); setDuration(0); }}
+      onClose={() => { setItem(null); markPlaying(false); setTime(0); setDuration(0); }}
       onClick={(e) => e.target === dialog.current && close()}
       onKeyDown={onKey}
       className="m-auto overflow-visible bg-transparent p-0 backdrop:bg-black/85"
@@ -203,11 +220,11 @@ export function ReelPlayer() {
               playsInline
               preload="auto"
               className="absolute inset-0 h-full w-full object-contain"
-              onPlay={() => setPlaying(true)}
-              onPause={() => setPlaying(false)}
+              onPlay={() => markPlaying(true)}
+              onPause={() => markPlaying(false)}
               onTimeUpdate={(e) => setTime(e.currentTarget.currentTime)}
               onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
-              onEnded={(e) => { e.currentTarget.currentTime = 0; setPlaying(false); }}
+              onEnded={(e) => { e.currentTarget.currentTime = 0; markPlaying(false); }}
             />
           ) : (
             <div ref={ytHost} className="pointer-events-none absolute inset-0 [&_iframe]:h-full [&_iframe]:w-full" />
