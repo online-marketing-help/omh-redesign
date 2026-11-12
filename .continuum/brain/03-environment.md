@@ -38,11 +38,27 @@ cd OHM/widget && set -a && . ./.env.local && set +a && \
 - `n8n/` and `retell/` in the working copy stay out of git: the Convex secret
   is in those files many times over.
 
+## Where the live site is
+
+`https://onlinemarketinghelp.co.uk/` is THIS repository, deployed. Next.js,
+behind Cloudflare, hosted on Hostinger. One deploy ships everything:
+
+- the marketing pages
+- `/lead-dashboard` (live, login-gated)
+- the API routes, including `/api/book-demo`
+- `/ohm-assistant.js`, which is `public/ohm-assistant.js` here
+
+There is no separate widget upload and no WordPress. Two unused copies of
+the widget exist (`ohm-assistant-eight.vercel.app` and
+`wp-content/uploads/ohm/`); ignore both.
+
 ## Deployment state (2026-11-12)
 
 - Convex: current.
 - n8n: `01-chat` live and current. `07-router`, `11-reactivation` pushed and
   **inactive**.
-- Widget JS: **not deployed.** The hosted copies still serve the old build,
-  so visitors have no history, no attachments, and still see two greetings.
+- **The live site is behind `main`.** Its widget is 23,135 bytes against the
+  30,922 on `main`, and `GET /api/book-demo` answers 405 there because that
+  handler does not exist in that build. Everything since is committed and
+  pushed; it needs one deploy of the repo.
 - Apps Script: **not redeployed.** The booking lock is not live.

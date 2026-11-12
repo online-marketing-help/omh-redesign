@@ -93,11 +93,20 @@ unaffected and passes. Do not go looking for it in the code.
 
 ---
 
-**"Where is the widget actually served from?"** Three copies exist and only
-one matters. `https://onlinemarketinghelp.co.uk/ohm-assistant.js`, the WEB
-ROOT of the WordPress host, is what the live site loads. The Vercel copy
-(`ohm-assistant-eight.vercel.app`) and the one in
-`wp-content/uploads/ohm/` are not used by any page. Grepping the homepage
-HTML for "ohm-assistant" finds nothing because the tag is injected at
-runtime: check in a browser (`window.__ohmAssistantLoaded`) and watch the
-network requests, not the served HTML.
+**"Where is the widget actually served from?"** From this repo, like
+everything else. `https://onlinemarketinghelp.co.uk/` IS the Next.js app in
+this repository - `x-powered-by: Next.js`, `_next/static` present, no
+WordPress markers anywhere - behind Cloudflare, hosted on Hostinger. So
+`/ohm-assistant.js` is `public/ohm-assistant.js` here, and deploying the
+repo updates the widget, the dashboard and the API routes together. There
+is no separate file to upload.
+
+Two copies exist that nothing uses: `ohm-assistant-eight.vercel.app` and
+`wp-content/uploads/ohm/`. Both are leftovers.
+
+**This entry previously said the opposite** - that the site was WordPress and
+the widget had to be replaced by FTP at a web root. That was wrong, and it
+was wrong because grepping the served HTML for "ohm-assistant" finds nothing
+(the tag is injected at runtime) and because a `wp-content` path still
+answers 200. Check what is serving a site with headers, not with guesses:
+`curl -I` and look for `x-powered-by`.
