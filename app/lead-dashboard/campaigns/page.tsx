@@ -80,6 +80,14 @@ export default async function CampaignsPage({
       active="/lead-dashboard/campaigns"
       title="Campaigns"
       lead="Every batch we contacted on purpose, and what it cost as well as what it made."
+      toolbar={
+        <Link
+          href={demo ? "/lead-dashboard/campaigns/new?demo=1" : "/lead-dashboard/campaigns/new"}
+          className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-inverse px-3 py-1.5 text-[13.5px] font-semibold text-oninverse outline-none transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+        >
+          Start a campaign
+        </Link>
+      }
       counts={{ "/lead-dashboard/campaigns": running || undefined }}
       urgent={running ? ["/lead-dashboard/campaigns"] : []}
       demo={demo}
@@ -95,9 +103,16 @@ export default async function CampaignsPage({
         <Card title="No campaigns yet">
           <Empty>
             A campaign is a list contacted on purpose, which in practice means
-            reactivation. Nothing has been run. The first one appears here as
-            soon as it is started.
+            reactivation. Nothing has been run yet.
           </Empty>
+          <div className="pb-5 text-center">
+            <Link
+              href={demo ? "/lead-dashboard/campaigns/new?demo=1" : "/lead-dashboard/campaigns/new"}
+              className="inline-flex min-h-11 cursor-pointer items-center rounded-lg bg-inverse px-4 text-[14px] font-semibold text-oninverse outline-none transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+            >
+              Start the first one
+            </Link>
+          </div>
           <div className="text-center">
             <ShowExample href="/lead-dashboard/campaigns?demo=1" />
           </div>

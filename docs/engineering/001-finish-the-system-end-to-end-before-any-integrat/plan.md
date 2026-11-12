@@ -93,31 +93,37 @@ thing live, not merely written: a workflow on `srv1836598`, a function on
     assertions and `10-meta` cannot exist until the Meta app does. That is
     integration-blocked, not done.
 
-- [ ] **T9** - Deploy everything and prove it live
-  - Verify: `npm run build` passes, `widget/tests/run.sh` passes, Convex deployed and the new routes answer, the workflows listed on srv1836598, the dashboard driven in a browser at 1440 and 390
-
-## Order and why
-
-T3 first because it is finished work sitting on a laptop. T4 was next, as the
-only item that was a live bug, and was pulled for being on the public site
-rather than in this system.
-
-T5 and T6 are independent of each other and of T4; either can be skipped
-without blocking anything. T7 is independent. T8 is last because it is the
-largest and the least load-bearing: everything else works without it.
-
-T9 is not a task so much as the gate on the others.
+- [x] **T9** - Deploy everything and prove it live
+  - Convex `cool-ferret-103` deployed; the new routes answer, and the two
+    attacks the review found were verified dead against it with curl.
+  - n8n: `01-chat` live and answering with the new reply shaping, asked the
+    live webhook and read the reply. `07-router` and `11-reactivation`
+    pushed and left inactive on purpose.
+  - Dashboard: 9 screens at 1440 and 390, no overflow, no console errors;
+    the attachment bubbles rendered with the image's `naturalWidth > 0`.
+  - Widget: built, deployed to the Vercel copy, and driven in a browser from
+    the hosted file.
+  - `main` merged and pushed: `origin/main` = `ca89292`.
+  - **What is NOT deployed, and is not ours to deploy:**
+    `/ohm-assistant.js` at the Hostinger web root is what the live site
+    actually loads, and the Apps Script lives in OMH's Google account.
+    Both go to the other developer, with the code already on `main`.
 
 ## Definition of done
 
-- [ ] `widget/tests/run.sh` passes, no new skips, assertion count stated
-- [ ] `npx tsc --noEmit` clean in `website/`, and `tsc -p tsconfig.check.json` clean against the real Convex DataModel
-- [ ] `npm run build` exits 0
-- [ ] `npx eslint components app lib` shows no new errors
-- [ ] Every dashboard screen rendered at 1440 and 390, no overflow, no console errors
-- [ ] review.md filled in by a reviewer that did not write the code
+- [x] `widget/tests/run.sh` passes, no new skips, assertion count stated: 804
+      across 16 suites
+- [x] `npx tsc --noEmit` clean in `website/`, and `tsc -p tsconfig.check.json`
+      clean against the real Convex DataModel
+- [x] `npm run build` exits 0
+- [x] `npx eslint components app lib` shows no new errors
+- [x] Every dashboard screen rendered at 1440 and 390, no overflow, no
+      console errors
+- [x] review.md filled in by a reviewer that did not write the code: 14
+      findings, 2 of them live, all addressed
 
 ## Out of scope
+
 
 Meta messages and lead ads, WhatsApp, Twilio calls and SMS, inbound email
 replies. All four wait on a credential or a verification from somebody else,
