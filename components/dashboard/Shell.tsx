@@ -223,7 +223,19 @@ export function Rail({
               <Link
                 href={to(t.href)}
                 aria-current={on ? "page" : undefined}
-                className={`group flex items-center gap-2.5 whitespace-nowrap rounded-[10px] px-3 py-2.5 font-sans text-[14px] font-medium outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${
+                /* Read out as "Leads, 329" rather than "Leads329", and an
+                   urgent figure says what it means rather than being a
+                   number in a different colour. Colour is the only thing
+                   carrying "somebody is waiting" to the eye; this is what
+                   carries it to everybody else. */
+                aria-label={
+                  typeof n === "number" && !(urgent.includes(t.href) && n === 0)
+                    ? urgent.includes(t.href)
+                      ? `${t.label}, ${n} waiting`
+                      : `${t.label}, ${n}`
+                    : undefined
+                }
+                className={`group flex min-h-11 items-center gap-2.5 whitespace-nowrap rounded-[10px] px-3 py-2.5 font-sans text-[14px] font-medium outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${
                   on
                     ? "bg-white/[.09] text-oninverse shadow-[inset_0_1px_0_rgb(255_255_255/.09)]"
                     : "text-white/60 hover:bg-white/5 hover:text-white/90"
@@ -284,7 +296,7 @@ export function Rail({
             broken. This is the way to tell them apart. */}
         <Link
           href={demo ? "/lead-dashboard" : "/lead-dashboard?demo=1"}
-          className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 font-sans text-[12.5px] font-medium text-white/60 outline-none transition-colors duration-150 hover:bg-white/5 hover:text-white/90 focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+          className="mt-4 inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 font-sans text-[12.5px] font-medium text-white/60 outline-none transition-colors duration-150 hover:bg-white/5 hover:text-white/90 focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
         >
           {demo ? "Back to the real figures" : "See it with example data"}
         </Link>

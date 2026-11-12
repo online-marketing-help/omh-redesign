@@ -474,7 +474,11 @@ function CellView({ cell }: { cell: Cell }) {
           >
             {cell.v}
           </Link>
-          {cell.sub && <span className="mt-0.5 block text-[12.5px] text-muted">{cell.sub}</span>}
+          {cell.sub && (
+            <span title={cell.sub} className="mt-0.5 line-clamp-2 block text-[12.5px] text-muted">
+              {cell.sub}
+            </span>
+          )}
         </>
       );
     case "node":
@@ -511,8 +515,31 @@ function CellView({ cell }: { cell: Cell }) {
               the Leads table and pushing it past the page. Breaking anywhere
               costs a hyphenless wrap on a line nobody reads letter by letter,
               and buys back a column. */}
+          {/* One line, always.
+
+              A row is something you scan. The moment a cell can hold free
+              text, one row grows to the height of a paragraph and the table
+              stops being a table: an appointment with a four-line note made
+              its row 200px tall and pushed the next booking off the screen.
+              The full text lives on the thing's own page, which is one click
+              away; this is the line that gets you there.
+
+              `title` is a convenience for a mouse, never the only way to
+              read it.
+
+              Clamped by LINES, not by `truncate`. Two earlier attempts got
+              this wrong in opposite directions: clamping height alone let
+              the cell grow sideways instead and pushed the page 356px out,
+              and `truncate` brought `white-space: nowrap` with it, which
+              fought the deliberate wrapping above and pushed the Leads
+              table out by 140px because an email address could no longer
+              break. `line-clamp` caps the height and leaves wrapping
+              alone, which is the only combination that works for both. */}
           {cell.sub && (
-            <span className="mt-0.5 block text-[12.5px] text-muted [overflow-wrap:anywhere]">
+            <span
+              title={cell.sub}
+              className="mt-0.5 line-clamp-2 block text-[12.5px] text-muted [overflow-wrap:anywhere]"
+            >
               {cell.sub}
             </span>
           )}

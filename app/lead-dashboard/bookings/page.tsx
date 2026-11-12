@@ -70,7 +70,14 @@ export default async function Bookings({
       booked: b.at,
     },
     cells: [
-      { t: "text", v: b.reference, mono: true },
+      /* The reference opens the booking's own conversation, which is where
+         the note, the lead, the transcript and the outcome all are. A row
+         carries what you scan by; everything else is one click away. */
+      {
+        t: "link" as const,
+        v: b.reference,
+        href: `/lead-dashboard/conversations/${encodeURIComponent(b.sessionId)}${demo ? "?demo=1" : ""}`,
+      },
       {
         t: "text",
         v: b.preferredDate,
@@ -79,7 +86,12 @@ export default async function Bookings({
         strong: true,
       },
       { t: "text", v: b.name, sub: b.phone },
-      { t: "text", v: b.service, sub: b.notes || undefined },
+      /* What they booked, and nothing else. The note used to sit under it
+         and it is free text somebody typed: one four-line note made its row
+         200px tall and pushed the next booking off the screen. A row is for
+         scanning; the note is on the booking's own page, which the
+         reference links to. */
+      { t: "text", v: b.service },
       /* Which channel produced this appointment. Without it the diary and
          the channel report describe the same booking and never agree. */
       { t: "text", v: sourceLabel(sourceOf(b.sessionId)) },
