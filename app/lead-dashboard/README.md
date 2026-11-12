@@ -48,7 +48,15 @@ disagree about what an outcome does to the pipeline `status`.
 Four outcomes in bulk, not five. A win carries a value, a value belongs to one
 deal, and setting the same figure on twenty leads would invent revenue.
 
-Still missing: the same control on the lead detail page.
+The same control is on the conversation page, which IS the lead detail page;
+there is no separate one. It was there all along and could not be reached for
+a whole class of lead: the page bailed to "Nothing was recorded for this
+conversation" whenever there were no messages and no calls, which hid the
+lead panel too. A lead from a website form, a Google Ads lead form, or
+anything the router captured has no messages, so its outcome could never be
+set, and every channel figure built on that field was quietly missing them.
+The empty state now means actually empty: no transcript, no call, no lead and
+no booking.
 
 ### Campaigns
 **The screen and the report are done.** A `campaigns` table, `campaignId` on

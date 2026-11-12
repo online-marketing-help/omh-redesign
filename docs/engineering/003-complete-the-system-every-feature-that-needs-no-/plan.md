@@ -36,15 +36,27 @@ other developer deploys from it.
     `11-reactivation` active on n8n and `OHM_REACTIVATION_WEBHOOK` set,
     which is a deploy decision, not code.
 
-- [ ] **F2** - Set the outcome from the conversation page
+- [x] **F2** - Set the outcome from the conversation page
   - `OutcomePicker` already exists and is used on the Leads table. Put it on
     the lead detail panel of the conversation page, which is where somebody
     is standing when they have just read the transcript.
   - Test first: the write path is `routing.setOutcome`, which is asserted.
     What is not: that the conversation page passes the lead id it is
     displaying rather than the first lead on the session.
-  - Evidence: set an outcome from the conversation page in a browser, read
-    the row back out of Convex.
+  - **Done 2026-11-12, and it was not what the plan assumed.** The picker was
+    already on the conversation page, which IS the lead detail page; there is
+    no separate one, so that README line had been describing a page that does
+    not exist.
+  - The real bug was next to it. The page bailed to "Nothing was recorded for
+    this conversation" whenever there were no messages and no calls, and that
+    branch hid the lead panel as well. Every lead without a chat - a website
+    form, a Google Ads lead form, anything the router captured - had no way
+    to have its outcome set, and every channel figure built on that field was
+    quietly missing them. The empty state now means no transcript AND no call
+    AND no lead AND no booking.
+  - Evidence: a lead with no messages, driven in a browser - picker found,
+    "Won" chosen, £2400 entered - then read back out of Convex:
+    `outcome: won, valueGbp: 2400`. All screens clean at 1440 and 390.
 
 - [ ] **F3** - The assistant reads the photo
   - The widget already uploads and the dashboard already shows it. What is

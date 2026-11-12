@@ -102,7 +102,21 @@ export default async function Conversation({
           assistant&rsquo;s Convex deployment yet, or OHM_WIDGET_SECRET is not
           set on this server.
         </Empty>
-      ) : !demo && messages.length === 0 && calls.filter(Boolean).length === 0 ? (
+      ) : !demo &&
+        messages.length === 0 &&
+        calls.filter(Boolean).length === 0 &&
+        !lead &&
+        !thread?.bookings?.length ? (
+        /* Nothing at all: no transcript, no call, no lead, no booking. Only
+           then is there genuinely nothing to show.
+
+           This condition used to stop at "no messages and no calls", which
+           hid the whole page for a lead that never had a conversation: a
+           website form, a Google Ads lead form, anything the router
+           captured. Those leads have an outcome to record and this is the
+           page it is recorded on, so hiding it meant their outcome could
+           never be set, and every channel figure built on that field was
+           missing them. */
         <Empty>
           Nothing was recorded for this conversation. Leads captured before
           message logging was switched on have no transcript behind them.
