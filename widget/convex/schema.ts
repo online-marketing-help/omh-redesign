@@ -114,10 +114,40 @@ export default defineSchema({
     role: v.string(),           // user | assistant | human | system
     channel: v.string(),
     text: v.string(),
+
+    /* A photo or a voice note, where somebody sent one.
+
+       Optional, and the message still carries `text`: for an image that is
+       what the vision model read in it, and for a voice note what the
+       transcription heard. The assistant answers the text; the file is what
+       a person sees on the dashboard when they want to check the machine
+       got it right.
+
+       `kind` and `type` are what the BYTES said, not what the browser or
+       Meta claimed. See gates/attachments.js for why that distinction is
+       the whole point. */
+    attachment: v.optional(v.object({
+      storageId: v.id("_storage"),
+      kind: v.string(),          // image | audio
+      type: v.string(),          // the sniffed mime type
+      name: v.optional(v.string()),
+      size: v.optional(v.number()),
+      /* Where it came from, for a Meta attachment: their URL expires, so it
+         is kept for tracing rather than for serving. */
+      sourceUrl: v.optional(v.string()),
+    })),
+
     at: v.number(),
   })
     .index("by_session", ["sessionId"])
-    .index("by_session_at", ["sessionId", "at"]),
+    .index("by_session_at", ["sessionId", "at"])
+    /* One stored file, one message.
+
+       Without this, `attach` was a replay: a single uploaded file could be
+       posted into any conversation as many times as anyone liked, carrying
+       two thousand characters of their text each time. This index is how a
+       second attempt is recognised as a second attempt. */
+    .index("by_attachment", ["attachment.storageId"]),
 
   /* What we have learned about this visitor, carried between chat and voice
      so a caller never repeats themselves. */

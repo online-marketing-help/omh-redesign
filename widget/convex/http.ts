@@ -99,7 +99,8 @@ http.route({
       channel: b.channel || undefined,
       pageUrl: b.pageUrl || undefined,
       retellCallId: b.retellCallId || undefined,
-    }),
+    
+      attachment: b.attachment || undefined,}),
   ),
 });
 
@@ -333,21 +334,35 @@ http.route({
 
 /* --------------------------------------------------- handover, visitor side */
 
-/* The two routes below are the only ones with no secret, because the caller is
-   the visitor's own browser and a secret shipped to a browser is not a secret.
-   They are scoped to one session id, which the widget generated itself and
-   keeps in its own sessionStorage: the visitor's capability for the visitor's
-   own conversation. Neither route can read another session, list sessions, or
-   return the visitor's own messages back to them.
+/* The routes below carry no secret, because the caller is the visitor's own
+   browser and a secret shipped to a browser is not a secret. What stands in
+   for one is the pair of random ids that browser holds: the session id in
+   sessionStorage and the visitor id in localStorage, both now 16 bytes from
+   `crypto.getRandomValues`.
 
-   CORS is pinned to the sites the widget is installed on. A browser will not
-   hand the response to any other origin. */
+   `publicRoute` only checks that a session id is PRESENT. It cannot know
+   whose it is, so **every handler below is responsible for its own scoping**
+   and the ones that read anything check the pair. `/visitor/history` was
+   written against this comment rather than against that fact: it read on
+   the visitor id alone, and presenting somebody else's returned their whole
+   conversation. See visitors.historyForVisitor and visitor-auth.test.ts.
+
+   CORS is not a control here. It stops a BROWSER on another origin reading
+   the reply; the handler still runs, and curl is not a browser. Anything
+   these routes must not give away has to be refused by the handler. */
 const ALLOWED = [
   "https://onlinemarketinghelp.co.uk",
   "https://www.onlinemarketinghelp.co.uk",
   "https://ohm-assistant-online-marketing-help.vercel.app",
   "http://localhost:3000",
+  /* Where the site runs when 3000 is taken by another project. */
+  "http://localhost:3100",
   "http://localhost:3111",
+  /* web/embed/test/verify.mjs, which serves the built embed on a fixed port
+     so the widget can be driven in a real browser. n8n's own allow-list has
+     carried this one for a while; this list did not, so the harness could
+     reach the chat webhook and not the visitor routes. */
+  "http://localhost:4477",
 ];
 
 function cors(req: Request): Record<string, string> {
@@ -425,6 +440,25 @@ http.route({
       channel: b.channel || undefined,
       pageUrl: b.pageUrl || b.page_url || undefined,
       attribution: b.attribution || undefined,
+    }),
+  ),
+});
+
+/* Their own conversation, so a returning visitor opens the panel and finds
+   it where they left it. Keyed on the visitor id, which is what survives a
+   closed tab; see visitors.historyForVisitor for why that and not the
+   session. */
+http.route({ path: "/visitor/history", method: "OPTIONS", handler: preflight });
+http.route({
+  path: "/visitor/history",
+  method: "POST",
+  handler: publicRoute(async (ctx, b) =>
+    ctx.runQuery(api.visitors.historyForVisitor, {
+      visitorId: String(b.visitorId ?? b.visitor_id ?? ""),
+      /* Passed through and CHECKED against the visitor id, in the query.
+         The guard below only ensures a session id is present; it does not
+         and cannot know whose it is. */
+      sessionId: String(b.sessionId ?? b.session_id ?? ""),
     }),
   ),
 });
@@ -891,5 +925,66 @@ http.route({
     return await ctx.runQuery(api.routing.channelSpend, {});
   }),
 });
+
+/* ------------------------------------------------------- attachments
+
+   One door today, two planned.
+
+   The widget uploads bytes straight to Convex storage with a short-lived
+   URL, so a photo never passes through n8n or this file. The file is then
+   judged on the bytes that actually arrived, in attachments.ts, which is
+   the only check that counts: the browser-side one is advice, and the
+   upload URL is an ordinary endpoint anyone can PUT to.
+
+   **The Meta door is not built.** `checkRemote` in gates/attachments.js
+   has its assertions, including the SSRF host check, and nothing calls it:
+   there is no `10-meta` workflow, because there is no Meta app yet. The
+   route below (`/attachment/url`, secret-gated) is what that workflow will
+   use and has no caller today. Both are kept rather than deleted because
+   the assertions are the design and re-deriving them later is how the host
+   check gets left out. Neither is a shipped path, and this comment used to
+   describe them as though they were. */
+
+http.route({
+  path: "/attachment/url",
+  method: "POST",
+  handler: route(async (ctx) => ({ url: await ctx.storage.generateUploadUrl() })),
+});
+
+/* The visitor's door. No secret, because a public page cannot keep one, so
+   these two are rate limited and the file is judged on its real bytes after
+   it lands. See attachments.ts, which is where that happens. */
+http.route({ path: "/visitor/attachment/url", method: "OPTIONS", handler: preflight });
+http.route({
+  path: "/visitor/attachment/url",
+  method: "POST",
+  handler: publicRoute(async (ctx, b) =>
+    ctx.runMutation(api.attachments.uploadUrl, {
+      sessionId: String(b.sessionId ?? b.session_id),
+    }),
+  ),
+});
+
+http.route({ path: "/visitor/attachment/attach", method: "OPTIONS", handler: preflight });
+http.route({
+  path: "/visitor/attachment/attach",
+  method: "POST",
+  handler: publicRoute(async (ctx, b) =>
+    ctx.runAction(api.attachments.attach, {
+      sessionId: String(b.sessionId ?? b.session_id),
+      storageId: b.storageId,
+      kind: b.kind || undefined,
+      type: b.type || undefined,
+      name: b.name || undefined,
+      text: b.text || undefined,
+      pageUrl: b.pageUrl || b.page_url || undefined,
+    }),
+  ),
+});
+
+/* There is deliberately no route here for reading one back. The dashboard
+   gets a URL for each attachment from `/handover/thread`, which already
+   knows which messages have one; a second route per photo would be the same
+   answer, fetched again, behind the same secret. */
 
 export default http;

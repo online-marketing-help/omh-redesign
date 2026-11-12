@@ -108,7 +108,7 @@ check("icons are 18px, not the theme's forced 200px",
   iconBox.width < 30 && iconBox.height < 30,
   `${Math.round(iconBox.width)}x${Math.round(iconBox.height)}`);
 
-const inputBox = await inRoot(".compose input").boundingBox();
+const inputBox = await inRoot(".compose input[type=text]").boundingBox();
 check("the input is a normal height, not the theme's 120px",
   inputBox.height < 60, `${Math.round(inputBox.height)}px tall`);
 
@@ -125,8 +125,8 @@ check("the theme's own button is untouched, so nothing leaked out",
 
 /* ---- 5. a real question, answered by the live stack ------------------- */
 const started = Date.now();
-await inRoot(".compose input").fill("How much are your Google Ads packages per month?");
-await inRoot(".compose button").click();
+await inRoot(".compose input[type=text]").fill("How much are your Google Ads packages per month?");
+await inRoot(".compose button[type=submit]").click();
 await page.waitForFunction(() => {
   const r = document.getElementById("ohm-assistant-root");
   const b = r && r.shadowRoot.querySelectorAll(".bub.assistant");

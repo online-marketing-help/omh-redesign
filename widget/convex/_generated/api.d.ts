@@ -8,7 +8,9 @@
  * @module
  */
 
+import type * as attachments from "../attachments.js";
 import type * as campaigns from "../campaigns.js";
+import type * as crons from "../crons.js";
 import type * as functions from "../functions.js";
 import type * as handover from "../handover.js";
 import type * as http from "../http.js";
@@ -22,7 +24,9 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  attachments: typeof attachments;
   campaigns: typeof campaigns;
+  crons: typeof crons;
   functions: typeof functions;
   handover: typeof handover;
   http: typeof http;

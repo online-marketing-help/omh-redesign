@@ -260,6 +260,20 @@ export const logMessage = mutation({
     channel: v.optional(v.string()),
     pageUrl: v.optional(v.string()),
     retellCallId: v.optional(v.string()),
+    /* A photo or a voice note, already uploaded and already judged.
+
+       `kind` and `type` must be what the BYTES said, not what a browser or
+       Meta claimed: see gates/attachments.js. Nothing here re-checks, so
+       whatever calls this is responsible for having done so, and the two
+       callers that exist both do. */
+    attachment: v.optional(v.object({
+      storageId: v.id("_storage"),
+      kind: v.string(),
+      type: v.string(),
+      name: v.optional(v.string()),
+      size: v.optional(v.number()),
+      sourceUrl: v.optional(v.string()),
+    })),
   },
   handler: async (ctx, a) => {
     const channel = a.channel ?? "chat";
@@ -268,7 +282,11 @@ export const logMessage = mutation({
       sessionId: a.sessionId,
       role: a.role,
       channel,
-      text: a.text,
+      /* An attachment with no text is still a message. "Sent a photo" beats
+         an empty bubble on the dashboard while the vision model is still
+         reading it, or if it never does. */
+      text: a.text || (a.attachment ? `Sent a ${a.attachment.kind === "audio" ? "voice note" : "photo"}` : ""),
+      attachment: a.attachment,
       at: now(),
     });
     return { ok: true };
@@ -347,12 +365,16 @@ export const updateProfile = mutation({
 
 /* ---------------------------------------------------------------- limits */
 
-const WINDOW_MS = 60 * 60 * 1000;          // one hour
+export const WINDOW_MS = 60 * 60 * 1000;   // one hour
 const PER_SESSION = 30;                     // a real visitor never needs more
 const PER_IP = 60;                          // an office behind one address
-const PER_DEPLOYMENT = 1500;                // circuit breaker on the whole thing
+export const PER_DEPLOYMENT = 1500;         // circuit breaker on the whole thing
 
-async function bump(ctx: any, key: string, max: number, now: number) {
+/* Exported so attachments.ts can share this counter rather than keeping a
+   second one. Two rate limiters over the same table, with their own windows
+   and their own idea of what a session is, is how a visitor ends up over one
+   limit and under the other. */
+export async function bump(ctx: any, key: string, max: number, now: number) {
   const row = await ctx.db
     .query("limits")
     .withIndex("by_key", (i: any) => i.eq("key", key))

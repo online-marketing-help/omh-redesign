@@ -307,7 +307,35 @@ export const thread = query({
             notes: profile.notes ?? null,
           }
         : null,
-      messages: messages.map((m) => ({ role: m.role, text: m.text, at: m.at })),
+      messages: await Promise.all(
+        messages.map(async (m) => ({
+          role: m.role,
+          text: m.text,
+          at: m.at,
+          /* A photo or a voice note, with a URL the dashboard can put
+             straight in an <img> or an <audio>.
+
+             Resolved here rather than by a second round trip per
+             attachment: a conversation with eight photos in it would
+             otherwise be eight more requests, each one carrying the
+             deployment secret, to answer a question this query already
+             knows the answer to.
+
+             `getUrl` returns null for a storage id that no longer exists,
+             which is a real case: a file deleted after the message was
+             written. The dashboard shows the bubble and says the file is
+             gone, rather than rendering a broken image. */
+          attachment: m.attachment
+            ? {
+                kind: m.attachment.kind,
+                type: m.attachment.type,
+                name: m.attachment.name ?? null,
+                size: m.attachment.size ?? null,
+                url: await ctx.storage.getUrl(m.attachment.storageId),
+              }
+            : null,
+        })),
+      ),
       questions: escalations
         .filter((e) => e.sessionId === sessionId)
         .map((e) => ({

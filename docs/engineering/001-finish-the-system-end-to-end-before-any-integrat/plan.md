@@ -34,21 +34,26 @@ thing live, not merely written: a workflow on `srv1836598`, a function on
     without an `active` field preserves it. Before/after active states diffed:
     no change.
 
-- [~] **T4** - Booking availability: stop two people taking one slot
-  - **Pulled from this workstream on 2026-11-10, by decision.** The scope is
-    the dashboard and the engagement package; the booking form lives on the
-    public marketing site, which another developer is actively changing.
-  - Kept: `widget/gates/availability.js` and its 15 assertions. The logic is
-    done and proven, including the case that matters most, an unreachable
-    calendar offering nothing rather than everything.
-  - Reverted: `components/BookDemo.tsx`, `app/api/book-demo/route.ts`,
-    `docs/google-calendar-booking.md`.
-  - **The bug is still live.** Two visitors can book the same half hour on
-    onlinemarketinghelp.co.uk today. Whoever picks this up needs the gate,
-    a `GET /api/book-demo?date=` that uses it, and an Apps Script that checks
-    for a clash inside a `LockService` lock, because two submissions in the
-    same second both see the slot free and only a check in the same breath as
-    the write refuses the second.
+- [x] **T4** - Booking availability: stop two people taking one slot
+  - Pulled on 2026-11-10 by decision, then put back on 2026-11-11 when the
+    instruction was "fix and complete all of them".
+  - `widget/gates/availability.js` and its 15 assertions were already done.
+    What was missing was everything that used them.
+  - Done now: `GET /api/book-demo?date=` asks the calendar and runs the gate;
+    `components/BookDemo.tsx` strikes out the taken times and re-reads the
+    diary when a slot is lost; the Apps Script in
+    `docs/google-calendar-booking.md` gained a `freebusy` action, a
+    `LockService` lock around the write with a clash check inside it, and a
+    guest invite.
+  - The lock is the part that actually fixes it. Two submissions in the same
+    second both see the slot free on the page, and only a check in the same
+    breath as the write refuses the second. Everything before it is courtesy.
+  - A 409 is now its own answer, not a 502: "somebody took it, pick another"
+    is something the visitor can act on, "try again later" is not.
+  - **Not live until the client redeploys the Apps Script.** It is a new
+    version of their own script in their own Google account. Until then the
+    site behaves exactly as before: `freebusy` returns nothing the old script
+    understands, the route reports `asked: false`, and every time is offered.
 
 - [x] **T5** - `no_show` status and the chase route
   - Files: `widget/convex/schema.ts`, `widget/gates/routes.ts`, `app/lead-dashboard/bookings/page.tsx`
@@ -60,15 +65,33 @@ thing live, not merely written: a workflow on `srv1836598`, a function on
   - Test first: `widget/tests/spend.test.ts`, asserting a channel with no spend reads "not set" rather than £0, and that cost per booking is absent rather than infinite when nothing booked
   - Verify: `npx tsc --noEmit` clean; the Channels screen shows a figure after typing one in, and "not set" before
 
-- [ ] **T7** - Google Ads lead-form webhook into `07-router`
+- [x] **T7** - Google Ads lead-form webhook into `07-router`
   - Files: `widget/n8n/build-workflows.py`
   - Test first: `widget/tests/google-lead-form.test.ts` against a gate that maps Google's payload shape to ours, asserting the key is checked and a wrong key is refused
   - Verify: workflow validates 0 errors; a sample Google payload posted at the webhook creates a lead with `sourceChannel: google_ads`
 
-- [ ] **T8** - Images and voice notes on the widget
-  - Files: `widget/web/embed/src/embed.js`, `widget/convex/schema.ts`, `widget/n8n/build-workflows.py` (01-chat)
-  - Test first: `widget/tests/attachments.test.ts`, asserting a file over the limit is refused by size before upload and that a non-image type is refused
-  - Verify: upload one of each through the real widget and read the row back out of Convex
+- [x] **T8** - Images and voice notes, from the widget AND from Meta
+  - Widened on 2026-11-10: "fb wp insta theke j voice image asbe all amader
+    capture korte hobe". That is a different shape, not more of the same.
+    The widget hands over bytes; Facebook, Instagram and WhatsApp hand over a
+    URL and expect our server to fetch it, which is server-side request
+    forgery unless the host is checked first.
+  - Files: `widget/gates/attachments.js` (+ `.d.ts`), `widget/convex/attachments.ts`,
+    `widget/convex/http.ts`, `widget/convex/handover.ts`, `widget/web/embed/src/embed.js`,
+    `app/lead-dashboard/conversations/[session]/page.tsx`, `lib/dashboard/demo.ts`
+  - 64 assertions. The ones that matter: the type is read from the bytes and
+    not from what the browser said, SVG is refused, a Meta URL is accepted
+    only on a Meta host (`fbcdn.net.evil.example`, `169.254.169.254`,
+    `10.0.0.5` and `file://` all refused), and the stored file is judged
+    AGAIN on its real bytes and real length after upload, because the
+    browser-side check is advice and the upload URL is an ordinary endpoint.
+  - A refused file is deleted from storage rather than left there.
+  - Verified live: a real PNG uploaded through the route, logged, and read
+    back out of the transcript; both bubbles rendered in a browser on the
+    conversation page with the image's `naturalWidth > 0`.
+  - **The Meta half is written but not reachable**: `checkRemote` has its
+    assertions and `10-meta` cannot exist until the Meta app does. That is
+    integration-blocked, not done.
 
 - [ ] **T9** - Deploy everything and prove it live
   - Verify: `npm run build` passes, `widget/tests/run.sh` passes, Convex deployed and the new routes answer, the workflows listed on srv1836598, the dashboard driven in a browser at 1440 and 390

@@ -1178,6 +1178,46 @@ export function demoThread(sessionId: string): Thread | null {
     { role: "user", text: row.lastText ?? "Thanks.", at: row.lastAt ?? t },
   ];
 
+  /* One photo and one voice note, so the example shows what a conversation
+     looks like when somebody sends the thing they are asking about rather
+     than describing it. Both point at files this site already serves: the
+     example must never need the assistant's storage, or it stops working
+     the moment that deployment is unreachable, which is one of the
+     situations the example exists for.
+
+     Only on the conversations that have run long enough to have got there.
+     An attachment on every single example reads as a feature being
+     demonstrated rather than as a conversation. */
+  if (k > 4 && row.state !== "waiting") {
+    messages.splice(4, 0, {
+      role: "user",
+      text: "This is the one I meant.",
+      at: started + 4.5 * gap,
+      attachment: {
+        kind: "image",
+        type: "image/webp",
+        /* What a phone actually calls a photo. A descriptive name would be
+           a claim about what is in the picture, and the example picture is
+           the same one on every conversation. */
+        name: "IMG_4821.webp",
+        size: 148 * 1024,
+        url: "/images/case-studies/bakery.webp",
+      },
+    });
+    messages.push({
+      role: "user",
+      text: "",
+      at: (row.lastAt ?? t) + 80 * 1000,
+      attachment: {
+        kind: "audio",
+        type: "audio/mpeg",
+        name: "voice-note.mp3",
+        size: 310 * 1024,
+        url: "/audio/AI Voice Agent for Contractors & Builders/2-Renovation & Home Improvement Enquiry.mp3",
+      },
+    });
+  }
+
   if (row.state !== "waiting") {
     messages.push({
       role: "assistant",

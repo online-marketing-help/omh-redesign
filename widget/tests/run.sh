@@ -11,6 +11,18 @@
 # temp directory those paths point at nothing. That failure is silent in the
 # sense that it looks like a missing file rather than a wrong test.
 set -e
+
+# This script is zsh, not bash, and it uses zsh parameter expansions
+# (${0:A:h}, ${1:t:r}) throughout. Run under bash, those expansions are
+# syntax errors INSIDE THE LOOP BODY, so every suite is skipped, `fails`
+# stays 0, and the last line prints "every suite passed" having run nothing.
+# That is the worst possible failure for a test runner: a green result with no
+# tests behind it. So it refuses instead.
+if [ -z "${ZSH_VERSION:-}" ]; then
+  echo "run.sh needs zsh (it uses zsh expansions). Use: zsh tests/run.sh" >&2
+  exit 2
+fi
+
 HERE="${0:A:h}"
 ESB="$HERE/../../node_modules/.bin/esbuild"
 

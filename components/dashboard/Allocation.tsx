@@ -247,7 +247,19 @@ function Plot({
         <line x1={PAD.l} y1={PAD.t + ih} x2={W - PAD.r} y2={PAD.t + ih} stroke="var(--color-line)" />
         <line x1={PAD.l} y1={PAD.t} x2={PAD.l} y2={PAD.t + ih} stroke="var(--color-line)" />
         <text x={PAD.l} y={H - 8} className="fill-muted text-[10.5px]">leads &rarr;</text>
-        <text x={4} y={PAD.t + 9} className="fill-muted text-[10.5px]">booked &uarr;</text>
+        {/* Turned on its side and run up the axis it describes. Lying flat in
+            the top-left corner it started at x=4 and ran to about x=49, while
+            the "starved" quadrant label starts at x=44 on nearly the same
+            line, so the two sat on top of each other. */}
+        <text
+          transform={`rotate(-90 11 ${PAD.t + ih / 2})`}
+          x={11}
+          y={PAD.t + ih / 2}
+          textAnchor="middle"
+          className="fill-muted text-[10.5px]"
+        >
+          booked &rarr;
+        </text>
 
         {plotted.map((r) => {
           const cx = x(r.leads), cy = y(r.conversion ?? 0);

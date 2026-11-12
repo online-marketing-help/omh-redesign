@@ -92,6 +92,35 @@ def gate_source(module):
         capture_output=True, text=True, check=True)
     return out.stdout
 
+def gate_inline(module):
+    """A gates module's own text, with its export line removed.
+
+    For a gate that is already plain JavaScript this beats bundling it. The
+    file is `var` and `function` declarations plus one `export {...}` line,
+    so dropping that line leaves code a Code node runs as-is, with the
+    functions in scope under their own names.
+
+    Why not esbuild here: the bundled form assigns an IIFE to a global and
+    the Code node could not reach it at runtime ("GATE.tidy is not a
+    function"). That took the live chat down for about four minutes on
+    2026-11-11, between executions 77760 and 77768, and it was pushed
+    because the test ran the gate directly rather than running the node's
+    body the way n8n runs it: wrapped in a function, with `return` at the
+    top of that function. Anything that changes a Code node is now driven
+    through `new Function(...)` first, which is the only shape that would
+    have caught it.
+
+    The point of gates/ is that the text the tests assert is the text that
+    runs, and every layer between those two is somewhere for them to differ.
+    """
+    out = []
+    for line in (GATES / module).read_text().splitlines():
+        if line.startswith("export {") or line.startswith("export default"):
+            continue
+        out.append(line)
+    return "\n".join(out).rstrip() + "\n"
+
+
 def hdr(name, value):
     return {"sendHeaders": True,
             "headerParameters": {"parameters": [{"name": name, "value": value}]}}
@@ -155,6 +184,9 @@ ALLOWED_ORIGINS = ",".join([
     "http://localhost:3000",
     "http://localhost:3001",
     "http://localhost:3002",
+    # Where the site gets started when 3000 is taken by another project
+    # entirely, which on this machine it usually is.
+    "http://localhost:3100",
     "http://localhost:4455",
     "http://localhost:4477",   # web/embed/test/verify.mjs
     # The hosted preview the MD and the web developer test from, before the
@@ -263,11 +295,20 @@ def build_chat():
          "position": [-400, 240]},
 
         {"parameters": {"jsCode": (
-            "// Strip anything that reads as a stage direction and cap runaway replies.\n"
-            "let t = ($input.first().json.output || '').toString().trim();\n"
-            "t = t.replace(/^```+\\s*\\w*\\s*/g, '').replace(/```+$/g, '').trim();\n"
+            # The markdown stripper is gates/reply-shape.js verbatim, bundled,
+            # not a hand-written copy: the widget renders bubbles with
+            # textContent, so "**SEO Seed:**" reaches the visitor WITH the
+            # asterisks, and 22 assertions hold that it does not.
+            #
+            # Note what this does not do, despite what the old comment here
+            # claimed: it does not cap the reply. Cutting a reply off mid
+            # sentence loses the part that mattered and tells the visitor
+            # nothing was removed. Length is the system prompt's job; this
+            # only records when the prompt is losing.
+            gate_inline("reply-shape.js") + "\n"
+            "let t = tidy($input.first().json.output || '');\n"
             "if (!t) t = \"Sorry, I didn't catch that. Could you say it again?\";\n"
-            "return [{ json: { reply: t } }];"
+            "return [{ json: { reply: t, overlong: looksOverlong(t) } }];"
         )},
          "id": "clean", "name": "Clean Reply",
          "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [120, 0]},
@@ -790,6 +831,8 @@ TWILIO_FROM = env.get("TWILIO_FROM_NUMBER", "TWILIO_NUMBER_PENDING")
 RETELL_FROM = env.get("RETELL_FROM_NUMBER", TWILIO_FROM)
 
 ROUTER_PATH = "ohm-lead-router"
+GOOGLE_FORM_PATH = "ohm-google-lead-form"
+GOOGLE_FORM_KEY = env.get("GOOGLE_LEAD_FORM_KEY", "GOOGLE_LEAD_FORM_KEY_PENDING")
 WORKER_PATH = "ohm-sequence-now"
 SMS_IN_PATH = "ohm-sms-inbound"
 CALL_STATUS_PATH = "ohm-call-status"
@@ -830,9 +873,75 @@ def build_router():
         {"parameters": {"httpMethod": "POST", "path": ROUTER_PATH,
                         "responseMode": "responseNode", "options": {}},
          "id": "r_wh", "name": "Lead Webhook",
-         "type": "n8n-nodes-base.webhook", "typeVersion": 2, "position": [-1000, 0],
+         "type": "n8n-nodes-base.webhook", "typeVersion": 2, "position": [-1000, -140],
          # A caller left hanging retries, and a retried lead is a second text.
          "onError": "continueRegularOutput"},
+
+        # Google Ads lead forms, through the SAME router rather than a
+        # workflow of their own. The router already classifies any source and
+        # picks the route; all Google needs is a translator in front of it,
+        # because its payload is column_id / string_value pairs rather than
+        # fields.
+        {"parameters": {"httpMethod": "POST", "path": GOOGLE_FORM_PATH,
+                        "responseMode": "responseNode", "options": {}},
+         "id": "r_gwh", "name": "Google Lead Form Webhook",
+         "type": "n8n-nodes-base.webhook", "typeVersion": 2, "position": [-1000, 140],
+         "onError": "continueRegularOutput"},
+
+        {"parameters": {"jsCode": (
+            "// Google's shape into ours, and the key check.\n"
+            "//\n"
+            "// Bundled from widget/gates/google-lead-form.js, the same file\n"
+            "// the tests import: do not edit here.\n"
+            "//\n"
+            "// THIS IS A PUBLIC URL. The key is the only thing between the\n"
+            "// internet and rows in the client's lead table.\n"
+            + gate_inline("google-lead-form.js") +
+            "\n"
+            "const KEY = " + json.dumps(GOOGLE_FORM_KEY) + ";\n"
+            "const b = $input.first().json.body || $input.first().json;\n"
+            "const r = fromGoogleLeadForm(b, KEY);\n"
+            "\n"
+            "// Google needs a 200 whatever happens, or it reports the webhook\n"
+            "// as broken and stops sending. A refusal is still a 200 with a\n"
+            "// reason in it, and the reason is in the execution log.\n"
+            "if (!r.ok || !r.lead) {\n"
+            "  return [{ json: { _stop: true, why: r.why || 'test_lead', isTest: r.isTest === true } }];\n"
+            "}\n"
+            "return [{ json: r.lead }];"
+        )},
+         "id": "r_gmap", "name": "Google Form To A Lead",
+         "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [-780, 140],
+         "onError": "continueRegularOutput"},
+
+        # An If node wants more in `options` than a Switch does: the
+        # validator flags the two missing keys as errors rather than
+        # warnings, and a node n8n refuses to load is a dead branch.
+        {"parameters": {"conditions": {
+            "options": {"caseSensitive": True, "version": 2,
+                        "leftValue": "", "typeValidation": "strict"},
+            "conditions": [{"id": "stop",
+                            "leftValue": "={{ $json._stop }}",
+                            "rightValue": "",
+                            "operator": {"type": "boolean", "operation": "true", "singleValue": True}}],
+            "combinator": "and"}},
+         "id": "r_gstop", "name": "Refused Or A Test",
+         "type": "n8n-nodes-base.if", "typeVersion": 2.2, "position": [-560, 140]},
+
+        # Its own respond node, not the router's.
+        #
+        # The router's Respond reads $('Shape And Route') and $('Save Lead'),
+        # and a refused Google post never passes through either, so routing
+        # it there would throw instead of answering. Google reads a failed
+        # webhook as a broken one and stops sending leads, which is a silent
+        # outage: the client simply stops getting enquiries.
+        {"parameters": {"respondWith": "json",
+                        "responseBody": "={{ JSON.stringify({ ok: true, "
+                                        "handled: false, why: $json.why }) }}",
+                        "options": {}},
+         "id": "r_gok", "name": "Answer Google",
+         "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1.1,
+         "position": [-340, 240]},
 
         {"parameters": {"jsCode": (
             "// Normalise whatever the caller sent, and pick the route.\n"
@@ -987,6 +1096,14 @@ def build_router():
     ]
     conns = {
         "Lead Webhook": {"main": [[{"node": "Shape And Route", "type": "main", "index": 0}]]},
+        "Google Lead Form Webhook": {"main": [[{"node": "Google Form To A Lead", "type": "main", "index": 0}]]},
+        "Google Form To A Lead": {"main": [[{"node": "Refused Or A Test", "type": "main", "index": 0}]]},
+        # True is refused or a test: answer Google and stop. False is a real
+        # lead, which joins the ordinary router path at Shape And Route.
+        "Refused Or A Test": {"main": [
+            [{"node": "Answer Google", "type": "main", "index": 0}],
+            [{"node": "Shape And Route", "type": "main", "index": 0}],
+        ]},
         "Shape And Route": {"main": [[{"node": "Save Lead", "type": "main", "index": 0}]]},
         "Save Lead": {"main": [[{"node": "Enrol On The Route", "type": "main", "index": 0}]]},
         "Enrol On The Route": {"main": [[{"node": "Immediate Touches", "type": "main", "index": 0}]]},
@@ -1440,10 +1557,10 @@ def build_reactivation():
             "// The consent gate. Bundled from widget/gates/consent-gate.js:\n"
             "// do not edit here, edit the file and rebuild, or the tests stop\n"
             "// describing what actually runs.\n"
-            + gate_source("consent-gate.js") +
+            + gate_inline("consent-gate.js") +
             "\n"
             "const b = $input.first().json.body || $input.first().json;\n"
-            "const screened = GATE.screenRows(b.rows || b.people || []);\n"
+            "const screened = screenRows(b.rows || b.people || []);\n"
             "\n"
             "return [{ json: {\n"
             "  name: String(b.name || 'Reactivation').slice(0, 120),\n"

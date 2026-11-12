@@ -51,27 +51,82 @@ const SECRET = 'paste-a-long-random-string-here';
 // (Calendar settings -> Integrate calendar -> Calendar ID).
 const CALENDAR_ID = 'primary';
 
+const SLOT_MINUTES = 30;
+
+function calendar_() {
+  return CALENDAR_ID === 'primary'
+    ? CalendarApp.getDefaultCalendar()
+    : CalendarApp.getCalendarById(CALENDAR_ID);
+}
+
+function json_(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
 function doPost(e) {
   const data = JSON.parse(e.postData.contents);
   if (data.secret !== SECRET) return ContentService.createTextOutput('forbidden');
 
-  const start = Utilities.parseDate(data.date + ' ' + data.time, 'Europe/London', 'yyyy-MM-dd HH:mm');
-  const end = new Date(start.getTime() + 30 * 60 * 1000);
-  const calendar = CALENDAR_ID === 'primary'
-    ? CalendarApp.getDefaultCalendar()
-    : CalendarApp.getCalendarById(CALENDAR_ID);
+  // What is already in the diary on this date. The website asks this before
+  // it offers any times, so a slot that is taken is never offered at all.
+  if (data.action === 'freebusy') {
+    const dayStart = Utilities.parseDate(data.date + ' 00:00', 'Europe/London', 'yyyy-MM-dd HH:mm');
+    const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+    const busy = calendar_().getEvents(dayStart, dayEnd)
+      // An all-day block is "away", not a 30-minute meeting, so it rules the
+      // whole day out rather than one slot.
+      .filter(function (ev) { return !ev.isAllDayEvent(); })
+      .map(function (ev) {
+        return {
+          start: Utilities.formatDate(ev.getStartTime(), 'Europe/London', "yyyy-MM-dd'T'HH:mm:ss"),
+          end: Utilities.formatDate(ev.getEndTime(), 'Europe/London', "yyyy-MM-dd'T'HH:mm:ss"),
+        };
+      });
+    const allDay = calendar_().getEventsForDay(dayStart)
+      .some(function (ev) { return ev.isAllDayEvent(); });
+    return json_({ ok: true, busy: busy, allDay: allDay });
+  }
 
-  calendar.createEvent(data.title, start, end, { description: data.description });
-  return ContentService.createTextOutput('ok');
+  const start = Utilities.parseDate(data.date + ' ' + data.time, 'Europe/London', 'yyyy-MM-dd HH:mm');
+  const end = new Date(start.getTime() + SLOT_MINUTES * 60 * 1000);
+
+  // THE LOCK IS THE WHOLE POINT. Two people submitting the same slot in the
+  // same second both saw it free on the website, and only a check that is in
+  // the same breath as the write can refuse the second one. Everything before
+  // this is a courtesy; this is the guarantee.
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(20000)) return ContentService.createTextOutput('busy');
+  try {
+    const clash = calendar_().getEvents(start, end)
+      .filter(function (ev) { return !ev.isAllDayEvent(); });
+    if (clash.length) return ContentService.createTextOutput('taken');
+
+    const options = { description: data.description };
+    // An invite, so it is in the visitor's own diary and they get the
+    // reminder. Only when an email came through: createEvent throws on an
+    // empty guest string rather than ignoring it.
+    if (data.guest) {
+      options.guests = data.guest;
+      options.sendInvites = true;
+    }
+    calendar_().createEvent(data.title, start, end, options);
+    return ContentService.createTextOutput('ok');
+  } finally {
+    lock.releaseLock();
+  }
 }
 ```
 
+Three answers now come back from the booking call, and the website treats each
+one differently: `ok`, `taken` (somebody got there first, offer the other
+times) and `busy` (the lock could not be taken in twenty seconds, so try
+again). Anything else is a failure.
+
 ## What it does not do (yet)
 
-- **No invite to the visitor.** The page promises "We'll email to confirm, or
-  suggest another if it's taken", so the event is yours to confirm. To send an
-  invite instead, add `guests: '<their email>', sendInvites: true` to the
-  `createEvent` options and pass the email through from the route.
-- **No live availability.** The six times are fixed (`lib/book-demo.ts`). Two
-  people can pick the same slot; both land in the calendar and you offer one of
-  them another time.
+- **Working hours are not read from the calendar.** The six offered times are
+  still the fixed list in `lib/book-demo.ts`; what the calendar decides is
+  which of them are free. A week where OMH works different hours has to be
+  blocked out in the diary to show on the site.

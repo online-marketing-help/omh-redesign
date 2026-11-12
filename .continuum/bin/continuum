@@ -1,0 +1,557 @@
+#!/bin/sh
+# continuum - durable project state for AI coding sessions.
+# POSIX sh, no dependencies. The CLI owns stamps, appends and brief assembly;
+# the skills own the prose inside the state files.
+
+set -eu
+
+VERSION="1.1.0"
+BRIEF_MAX_BYTES=9000
+
+# ---------------------------------------------------------------- locate root
+
+find_root() {
+  dir=${CONTINUUM_DIR:-}
+  if [ -n "$dir" ]; then
+    printf '%s\n' "$dir"
+    return 0
+  fi
+  dir=$(pwd)
+  while [ "$dir" != "/" ]; do
+    if [ -d "$dir/.continuum" ]; then
+      printf '%s\n' "$dir/.continuum"
+      return 0
+    fi
+    dir=$(dirname "$dir")
+  done
+  return 1
+}
+
+C=""
+PROJECT=""
+resolve() {
+  if ! C=$(find_root); then
+    printf 'continuum: no .continuum/ found. Run `continuum init` in the project root.\n' >&2
+    exit 3
+  fi
+  PROJECT=$(dirname "$C")
+}
+
+now() { date -u +%Y-%m-%dT%H:%M:%SZ; }
+today() { date -u +%Y-%m-%d; }
+
+# ------------------------------------------------------------------- identity
+# One machine runs many projects, so every project carries a stable identity and
+# announces it in the brief. The registry is the cross-project index: it answers
+# "which projects are mid-flight, and what was each one about to do".
+
+CONTINUUM_HOME=${CONTINUUM_HOME:-$HOME/.continuum}
+REGISTRY="$CONTINUUM_HOME/registry.tsv"
+
+slug() {
+  printf '%s' "$1" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g; s/--*/-/g; s/^-//; s/-$//'
+}
+
+# cksum is POSIX, unlike md5/md5sum, and a path fingerprint is all this needs.
+path_hash() {
+  printf '%s' "$1" | cksum | awk '{ printf "%x", $1 }'
+}
+
+cfg_get() {
+  sed -n 's/.*"'"$1"'"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$C/config.json" 2>/dev/null | head -1
+}
+
+project_name() {
+  n=$(cfg_get project)
+  [ -n "$n" ] && printf '%s' "$n" || basename "$PROJECT"
+}
+
+project_id() {
+  id=$(cfg_get id)
+  [ -n "$id" ] && { printf '%s' "$id"; return 0; }
+  printf '%s-%s' "$(slug "$(basename "$PROJECT")")" "$(path_hash "$PROJECT")"
+}
+
+# Registry rows are tab separated, so every field is squeezed to one clean line.
+one_line() { tr '\t\n' '  ' | sed 's/  *$//'; }
+
+open_count() {
+  n=$(grep -cE '^\| T-[0-9]{3} \| (TODO|DOING|BLOCKED) \|' "$C/TASKS.md" 2>/dev/null || true)
+  n=$(printf '%s' "$n" | tr -dc '0-9')
+  printf '%s' "${n:-0}"
+}
+
+next_action() {
+  n=$(grep -m1 '^- next action:' "$C/STATE.md" 2>/dev/null | sed 's/^- next action: //' | one_line)
+  [ -n "$n" ] && printf '%s' "$n" || printf -- '-'
+}
+
+# Upsert this project's row in the global registry.
+register() {
+  mkdir -p "$CONTINUUM_HOME"
+  [ -f "$REGISTRY" ] || printf '# id\tname\tpath\tupdated\topen\tnext\n' > "$REGISTRY"
+  id=$(project_id)
+  row=$(printf '%s\t%s\t%s\t%s\t%s\t%s' \
+    "$id" "$(project_name)" "$PROJECT" "$(now)" "$(open_count)" "$(next_action)")
+  tmp="$REGISTRY.tmp.$$"
+  ID="$id" awk -F'\t' '$1 != ENVIRON["ID"]' "$REGISTRY" > "$tmp"
+  printf '%s\n' "$row" >> "$tmp"
+  mv "$tmp" "$REGISTRY"
+}
+
+git_sha() {
+  if git -C "$PROJECT" rev-parse --short HEAD 2>/dev/null; then :; else printf 'no-git'; fi
+}
+git_branch() {
+  if git -C "$PROJECT" rev-parse --abbrev-ref HEAD 2>/dev/null; then :; else printf '-'; fi
+}
+git_dirty() {
+  if git -C "$PROJECT" rev-parse --git-dir >/dev/null 2>&1; then
+    git -C "$PROJECT" status --porcelain 2>/dev/null | wc -l | tr -d ' '
+  else
+    printf '0'
+  fi
+}
+
+# ------------------------------------------------------------------ templates
+
+tpl_dir() {
+  # templates live next to the installed CLI, or inside .continuum/.templates
+  self=$0
+  case $self in
+    */*) base=$(cd "$(dirname "$self")/.." 2>/dev/null && pwd) ;;
+    *)   base="" ;;
+  esac
+  if [ -n "$base" ] && [ -d "$base/templates" ]; then
+    printf '%s\n' "$base/templates"
+  elif [ -d "${C:-}/.templates" ]; then
+    printf '%s\n' "$C/.templates"
+  else
+    printf '\n'
+  fi
+}
+
+# --------------------------------------------------------------------- init
+
+cmd_init() {
+  root=$(pwd)
+  C="$root/.continuum"
+  PROJECT="$root"
+  # Idempotent: existing files are never overwritten, missing ones are filled in.
+  if [ -f "$C/STATE.md" ] && [ "${1:-}" != "--force" ]; then
+    printf 'continuum: already initialised at %s (nothing to do)\n' "$C"
+    exit 0
+  fi
+  mkdir -p "$C/brain" "$C/journal" "$C/artifacts"
+  t=$(tpl_dir)
+
+  copy_tpl() {
+    src="$1"; dst="$2"
+    [ -f "$dst" ] && return 0
+    if [ -n "$t" ] && [ -f "$t/$src" ]; then
+      cp "$t/$src" "$dst"
+    else
+      printf '# %s\n\n_pending - fill on onboarding._\n' "$(basename "$dst" .md)" > "$dst"
+    fi
+  }
+
+  copy_tpl STATE.md     "$C/STATE.md"
+  copy_tpl NEXT.md      "$C/NEXT.md"
+  copy_tpl TASKS.md     "$C/TASKS.md"
+  copy_tpl DECISIONS.md "$C/DECISIONS.md"
+  for f in 00-overview 01-architecture 02-conventions 03-environment 04-glossary 05-pitfalls; do
+    copy_tpl "brain/$f.md" "$C/brain/$f.md"
+  done
+
+  if [ ! -f "$C/config.json" ]; then
+    name=${CONTINUUM_NAME:-$(basename "$root")}
+    cat > "$C/config.json" <<EOF
+{
+  "version": "$VERSION",
+  "id": "$(slug "$name")-$(path_hash "$root")",
+  "project": "$name",
+  "created": "$(now)",
+  "brief_max_bytes": $BRIEF_MAX_BYTES,
+  "onboarded": false
+}
+EOF
+  fi
+
+  j="$C/journal/$(today).md"
+  [ -f "$j" ] || printf '# Journal %s\n\n' "$(today)" > "$j"
+  printf -- '- %s · init · continuum %s scaffolded\n' "$(now)" "$VERSION" >> "$j"
+
+  stamp "onboarding not run yet - run /continuum"
+  register
+  printf 'continuum: initialised %s\n' "$C"
+  printf 'continuum: project id %s\n' "$(project_id)"
+}
+
+# ------------------------------------------------------------------- stamping
+
+# Rewrites the fenced stamp block in STATE.md.
+stamp() {
+  next=${1:-}
+  s="$C/STATE.md"
+  [ -f "$s" ] || printf '# Project State\n\n<!-- continuum:stamp -->\n<!-- /continuum:stamp -->\n' > "$s"
+  grep -q 'continuum:stamp' "$s" || {
+    tmp="$s.tmp.$$"
+    { printf '<!-- continuum:stamp -->\n<!-- /continuum:stamp -->\n\n'; cat "$s"; } > "$tmp"
+    mv "$tmp" "$s"
+  }
+  count=0
+  if [ -f "$C/.checkpoints" ]; then count=$(cat "$C/.checkpoints"); fi
+  block=$(printf -- '<!-- continuum:stamp -->\n- updated: %s\n- git: %s on %s (%s uncommitted files)\n- checkpoints: %s\n- next action: %s\n<!-- /continuum:stamp -->' \
+    "$(now)" "$(git_sha)" "$(git_branch)" "$(git_dirty)" "$count" "${next:-see NEXT.md}")
+
+  tmp="$s.tmp.$$"
+  BLOCK="$block" awk '
+    /<!-- continuum:stamp -->/ { print ENVIRON["BLOCK"]; skip=1; next }
+    /<!-- \/continuum:stamp -->/ { skip=0; next }
+    skip != 1 { print }
+  ' "$s" > "$tmp"
+  mv "$tmp" "$s"
+
+  printf '%s' "$(git_sha)" > "$C/.last-sha"
+}
+
+cmd_checkpoint() {
+  resolve
+  next=${1:-}
+  n=0
+  [ -f "$C/.checkpoints" ] && n=$(cat "$C/.checkpoints")
+  n=$((n + 1))
+  printf '%s' "$n" > "$C/.checkpoints"
+  stamp "$next"
+  register
+  jlog "checkpoint #$n${next:+ · next: $next}"
+  printf 'continuum: checkpoint #%s recorded (%s)\n' "$n" "$(git_sha)"
+}
+
+# -------------------------------------------------------------------- journal
+
+jlog() {
+  j="$C/journal/$(today).md"
+  [ -f "$j" ] || printf '# Journal %s\n\n' "$(today)" > "$j"
+  printf -- '- %s · %s\n' "$(now)" "$1" >> "$j"
+}
+
+cmd_log() {
+  resolve
+  [ $# -ge 1 ] || { printf 'usage: continuum log "<line>"\n' >&2; exit 2; }
+  jlog "$*"
+  printf 'continuum: logged\n'
+}
+
+# ---------------------------------------------------------------------- tasks
+
+next_task_id() {
+  # Only real table rows count: the file's own prose contains example IDs.
+  last=$(grep -E '^\| T-[0-9]{3} \|' "$C/TASKS.md" 2>/dev/null | grep -oE 'T-[0-9]{3}' | sort | tail -1 || true)
+  if [ -z "$last" ]; then
+    printf 'T-001'
+  else
+    num=$(printf '%s' "$last" | sed 's/T-//' | sed 's/^0*//')
+    [ -z "$num" ] && num=0
+    printf 'T-%03d' $((num + 1))
+  fi
+}
+
+cmd_task() {
+  resolve
+  sub=${1:-list}; shift 2>/dev/null || true
+  f="$C/TASKS.md"
+  [ -f "$f" ] || printf '# Tasks\n\n| ID | Status | Task | Evidence |\n|---|---|---|---|\n' > "$f"
+  case $sub in
+    add)
+      [ $# -ge 1 ] || { printf 'usage: continuum task add "<task>"\n' >&2; exit 2; }
+      id=$(next_task_id)
+      printf '| %s | TODO | %s | - |\n' "$id" "$*" >> "$f"
+      jlog "task $id added · $*"
+      printf '%s\n' "$id"
+      ;;
+    start|done|block|drop)
+      [ $# -ge 1 ] || { printf 'usage: continuum task %s <ID> [evidence]\n' "$sub" >&2; exit 2; }
+      id=$1; shift
+      case $sub in
+        start) st=DOING ;;
+        done)  st=DONE ;;
+        block) st=BLOCKED ;;
+        drop)  st=DROPPED ;;
+      esac
+      ev=${*:-}
+      grep -q "| $id |" "$f" || { printf 'continuum: no such task %s\n' "$id" >&2; exit 1; }
+      if [ "$st" = DONE ] && [ -z "$ev" ]; then
+        printf 'continuum: refusing to mark %s DONE without evidence.\n  usage: continuum task done %s "<command run + observed result>"\n' "$id" "$id" >&2
+        exit 4
+      fi
+      tmp="$f.tmp.$$"
+      ID="$id" ST="$st" EV="$ev" awk -F'|' '
+        BEGIN { OFS="|" }
+        {
+          line=$0
+          if (index(line, "| " ENVIRON["ID"] " |") == 1) {
+            n=split(line, c, "|")
+            c[3]=" " ENVIRON["ST"] " "
+            if (ENVIRON["EV"] != "") c[5]=" " ENVIRON["EV"] " "
+            out=""
+            for (i=1; i<=n; i++) out = out c[i] (i<n ? "|" : "")
+            print out
+            next
+          }
+          print line
+        }
+      ' "$f" > "$tmp"
+      mv "$tmp" "$f"
+      jlog "task $id -> $st${ev:+ · $ev}"
+      printf 'continuum: %s -> %s\n' "$id" "$st"
+      ;;
+    list)
+      grep -E '^\| T-[0-9]{3} \|' "$f" 2>/dev/null || printf '(no tasks)\n'
+      ;;
+    open)
+      grep -E '^\| T-[0-9]{3} \| (TODO|DOING|BLOCKED) \|' "$f" 2>/dev/null || printf '(no open tasks)\n'
+      ;;
+    *)
+      printf 'usage: continuum task {add|start|done|block|drop|list|open}\n' >&2; exit 2 ;;
+  esac
+}
+
+# ---------------------------------------------------------------------- brief
+
+strip_stamp() {
+  awk '
+    /<!-- continuum:stamp -->/ { inb=1 }
+    inb != 1 { print }
+    /<!-- \/continuum:stamp -->/ { inb=0 }
+  ' "$1"
+}
+
+cmd_brief() {
+  resolve
+  {
+    printf '=== CONTINUUM RESUME BRIEF ===\n'
+    printf 'project : %s\n' "$(project_name)"
+    printf 'id      : %s\n' "$(project_id)"
+    printf 'root    : %s\n' "$PROJECT"
+    printf 'repo    : %s on %s\n' "$(git_sha)" "$(git_branch)"
+    printf 'as of   : %s\n' "$(now)"
+    printf '\nThis project carries durable state in .continuum/. Treat the brief below as\n'
+    printf 'established fact about the project. Do not ask the user to re-explain it.\n'
+    printf 'When naming the project back to the user, use the name above, not a guess\n'
+    printf 'from the directory path. Other projects on this machine have their own state;\n'
+    printf '`continuum projects` lists them and never mix their notes into this one.\n'
+
+    if [ -f "$C/STATE.md" ]; then
+      printf '\n--- STATE ---\n'
+      sed -n '1,120p' "$C/STATE.md" | sed 's/^<!-- \/\?continuum:stamp -->$//' | sed '/^$/N;/^\n$/D'
+    fi
+
+    if [ -f "$C/NEXT.md" ]; then
+      printf '\n--- NEXT (resume contract: start here) ---\n'
+      sed -n '1,60p' "$C/NEXT.md"
+    fi
+
+    printf '\n--- OPEN TASKS ---\n'
+    if [ -f "$C/TASKS.md" ]; then
+      grep -E '^\| T-[0-9]{3} \| (DOING|BLOCKED|TODO) \|' "$C/TASKS.md" 2>/dev/null | head -14 || printf '(none)\n'
+    else
+      printf '(none)\n'
+    fi
+
+    printf '\n--- DRIFT SINCE LAST CHECKPOINT ---\n'
+    last=""
+    [ -f "$C/.last-sha" ] && last=$(cat "$C/.last-sha")
+    if [ -n "$last" ] && [ "$last" != "no-git" ] && git -C "$PROJECT" rev-parse --git-dir >/dev/null 2>&1; then
+      if git -C "$PROJECT" cat-file -e "$last" 2>/dev/null; then
+        n=$(git -C "$PROJECT" rev-list --count "$last"..HEAD 2>/dev/null || printf '0')
+        if [ "$n" = "0" ]; then
+          printf 'No commits since last checkpoint (%s).\n' "$last"
+        else
+          printf '%s commit(s) landed since last checkpoint (%s) - state may be stale:\n' "$n" "$last"
+          git -C "$PROJECT" log --oneline "$last"..HEAD 2>/dev/null | head -10
+        fi
+      else
+        printf 'Recorded sha %s is not in this repo (rebase/clone?) - re-verify state.\n' "$last"
+      fi
+    else
+      printf 'No git baseline recorded.\n'
+    fi
+    d=$(git_dirty)
+    [ "$d" != "0" ] && printf '%s uncommitted file(s) in the working tree.\n' "$d"
+
+    newest=$(ls -1 "$C/journal" 2>/dev/null | sort | tail -1 || true)
+    if [ -n "$newest" ]; then
+      printf '\n--- JOURNAL TAIL (%s) ---\n' "$newest"
+      tail -14 "$C/journal/$newest"
+    fi
+
+    printf '\n--- BRAIN (read on demand, do not re-derive) ---\n'
+    for f in "$C"/brain/*.md; do
+      [ -f "$f" ] || continue
+      first=$(grep -m1 '^#' "$f" 2>/dev/null | sed 's/^#* *//')
+      printf '%s - %s\n' ".continuum/brain/$(basename "$f")" "${first:-untitled}"
+    done
+
+    printf '\nRules: checkpoint after every completed unit of work (`continuum checkpoint "<next action>"`);\n'
+    printf 'never mark a task DONE without evidence; rewrite NEXT.md before the session ends.\n'
+    printf '=== END BRIEF ===\n'
+  } | head -c "$BRIEF_MAX_BYTES"
+}
+
+# --------------------------------------------------------------------- doctor
+
+cmd_doctor() {
+  resolve
+  rc=0
+  printf 'continuum %s · %s\n' "$VERSION" "$C"
+  for f in STATE.md NEXT.md TASKS.md DECISIONS.md config.json; do
+    if [ -f "$C/$f" ]; then printf '  ok    %s\n' "$f"; else printf '  MISS  %s\n' "$f"; rc=1; fi
+  done
+  n=$(ls -1 "$C"/brain/*.md 2>/dev/null | wc -l | tr -d ' ')
+  printf '  ok    brain/ (%s files)\n' "$n"
+  pending=$(grep -l '_pending' "$C"/brain/*.md 2>/dev/null | wc -l | tr -d ' ')
+  [ "$pending" != "0" ] && { printf '  WARN  %s brain file(s) still pending - run /continuum onboarding\n' "$pending"; rc=1; }
+  if [ -f "$C/STATE.md" ]; then
+    u=$(grep -m1 '^- updated:' "$C/STATE.md" | sed 's/^- updated: //')
+    printf '  ok    last checkpoint: %s\n' "${u:-never}"
+  fi
+  printf '  ok    open tasks: %s\n' "$(open_count)"
+  if [ -f "$PROJECT/.claude/settings.json" ] && grep -q continuum "$PROJECT/.claude/settings.json" 2>/dev/null; then
+    printf '  ok    hooks wired in .claude/settings.json\n'
+  else
+    printf '  WARN  SessionStart hook not found - resume will not be automatic\n'
+    rc=1
+  fi
+  exit $rc
+}
+
+cmd_status() {
+  resolve
+  sed -n '/continuum:stamp/,/\/continuum:stamp/p' "$C/STATE.md" 2>/dev/null | sed 's/<!--.*-->//' | sed '/^$/d'
+  printf -- '--- open ---\n'
+  grep -E '^\| T-[0-9]{3} \| (DOING|TODO|BLOCKED) \|' "$C/TASKS.md" 2>/dev/null | head -10 || printf '(none)\n'
+}
+
+# ------------------------------------------------------- cross-project identity
+
+cmd_where() {
+  resolve
+  printf 'project : %s\n' "$(project_name)"
+  printf 'id      : %s\n' "$(project_id)"
+  printf 'root    : %s\n' "$PROJECT"
+  printf 'cwd     : %s\n' "$(pwd)"
+  printf 'repo    : %s on %s (%s uncommitted)\n' "$(git_sha)" "$(git_branch)" "$(git_dirty)"
+  printf 'state   : %s\n' "$(grep -m1 '^- updated:' "$C/STATE.md" 2>/dev/null | sed 's/^- updated: //')"
+  printf 'open    : %s task(s)\n' "$(open_count)"
+  printf 'next    : %s\n' "$(next_action)"
+}
+
+cmd_projects() {
+  if [ ! -f "$REGISTRY" ]; then
+    printf 'continuum: no projects registered yet (%s)\n' "$REGISTRY"
+    exit 0
+  fi
+  here=""
+  if C=$(find_root 2>/dev/null); then PROJECT=$(dirname "$C"); here=$(project_id); fi
+  printf '%-3s %-26s %-20s %-5s %s\n' '' 'PROJECT' 'UPDATED' 'OPEN' 'NEXT ACTION'
+  HERE="$here" awk -F'\t' '
+    /^#/ { next }
+    NF >= 6 {
+      mark = ($1 == ENVIRON["HERE"]) ? "->" : "  "
+      printf "%-3s %-26s %-20s %-5s %s\n", mark, substr($2,1,26), substr($4,1,19), $5, substr($6,1,60)
+    }
+  ' "$REGISTRY" | sort -k3 -r
+  printf '\nRegistry: %s\n' "$REGISTRY"
+  printf 'Resolve one with: continuum switch <project-name-or-id>\n'
+}
+
+cmd_switch() {
+  [ $# -ge 1 ] || { printf 'usage: continuum switch <project-name-or-id>\n' >&2; exit 2; }
+  [ -f "$REGISTRY" ] || { printf 'continuum: no registry at %s\n' "$REGISTRY" >&2; exit 3; }
+  q=$1
+  match=$(Q="$q" awk -F'\t' '
+    /^#/ { next }
+    NF >= 3 {
+      q = tolower(ENVIRON["Q"])
+      if (tolower($1) == q || tolower($2) == q) { print $0; exit }
+    }
+  ' "$REGISTRY")
+  if [ -z "$match" ]; then
+    match=$(Q="$q" awk -F'\t' '
+      /^#/ { next }
+      NF >= 3 { if (index(tolower($2), tolower(ENVIRON["Q"])) > 0) { print $0; exit } }
+    ' "$REGISTRY")
+  fi
+  [ -n "$match" ] || { printf 'continuum: no registered project matching "%s"\n' "$q" >&2; exit 1; }
+  p=$(printf '%s' "$match" | cut -f3)
+  [ -d "$p/.continuum" ] || { printf 'continuum: registered path is gone: %s\n' "$p" >&2; exit 1; }
+  printf '%s\n' "$p"
+  CONTINUUM_DIR="$p/.continuum" "$0" brief
+}
+
+cmd_rename() {
+  resolve
+  [ $# -ge 1 ] || { printf 'usage: continuum rename "<display name>"\n' >&2; exit 2; }
+  new=$*
+  tmp="$C/config.json.tmp.$$"
+  NEW="$new" awk '
+    /"project"[[:space:]]*:/ { sub(/:[[:space:]]*"[^"]*"/, ": \"" ENVIRON["NEW"] "\""); print; next }
+    { print }
+  ' "$C/config.json" > "$tmp"
+  mv "$tmp" "$C/config.json"
+  register
+  jlog "project renamed to $new"
+  printf 'continuum: project is now "%s" (id %s, unchanged)\n' "$(project_name)" "$(project_id)"
+}
+
+cmd_help() {
+  cat <<'EOF'
+continuum - durable project state for AI coding sessions
+
+  continuum init [--force]        scaffold .continuum/ in the current directory
+  continuum brief                 print the resume brief (used by the SessionStart hook)
+  continuum checkpoint "<next>"   stamp state + journal a checkpoint
+  continuum log "<line>"          append a line to today's journal
+  continuum task add "<task>"     create a task, prints its ID
+  continuum task start <ID>
+  continuum task done <ID> "<evidence>"   refuses without evidence
+  continuum task block <ID> "<why>"
+  continuum task {list|open}
+  continuum status                short state + open tasks
+  continuum doctor                health and drift check (exit 1 if degraded)
+
+Across projects:
+  continuum where                 which project am I in, and what was it doing
+  continuum projects              every registered project, newest first
+  continuum switch <name|id>      resolve a project: prints its path, then its brief
+  continuum rename "<name>"       change the display name (id stays stable)
+  continuum version
+
+Env: CONTINUUM_DIR overrides state location.
+     CONTINUUM_HOME overrides the registry location (default ~/.continuum).
+     CONTINUUM_NAME sets the display name at init time.
+EOF
+}
+
+main() {
+  cmd=${1:-help}; shift 2>/dev/null || true
+  case $cmd in
+    init)       cmd_init "$@" ;;
+    brief)      cmd_brief ;;
+    checkpoint) cmd_checkpoint "$@" ;;
+    log)        cmd_log "$@" ;;
+    task)       cmd_task "$@" ;;
+    status)     cmd_status ;;
+    doctor)     cmd_doctor ;;
+    where|id)   cmd_where ;;
+    projects|ls) cmd_projects ;;
+    switch)     cmd_switch "$@" ;;
+    rename)     cmd_rename "$@" ;;
+    version|--version|-v) printf 'continuum %s\n' "$VERSION" ;;
+    help|--help|-h) cmd_help ;;
+    *) printf 'continuum: unknown command %s\n' "$cmd" >&2; cmd_help >&2; exit 2 ;;
+  esac
+}
+
+main "$@"
