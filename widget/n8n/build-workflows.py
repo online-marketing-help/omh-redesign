@@ -52,6 +52,12 @@ OPENROUTER_CRED = {
     # does not know and the node silently runs without auth.
     "openRouterApi": {"id": "Sj2vuK21qAcp0hJj", "name": "OpenRouter — OMH Site Assistant"}
 }
+# A plain HTTP call to OpenRouter, for describing a photo. The langchain
+# credential above only works on langchain nodes, and describing an image is
+# one request rather than an agent, so it goes through httpRequest with the
+# key in a header. Same account, same bill.
+OPENROUTER_KEY = env["OPENROUTER_API_KEY"]
+
 CHAT_MODEL = "anthropic/claude-haiku-5.5"      # $0.10 / $0.50 per 1M, 1M context
 CHAT_MODEL_FALLBACK = "openai/gpt-4o-mini"     # different vendor, so one outage is not both
 
@@ -249,8 +255,14 @@ def build_chat():
         {"parameters": {"jsCode": (
             "// What we already know about this visitor is prepended to the turn so\n"
             "// the agent never asks for a detail it has already been given.\n"
+            "//\n"
+            "// Read from NAMED nodes, not from $input: this node is reached from\n"
+            "// two branches now (with a photo and without), so whatever arrives on\n"
+            "// the wire is whichever branch ran, and the profile has to be asked\n"
+            "// for by name either way.\n"
             "const wh = $('Chat Webhook').first().json.body;\n"
-            "const p = $input.first().json || {};\n"
+            "let p = {};\n"
+            "try { p = $('Load Profile').first().json || {}; } catch (e) { p = {}; }\n"
             "const known = [];\n"
             "if (p.name) known.push('name: ' + p.name);\n"
             "if (p.email) known.push('email: ' + p.email);\n"
@@ -264,10 +276,82 @@ def build_chat():
             "  ? 'ALREADY KNOWN ABOUT THIS VISITOR (do not ask again): ' + known.join(' | ') + '\\n\\n'\n"
             "  : '';\n"
             "const page = wh.page_url ? 'They are on this page: ' + wh.page_url + '\\n\\n' : '';\n"
-            "return [{ json: { chat_input: hint + page + 'Visitor says: ' + (wh.message || '') } }];"
+            "// What the photo showed, when there was one. Asked for by name and\n"
+            "// in a try, because the describing branch does not run on an\n"
+            "// ordinary turn and referencing a node that did not run throws.\n"
+            "let photo = '';\n"
+            "try { photo = $('Describe The Photo').first().json.note || ''; } catch (e) { photo = ''; }\n"
+            "if (photo) photo += '\\n\\n';\n"
+            "return [{ json: { chat_input: hint + page + photo + 'Visitor says: ' + (wh.message || '') } }];"
         )},
          "id": "build_ctx", "name": "Build Context",
          "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [-380, 0]},
+
+        # ----------------------------------------------- the photo path
+
+        {"parameters": {"conditions": {
+            "options": {"caseSensitive": True, "leftValue": "", "typeValidation": "loose",
+                        "version": 2},
+            "conditions": [{
+                "id": "has_image",
+                "leftValue": "={{ $('Chat Webhook').first().json.body.attachment ? $('Chat Webhook').first().json.body.attachment.kind : '' }}",
+                "rightValue": "image",
+                "operator": {"type": "string", "operation": "equals"},
+            }],
+            "combinator": "and",
+         }, "options": {}},
+         "id": "has_photo", "name": "Did They Send A Photo",
+         "type": "n8n-nodes-base.if", "typeVersion": 2.2, "position": [-480, 0]},
+
+        # The widget sends a storage id, never a URL. Resolving it here is
+        # the whole point: a workflow fetching an address chosen in a browser
+        # is server-side request forgery, and Convex refuses an id that is
+        # not already in a conversation.
+        convex_http("photo_url", "Where Is The Photo", "/attachment/urlFor",
+                    "={{ JSON.stringify({ storageId: $('Chat Webhook').first().json.body.attachment.storageId }) }}",
+                    -340, -220),
+
+        {"parameters": {
+            "method": "POST",
+            "url": "https://openrouter.ai/api/v1/chat/completions",
+            "sendHeaders": True,
+            "headerParameters": {"parameters": [
+                {"name": "authorization", "value": "Bearer " + OPENROUTER_KEY},
+                {"name": "content-type", "value": "application/json"},
+            ]},
+            "sendBody": True, "specifyBody": "json",
+            "jsonBody": "={{ JSON.stringify($json.body) }}",
+            "options": {"timeout": 30000},
+         },
+         "id": "photo_look", "name": "Look At The Photo",
+         "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2,
+         "position": [-60, -220],
+         # A photo we cannot look at must not take the conversation down
+         # with it. The describing node turns a failure into an honest
+         # sentence.
+         "onError": "continueRegularOutput"},
+
+        {"parameters": {"jsCode": (
+            gate_inline("vision.js") + "\n"
+            "// Build the request. The URL came from Convex, which only\n"
+            "// answers for a file already in a conversation.\n"
+            "const r = $input.first().json || {};\n"
+            "if (!r.ok || !r.url) return [{ json: { body: null, skip: true } }];\n"
+            "return [{ json: { body: visionRequest(r.url, '') } }];"
+        )},
+         "id": "photo_ask", "name": "Ask What It Shows",
+         "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [-200, -220]},
+
+        {"parameters": {"jsCode": (
+            gate_inline("vision.js") + "\n"
+            "// What came back, turned into a sentence for the agent. A\n"
+            "// failure gets an honest one rather than none: somebody just\n"
+            "// sent a photo and silence is not an answer.\n"
+            "const d = describeFrom($input.first().json);\n"
+            "return [{ json: { note: d.prompt, saw: d.ok, why: d.why } }];"
+        )},
+         "id": "photo_note", "name": "Describe The Photo",
+         "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [80, -220]},
 
         {"parameters": {"promptType": "define", "text": "={{ $json.chat_input }}",
                         "needsFallback": True,
@@ -344,7 +428,16 @@ def build_chat():
     conns = {
         "Chat Webhook": {"main": [[{"node": "Log User Message", "type": "main", "index": 0},
                                    {"node": "Load Profile", "type": "main", "index": 0}]]},
-        "Load Profile": {"main": [[{"node": "Build Context", "type": "main", "index": 0}]]},
+        "Load Profile": {"main": [[{"node": "Did They Send A Photo", "type": "main", "index": 0}]]},
+        # True goes the long way round and ends at the same place.
+        "Did They Send A Photo": {"main": [
+            [{"node": "Where Is The Photo", "type": "main", "index": 0}],
+            [{"node": "Build Context", "type": "main", "index": 0}],
+        ]},
+        "Where Is The Photo": {"main": [[{"node": "Ask What It Shows", "type": "main", "index": 0}]]},
+        "Ask What It Shows": {"main": [[{"node": "Look At The Photo", "type": "main", "index": 0}]]},
+        "Look At The Photo": {"main": [[{"node": "Describe The Photo", "type": "main", "index": 0}]]},
+        "Describe The Photo": {"main": [[{"node": "Build Context", "type": "main", "index": 0}]]},
         "Build Context": {"main": [[{"node": "Melissa", "type": "main", "index": 0}]]},
         "Melissa": {"main": [[{"node": "Clean Reply", "type": "main", "index": 0}],
                           [{"node": "Agent Unavailable", "type": "main", "index": 0}]]},

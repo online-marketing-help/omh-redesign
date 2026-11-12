@@ -982,7 +982,20 @@ http.route({
   ),
 });
 
-/* There is deliberately no route here for reading one back. The dashboard
+/* A URL for a stored file, for n8n. `01-chat` has a storage id and needs to
+   show the picture to a vision model; the widget must not hand over a URL,
+   because a workflow fetching an address a stranger chose is the forgery
+   `checkRemote` exists to stop. The query refuses an id that is not already
+   in a conversation. */
+http.route({
+  path: "/attachment/urlFor",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runQuery(api.attachments.urlFor, { storageId: b.storageId }),
+  ),
+});
+
+/* There is deliberately no PUBLIC route for reading one back. The dashboard
    gets a URL for each attachment from `/handover/thread`, which already
    knows which messages have one; a second route per photo would be the same
    answer, fetched again, behind the same secret. */

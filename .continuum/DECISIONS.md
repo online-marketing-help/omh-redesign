@@ -86,3 +86,28 @@ alternative. Not here: formatting, naming, anything the linter settles.
 - **Enforced structurally:** a `call` step exists only in routes B and E. C,
   D and F have none, so an automated marketing call is not reachable by a
   configuration mistake. A test asserts it.
+
+---
+
+## D-006 - A photo is described first, then handed to the agent as text
+
+- **Date:** 2026-11-12
+- **Decision:** when a visitor sends a photo, a separate OpenRouter call
+  describes it, and the description goes into the agent's turn as text. The
+  agent itself stays a text agent.
+- **Because:** the n8n agent node takes a string prompt. Making it carry an
+  image content array means fighting the node, and the agent's tools, memory
+  and system prompt all work. One extra call buys leaving all of that alone.
+- **Cost, measured not guessed:** $0.0001331 per photo on
+  `anthropic/claude-haiku-5.5`, 806 prompt tokens and 105 completion, on a
+  100KB image. About 7,500 photos per dollar. Only images are sent; a voice
+  note is not, because that is a paid call that can only fail.
+- **The description is untrusted text.** It is written by a model reading a
+  stranger's picture and then placed inside a prompt, so it is fenced and
+  labelled as something the visitor sent rather than as an instruction.
+  Somebody will eventually photograph a sign saying "ignore your
+  instructions". `gates/vision.js`, asserted.
+- **The widget sends a storage id, never a URL.** Convex resolves it, and
+  refuses an id that is not already in a conversation. A workflow fetching
+  an address chosen in a browser is the forgery `checkRemote` exists to
+  prevent, and it is no better coming from our own page.

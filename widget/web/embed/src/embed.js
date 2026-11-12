@@ -986,11 +986,67 @@ button,input{font:inherit;color:inherit;margin:0}
           msg.att.pending = false;
           state.uploading = false;
           render();
+
+          /* And now ask for an answer.
+
+             Without this the file was stored, shown, and met with silence:
+             the assistant was never told anything had arrived. A visitor
+             who sends a photo of the thing they are asking about and gets
+             no reply assumes the whole widget is broken. */
+          askAboutFile(v.kind, (d.attachment && d.attachment.storageId) || null);
         })
         .catch(function (e) { fail(String((e && e.message) || "")); });
     }).catch(function () {
       note("I could not read that file. Could you try another?");
     });
+  }
+
+  /* The turn that follows an upload.
+
+     The storage id goes up, never a URL: the server resolves it. Handing a
+     workflow an address chosen in the browser is the forgery the Meta path
+     is careful about, and it would be no better coming from here. */
+  function askAboutFile(kind, storageId) {
+    /* While a person has the conversation the assistant must not answer
+       over them. They can see the photo in the thread; that is enough. */
+    if (state.handover === "waiting" || state.handover === "live") return;
+
+    state.sending = true;
+    render();
+
+    fetch(CHAT_URL, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        session_id: sess,
+        visitor_id: visitor,
+        message: kind === "audio" ? "[voice note]" : "[photo]",
+        attachment: { storageId: storageId, kind: kind },
+        page_url: location.href,
+      }),
+    })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        state.msgs.push({
+          role: "assistant",
+          text:
+            (d && d.reply) ||
+            (kind === "audio"
+              ? "Thanks. I cannot listen to voice notes yet, but the team can. What is it about?"
+              : "Thanks. I could not open that one. Could you tell me what it shows?"),
+        });
+      })
+      .catch(function () {
+        state.msgs.push({
+          role: "assistant",
+          text: "Thanks for that. Tell me what you would like me to look at and I will help.",
+        });
+      })
+      .then(function () {
+        state.sending = false;
+        render();
+        pollNow();
+      });
   }
 
   clipBtn.addEventListener("click", function () { fileInput.click(); });

@@ -58,7 +58,7 @@ other developer deploys from it.
     "Won" chosen, £2400 entered - then read back out of Convex:
     `outcome: won, valueGbp: 2400`. All screens clean at 1440 and 390.
 
-- [ ] **F3** - The assistant reads the photo
+- [x] **F3** - The assistant reads the photo
   - The widget already uploads and the dashboard already shows it. What is
     missing is the turn: when a message carries an image, the chat workflow
     has to pass it to the model, which already takes images.
@@ -71,8 +71,26 @@ other developer deploys from it.
   - Evidence: send a real photo through the live widget and read the
     assistant's reply; it has to say something only the picture could tell
     it.
-  - **Cost:** every image turn is a vision call. Measure one and write the
-    figure down before this is left switched on.
+  - **Done 2026-11-12, and the gap was bigger than the plan said.** The
+    widget never requested a chat turn after an upload at all, so a photo
+    was stored, shown on the dashboard, and met with silence. Three parts:
+    the widget now asks for a reply; Convex resolves a storage id to a URL
+    for n8n (refusing any id not already in a conversation, so it is not an
+    oracle); and `01-chat` gained a branch that describes the picture and
+    feeds the description to the agent as text.
+  - `gates/vision.js` + 34 assertions, including that only an image is sent
+    to a vision model, that a failure says "I could not see it" rather than
+    inventing a description, and that the description is fenced as a
+    quotation because a photograph of a sign saying "ignore your
+    instructions" is the obvious attack.
+  - All four new Code node cases driven through `new Function` BEFORE the
+    push, per the rule. The push then broke nothing: a text turn still
+    answered with real prices.
+  - Live evidence: a real photo uploaded through the live routes and the
+    assistant replied "a decorated cake with white frosting and some
+    greenery", which is what the file is.
+  - **Cost, measured:** $0.0001331 per photo, 806 prompt tokens and 105
+    completion. About 7,500 photos per dollar.
 
 - [ ] **F4** - Decide what happens to a voice note
   - NOT a build task yet. A one-page answer to: transcribe with what, at what

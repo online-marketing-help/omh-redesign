@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, action, internalMutation } from "./_generated/server";
+import { mutation, action, internalMutation, query } from "./_generated/server";
 import { api } from "./_generated/api";
 import { bump } from "./functions";
 import { verifyStored, LIMITS } from "../gates/attachments.js";
@@ -244,5 +244,40 @@ export const sweepOrphans = internalMutation({
       deleted++;
     }
     return { looked: files.length, deleted };
+  },
+});
+
+/**
+ * A URL for a stored file, for the server side.
+ *
+ * `01-chat` needs this: the widget tells it a storage id and it has to show
+ * the picture to a vision model. The widget cannot simply hand over a URL,
+ * because then a workflow would be fetching an address a stranger chose,
+ * which is the server-side request forgery `checkRemote` exists to prevent.
+ * An id is safe where a URL is not: this resolves it.
+ *
+ * **Only for a file that is already in a conversation.** Without that check
+ * this would answer for any id at all, which turns a guessed id into
+ * somebody else's photo. A file that has not been attached yet has no
+ * business being shown to anything.
+ */
+export const urlFor = query({
+  args: { storageId: v.id("_storage") },
+  handler: async (ctx, { storageId }) => {
+    const used = await ctx.db
+      .query("messages")
+      .withIndex("by_attachment", (i) => i.eq("attachment.storageId", storageId))
+      .first();
+    if (!used) return { ok: false as const, why: "not_attached" };
+
+    const url = await ctx.storage.getUrl(storageId);
+    if (!url) return { ok: false as const, why: "gone" };
+    return {
+      ok: true as const,
+      url,
+      kind: used.attachment?.kind ?? "image",
+      type: used.attachment?.type ?? "",
+      sessionId: used.sessionId,
+    };
   },
 });
