@@ -166,7 +166,11 @@ function SignOut() {
   );
 }
 
-function Rail({
+/* Exported so the loading state can render the real rail rather than a
+   copy of it. A second hand-maintained rail would drift from this one, and
+   the copy in the loading state is the one nobody would notice had
+   drifted. */
+export function Rail({
   active,
   counts,
   urgent,
