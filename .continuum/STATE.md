@@ -1,10 +1,10 @@
 # Project State
 
 <!-- continuum:stamp -->
-- updated: 2026-11-12T13:13:46Z
-- git: 14c91f9 on finish-system-attachments-history (4 uncommitted files)
-- checkpoints: 1
-- next action: Review fixes landed; two deployments pending with Rafiul
+- updated: 2026-11-12T13:19:08Z
+- git: e9f6157 on finish-system-attachments-history (10 uncommitted files)
+- checkpoints: 2
+- next action: Brain filled, 4 tasks open; next session resumes from NEXT.md
 <!-- /continuum:stamp -->
 
 > Single source of truth for "where are we". Rewritten, not appended to.
