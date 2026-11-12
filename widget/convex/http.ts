@@ -928,6 +928,19 @@ http.route({
   }),
 });
 
+/* A reply that came by email.
+
+   `12-email-inbound` reads the mailbox OMH already sends from and posts
+   each message here. Everything that decides whether it counts is in
+   gates/email-reply.js and convex/email.ts; this is only the door. */
+http.route({
+  path: "/email/inbound",
+  method: "POST",
+  handler: route(async (ctx, b) =>
+    ctx.runMutation(api.email.emailReplyArrived, { message: b.message ?? b }),
+  ),
+});
+
 /* ------------------------------------------------------- attachments
 
    One door today, two planned.

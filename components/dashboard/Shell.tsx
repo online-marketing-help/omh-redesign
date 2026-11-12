@@ -3,6 +3,7 @@ import { NAV_ICON, IconSignOut } from "./icons";
 import { getInbox } from "@/lib/dashboard/handover";
 import { dashboardLocked } from "@/lib/dashboard/auth";
 import { signOut } from "@/app/lead-dashboard/login/actions";
+import { TABS } from "@/lib/dashboard/screens";
 
 /* The frame every dashboard screen sits in.
 
@@ -19,33 +20,6 @@ import { signOut } from "@/app/lead-dashboard/login/actions";
    Below 1024px the rail becomes a scrollable row of tabs at the top, because
    a 248px rail on a laptop in a meeting room is fine and on a phone is not. */
 
-const TABS = [
-  { href: "/lead-dashboard", label: "Overview" },
-  /* Second, directly under Overview: it is the only screen with someone
-     waiting on the other end, so it is the one worth seeing first. */
-  { href: "/lead-dashboard/handover", label: "Needs a person" },
-  /* Every channel in one list. Second after the queue because it is the
-     screen a business would leave open all day. */
-  { href: "/lead-dashboard/inbox", label: "Inbox" },
-  { href: "/lead-dashboard/calls", label: "Calls" },
-  /* Conversations is not a separate entry. It was the same subject as the
-     Inbox at a different grain, one row per person instead of one per
-     message, and two entries for that read as two screens that happened to
-     look alike. It is a toggle inside the Inbox now; the route still works
-     and still carries every link pointing at it. */
-  { href: "/lead-dashboard/leads", label: "Leads" },
-  { href: "/lead-dashboard/bookings", label: "Appointments" },
-  /* The routing screens. Below the record of what happened, because they are
-     about what is about to happen, which is checked less often but matters
-     more when it is wrong. */
-  { href: "/lead-dashboard/sequences", label: "Follow-ups" },
-  /* Beside Follow-ups rather than beside Channels: a campaign is a batch of
-     follow-ups started on purpose, and the two screens are read together when
-     one is running. */
-  { href: "/lead-dashboard/campaigns", label: "Campaigns" },
-  { href: "/lead-dashboard/channels", label: "Channels" },
-  { href: "/lead-dashboard/settings", label: "Settings" },
-] as const;
 
 export async function Shell({
   children,

@@ -76,21 +76,26 @@ export function CampaignStart({
     }
     start(async () => {
       setResult(
-        await attempt(() =>
-          startCampaign(
-            name,
-            accepted.map((p) => ({
-            name: p.name,
-            email: p.email,
-            phone: p.phone,
-            company: p.company,
-            service: p.service,
-            consentBasis: p.consentBasis,
-            consentEvidence: p.consentEvidence,
-            lastBoughtAt: p.lastBoughtAt,
-          })),
-            note,
-          ),
+        await attempt(
+          () =>
+            startCampaign(
+              name,
+              accepted.map((q) => ({
+                name: q.name,
+                email: q.email,
+                phone: q.phone,
+                company: q.company,
+                service: q.service,
+                consentBasis: q.consentBasis,
+                consentEvidence: q.consentEvidence,
+                lastBoughtAt: q.lastBoughtAt,
+              })),
+              note,
+            ),
+          /* Starting a campaign enrols people and sends them a message.
+             If the response is lost, the enrolment may still have
+             happened, and "try again" would contact everybody twice. */
+          "sends",
         ),
       );
     });

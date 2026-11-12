@@ -63,12 +63,21 @@ export function NoShowButton({
             return;
           }
           start(async () => {
-            const r = await attempt(() => markNoShow(reference));
+            const r = await attempt(() => markNoShow(reference), "sends");
             if (r.ok) {
               setDone(true);
               setNote(r.chasing ? "Marked, and being chased" : "Marked");
             } else {
-              setAsking(false);
+              /* Stay in the asking state, with the reason beside the
+                 button.
+
+                 This used to collapse back to the plain "No show" button
+                 and write the message to state that is only rendered once
+                 `done` is true, so a failed attempt said NOTHING. A
+                 control that snaps back to its resting state reads as a
+                 click that missed, so the natural response is to press it
+                 again - and this one starts a sequence that texts a
+                 customer. Two half-landed presses is two texts. */
               setNote(r.message ?? "That did not save.");
             }
           });
@@ -84,6 +93,11 @@ export function NoShowButton({
       >
         No
       </button>
+      {note && (
+        <span role="status" className="text-[12.5px] text-error">
+          {note}
+        </span>
+      )}
     </span>
   );
 }

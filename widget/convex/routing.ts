@@ -28,6 +28,7 @@ import { v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import { ROUTES, nextStep, stepAt, type RouteId } from "../gates/routes";
 import { render } from "../gates/templates";
+import { countsAsReply } from "../gates/email-reply.js";
 import { phoneKey, emailKey } from "./visitors";
 
 const LEASE_MS = 120 * 1000;
@@ -99,7 +100,12 @@ async function repliedSince(
     .query("touches")
     .withIndex("by_lead_at", (q) => q.eq("leadId", leadId).gt("at", since))
     .collect();
-  return inbound.some((t) => t.direction === "in");
+  /* `countsAsReply`, not `direction === "in"`. An out-of-office is
+     recorded as an inbound touch so the team can see one came back; if it
+     counted here the follow-up would stop anyway and the reply rate on
+     every report would include it. One rule, shared with the mail
+     reader. */
+  return inbound.some((t) => countsAsReply(t));
 }
 
 /** Did the call on this route go unanswered? */

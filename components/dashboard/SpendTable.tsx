@@ -67,10 +67,35 @@ export function SpendTable({
       return;
     }
 
+    /* What this channel held before the optimistic write, so a failure can
+       put back THIS value rather than the whole table.
+
+       It used to reset to `initial`, the server-rendered prop. That is not
+       the last known good state: it is the state at page load. Set Google
+       to 500 successfully, then fail while setting Facebook, and Google
+       silently reverted on screen to the figure it had when the page
+       opened, while the store still held 500. The note said only that
+       Facebook had not saved. The cost-per-lead figures being read on the
+       same visit were then computed off a number the table was lying
+       about. */
+    const before = spend[channel];
+
     start(async () => {
       const r = await attempt(() => saveChannelSpend(channel, pounds));
-      setNote(r.ok ? null : (r.message ?? "That did not save."));
-      if (!r.ok) setSpend(initial);
+      if (r.ok) {
+        /* Said, not silent. The same reasoning as the outcome picker: on a
+           fast save, a value that simply changes is indistinguishable from
+           a press that did nothing. */
+        setNote(`Saved ${sourceLabel(channel)}.`);
+        return;
+      }
+      setNote(r.message ?? "That did not save.");
+      setSpend((s) => {
+        const back = { ...s };
+        if (before === undefined) delete back[channel];
+        else back[channel] = before;
+        return back;
+      });
     });
   }
 

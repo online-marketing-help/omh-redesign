@@ -1369,7 +1369,19 @@ def build_worker():
                         "subject": "={{ $json.subject }}",
                         "emailFormat": "text",
                         "text": "={{ $json.body }}",
-                        "options": {}},
+                        # A Reply-To carrying the touch this answers.
+                        #
+                        # The second of two ways a reply is matched back.
+                        # The first is threading: the mail server's own
+                        # Message-ID, recorded on the touch and looked up
+                        # through the index that already holds a Twilio SID.
+                        # Threading works on any mailbox with no setup but
+                        # loses a client that starts a fresh message; this
+                        # survives that but needs the host to route plus
+                        # addresses, which is a provider feature rather than
+                        # a standard. Their weaknesses do not overlap, which
+                        # is the only reason to carry both.
+                        "options": {"replyTo": "={{ 'replies+t' + String($json.idempotencyKey || '').replace(':', '-') + '@onlinemarketinghelp.co.uk' }}"}},
          "id": "w_email", "name": "Email Them",
          "type": "n8n-nodes-base.emailSend", "typeVersion": 2.1,
          "position": [-120, 60], "credentials": SMTP_CRED,
@@ -1687,6 +1699,82 @@ def build_inbound():
 REACTIVATION_PATH = "ohm-reactivation"
 
 
+def build_email_inbound():
+    """Read the mailbox OMH already sends from, and count the replies.
+
+    No new provider. The website and the sequence engine both send through
+    the same SMTP account on OMH's own domain, so the replies are already
+    arriving somewhere IMAP can read. Postmark or Resend would mean a new
+    account, a new bill, DNS changes and a webhook to secure, to collect
+    mail that is already in a mailbox.
+
+    **This workflow cannot be activated until an IMAP credential exists on
+    this instance.** There is none today, and the mailbox password lives on
+    the production server rather than anywhere this builder can reach.
+    """
+    nodes = [
+        {"parameters": {"postProcessAction": "read",
+                        "options": {"customEmailConfig": '["UNSEEN"]'}},
+         "id": "mail_in", "name": "New Mail",
+         "type": "n8n-nodes-base.emailReadImap", "typeVersion": 2,
+         "position": [-720, 0]},
+
+        {"parameters": {"jsCode": (
+            gate_inline("email-reply.js") + "\n"
+            "// Shape whatever the IMAP node produced into the one thing the\n"
+            "// gate reads. Different servers name these differently, so each\n"
+            "// is looked for rather than assumed.\n"
+            "const m = $input.first().json || {};\n"
+            "const h = m.headers || {};\n"
+            "const msg = {\n"
+            "  subject: m.subject || h.subject || '',\n"
+            "  from: (m.from && (m.from.text || m.from.value?.[0]?.address)) || h.from || '',\n"
+            "  to: (m.to && (m.to.text || m.to.value?.[0]?.address)) || h.to || '',\n"
+            "  text: m.text || m.textPlain || m.html || '',\n"
+            "  contentType: h['content-type'] || '',\n"
+            "  messageId: m.messageId || h['message-id'] || '',\n"
+            "  uid: m.uid || m.attributes?.uid || m.messageId || h['message-id'] || '',\n"
+            "  headers: h,\n"
+            "};\n"
+            "// Decided here as well as in Convex, so the reason is in the\n"
+            "// execution log even when nothing is written.\n"
+            "const seen = readReply(msg, () => null);\n"
+            "return [{ json: { message: msg, looksAuto: isAutoReply(msg), why: seen.why } }];"
+        )},
+         "id": "mail_shape", "name": "Read The Message",
+         "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [-480, 0]},
+
+        # Convex decides for real: only it can look up a Message-ID or an
+        # idempotency key, and only it can stop a sequence.
+        convex_http("mail_post", "Tell Convex", "/email/inbound",
+                    "={{ JSON.stringify({ message: $json.message }) }}",
+                    -240, 0),
+
+        {"parameters": {"jsCode": (
+            "// One line per message, so an outage or a misconfigured\n"
+            "// Reply-To shows up as a number in the executions rather than\n"
+            "// as silence. Unmatched mail is counted, never guessed at.\n"
+            "const r = $input.first().json || {};\n"
+            "return [{ json: {\n"
+            "  counted: r.reply === true,\n"
+            "  why: r.why || '',\n"
+            "  leadId: r.leadId || null,\n"
+            "  duplicate: r.duplicate === true,\n"
+            "} }];"
+        )},
+         "id": "mail_log", "name": "What It Was",
+         "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [0, 0]},
+    ]
+
+    conns = {
+        "New Mail": {"main": [[{"node": "Read The Message", "type": "main", "index": 0}]]},
+        "Read The Message": {"main": [[{"node": "Tell Convex", "type": "main", "index": 0}]]},
+        "Tell Convex": {"main": [[{"node": "What It Was", "type": "main", "index": 0}]]},
+    }
+    return {"name": "OHM Assistant — Email Inbound", "nodes": nodes,
+            "connections": conns, "settings": {"executionOrder": "v1"}}
+
+
 def build_reactivation():
     """A list of past customers, screened and put on route F.
 
@@ -1865,6 +1953,7 @@ OUT = {
     "08-sequence-worker.json": build_worker(),
     "09-twilio-inbound.json": build_inbound(),
     "11-reactivation.json": build_reactivation(),
+    "12-email-inbound.json": build_email_inbound(),
 }
 
 for fname, wf in OUT.items():

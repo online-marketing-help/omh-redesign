@@ -20,18 +20,39 @@
 
 export type Attempt = { ok: boolean; message?: string };
 
+/* What to say, which depends on what the write DOES.
+
+   A rejected fetch means the RESPONSE did not arrive. It does not mean the
+   request was never served. For a write that sets a field to a value, that
+   distinction does not matter and "try again" is the right advice. For a
+   write that sends something to a person, it matters completely: the first
+   attempt may have gone through, and repeating it sends twice.
+
+   This function refuses to retry on the user's behalf for exactly that
+   reason. Telling THEM to retry, in the same breath, would hand the
+   problem straight back. So the two kinds of write say different things. */
+export type Repeatable =
+  /* Setting a value. Pressing again lands on the same answer. */
+  | "safe"
+  /* Sends a message, starts a sequence, enrols people. Pressing again may
+     do it twice. */
+  | "sends";
+
 export async function attempt<T extends Attempt>(
   run: () => Promise<T>,
+  kind: Repeatable = "safe",
 ): Promise<T | { ok: false; message: string }> {
   try {
     return await run();
   } catch {
     /* No detail from the error itself: it is almost always "Failed to
-       fetch", which tells a person at OMH nothing. What they need to know
-       is whether it saved, and it did not. */
+       fetch", which tells a person at OMH nothing. */
     return {
       ok: false,
-      message: "That did not reach us. Check your connection and try again.",
+      message:
+        kind === "sends"
+          ? "We could not confirm that. It may still have gone through, so check before doing it again."
+          : "That did not reach us. Check your connection and try again.",
     };
   }
 }

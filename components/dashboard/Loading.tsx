@@ -1,4 +1,5 @@
 import { Rail } from "./Shell";
+import type { Screen } from "@/lib/dashboard/screens";
 
 /* =========================================================================
    What is on screen while a screen is being fetched.
@@ -24,25 +25,33 @@ import { Rail } from "./Shell";
    The rail is the real `Rail` with no counts rather than a copy of it. A
    second hand-maintained rail would drift from the first, and the one in
    the loading state is the one nobody would notice had drifted.
+
+   **Known limitation: the skeleton does not know about the example data.**
+   `loading.tsx` receives no props and no search params, so it cannot tell
+   whether `?demo=1` is on. Two consequences, one handled and one not. The
+   rail is made inert here, so it cannot send somebody out of demo mode by
+   accident. The demo banner is NOT rendered, so in example mode the page
+   does shift down by its height when the real screen arrives. Fixing that
+   needs the flag somewhere the skeleton can read, such as a cookie, and is
+   worth doing the next time that banner is touched.
    ========================================================================= */
 
-export function DashboardLoading({
-  active,
-  title,
-  lead,
-  shape = "cards",
-}: {
-  active: string;
-  title: string;
-  lead?: string;
-  /** Which arrangement of placeholders matches this screen's real content. */
-  shape?: "cards" | "table" | "split" | "form";
-}) {
+export function DashboardLoading({ screen }: { screen: Screen }) {
+  const { active, title, lead, shape } = screen;
   return (
     <div id="omh-dashboard" className="min-h-dvh bg-warm text-ink">
-      {/* No counts: they are part of what is being fetched, and a zero here
-          would be a figure somebody could read. */}
-      <Rail active={active} counts={{}} urgent={[]} demo={false} />
+      {/* Inert.
+
+          The rail is the real one, but during the skeleton it cannot know
+          whether the example data is on, and `Rail` appends `?demo=1` to
+          every link only when it does. A live rail here would therefore
+          send somebody out of demo mode mid-demonstration, into mostly
+          empty real figures, which is precisely what that link-building
+          exists to prevent. It is a placeholder for about 150ms; making it
+          unclickable for that long is cheaper than the alternative. */}
+      <div aria-hidden="true" className="pointer-events-none">
+        <Rail active={active} counts={{}} urgent={[]} demo={false} />
+      </div>
 
       <div className="lg:pl-[248px]">
         <header className="border-b border-line">
@@ -54,9 +63,7 @@ export function DashboardLoading({
               <h1 className="mt-1.5 font-sans text-[26px] font-semibold leading-[1.1] tracking-[-.025em] sm:text-[30px]">
                 {title}
               </h1>
-              {lead && (
-                <p className="mt-2 max-w-[68ch] text-[14px] leading-relaxed text-muted">{lead}</p>
-              )}
+              <p className="mt-2 max-w-[68ch] text-[14px] leading-relaxed text-muted">{lead}</p>
             </div>
           </div>
         </header>
