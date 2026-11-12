@@ -26,6 +26,12 @@ export function SiteSearch({ entries }: { entries: SearchEntry[] }) {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
+      /* `key` is optional on KeyboardEvent and genuinely arrives undefined:
+         password managers and browser autofill dispatch synthetic keydowns
+         without it, which is why this threw on the sign-in screen rather
+         than anywhere a person was actually typing. A global listener sees
+         every one of those, so it has to survive them. */
+      if (typeof event.key !== "string") return;
       if (event.key.toLowerCase() !== "k" || !(event.metaKey || event.ctrlKey)) return;
       event.preventDefault();
       const dialog = dialogRef.current;

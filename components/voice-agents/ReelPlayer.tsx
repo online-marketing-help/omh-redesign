@@ -179,6 +179,11 @@ export function ReelPlayer() {
 
   const onKey = (e: React.KeyboardEvent) => {
     if ((e.target as Element).matches("input")) return;
+    /* Same reason as SiteSearch: `key` is optional and autofill sends
+       keydowns without it. This one is scoped to the player rather than
+       the window, so it is far less exposed, but the assumption is the
+       same and it costs a line. */
+    if (typeof e.key !== "string") return;
     const k = e.key.toLowerCase();
     if (k === " " || k === "k") { e.preventDefault(); toggle(); }
     else if (k === "arrowright") seek(Math.min(duration, time + 5));
