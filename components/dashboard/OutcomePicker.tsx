@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { setLeadOutcome } from "@/app/lead-dashboard/leads/actions";
 import { outcomeLabel, money } from "@/lib/dashboard/channels";
 import { IconCheck, IconSort } from "./icons";
+import { attempt } from "@/lib/dashboard/attempt";
 
 /* =========================================================================
    What came of a lead.
@@ -52,7 +53,29 @@ export function OutcomePicker({
   const [open, setOpen] = useState(false);
   const [asking, setAsking] = useState(false);
   const [amount, setAmount] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  /* What to say about the last attempt.
+
+     Success used to say nothing at all: the control simply became the new
+     value. On a fast save that is indistinguishable from a click that did
+     nothing, and picking the outcome a lead already had changed nothing on
+     screen whatsoever. This is the field every channel figure is built on,
+     so "did that land?" is a question worth never having to ask.
+
+     `ok` clears itself after a moment; a failure stays until the next
+     attempt, because an error that vanishes is an error nobody read. */
+  const [note, setNote] = useState<{ text: string; ok: boolean } | null>(null);
+  const clearer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  function say(text: string, ok: boolean) {
+    clearTimeout(clearer.current);
+    setNote({ text, ok });
+    if (ok) clearer.current = setTimeout(() => setNote(null), 2600);
+  }
+
+  /* A timer outliving the row it belonged to would set state on something
+     that is gone: these live in a table whose rows come and go with a
+     filter. */
+  useEffect(() => () => clearTimeout(clearer.current), []);
   const [pending, start] = useTransition();
   /* Which way the menu opens. A row can be anywhere in a table of sixty, and
      opening downward from the last row put the final option below the fold
@@ -73,17 +96,19 @@ export function OutcomePicker({
     if (demo) {
       setCurrent(next);
       setValue(next === "won" ? (gbp ?? null) : null);
-      setError("Example data. Nothing was saved.");
+      say("Example data. Nothing was saved.", false);
       return;
     }
     start(async () => {
-      const r = await setLeadOutcome(leadId, next, gbp);
+      const r = await attempt(() => setLeadOutcome(leadId, next, gbp));
       if (r.ok) {
         setCurrent(next);
         setValue(next === "won" ? (gbp ?? null) : null);
-        setError(null);
+        say("Saved", true);
       } else {
-        setError(r.message ?? "Did not save");
+        /* The value on screen is deliberately left alone: it still shows
+           what is actually in the database, not what was asked for. */
+        say(r.message ?? "That did not save", false);
       }
     });
   }
@@ -199,8 +224,14 @@ export function OutcomePicker({
       ) : null}
       <IconSort className="h-3 w-3 opacity-50" />
     </button>
-    {error && (
-      <span role="status" className="text-[12.5px] text-muted">{error}</span>
+    {note && (
+      <span
+        role="status"
+        className={`text-[12.5px] ${note.ok ? "text-[var(--dash-accent-text)]" : "text-error"}`}
+      >
+        {note.ok ? "\u2713 " : ""}
+        {note.text}
+      </span>
     )}
     </span>
   );

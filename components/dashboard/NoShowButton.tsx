@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { markNoShow } from "@/app/lead-dashboard/bookings/actions";
+import { attempt } from "@/lib/dashboard/attempt";
 
 /* =========================================================================
    They did not turn up.
@@ -62,7 +63,7 @@ export function NoShowButton({
             return;
           }
           start(async () => {
-            const r = await markNoShow(reference);
+            const r = await attempt(() => markNoShow(reference));
             if (r.ok) {
               setDone(true);
               setNote(r.chasing ? "Marked, and being chased" : "Marked");

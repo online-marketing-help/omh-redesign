@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { parseCsv } from "@/widget/gates/csv.js";
 import { screenRows } from "@/widget/gates/consent-gate.js";
 import { startCampaign, type StartResult } from "@/app/lead-dashboard/campaigns/new/actions";
+import { attempt } from "@/lib/dashboard/attempt";
 
 /* =========================================================================
    Start a reactivation campaign.
@@ -75,9 +76,10 @@ export function CampaignStart({
     }
     start(async () => {
       setResult(
-        await startCampaign(
-          name,
-          accepted.map((p) => ({
+        await attempt(() =>
+          startCampaign(
+            name,
+            accepted.map((p) => ({
             name: p.name,
             email: p.email,
             phone: p.phone,
@@ -87,7 +89,8 @@ export function CampaignStart({
             consentEvidence: p.consentEvidence,
             lastBoughtAt: p.lastBoughtAt,
           })),
-          note,
+            note,
+          ),
         ),
       );
     });

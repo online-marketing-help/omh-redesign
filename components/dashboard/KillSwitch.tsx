@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { setOutbound } from "@/app/lead-dashboard/settings/actions";
 import { IconPower, IconAlert, IconCheck } from "./icons";
+import { attempt } from "@/lib/dashboard/attempt";
 
 /* =========================================================================
    Stop everything.
@@ -38,7 +39,7 @@ export function KillSwitch({
   function apply(next: boolean) {
     setConfirming(false);
     start(async () => {
-      const r = await setOutbound(next);
+      const r = await attempt(() => setOutbound(next));
       if (r.ok) setOn(r.enabled ?? next);
       setNote({ ok: r.ok, text: r.message ?? "" });
     });

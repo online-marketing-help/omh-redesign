@@ -49,7 +49,7 @@ were only visible on screen.
   - Evidence: the same rail script asserts the accessible name of every
     item carrying a figure.
 
-- [ ] **U5** - Confirm that setting an outcome actually saved
+- [x] **U5** - Confirm that setting an outcome actually saved
   - `OutcomePicker` and `BulkOutcome` have one feedback path between them.
     The control shows "Saving..." then becomes the new value, which on a
     fast connection is indistinguishable from nothing happening.
@@ -57,15 +57,47 @@ were only visible on screen.
     land?" is a question worth never having to ask.
   - Not a toast. A brief, quiet confirmation on the control itself, and a
     real message when it fails, matching how `SpendTable` already behaves.
-  - Test first: assert that a failed save says so and leaves the old value
-    on screen rather than the optimistic one.
+  - **Done 2026-11-12, and the real defect was worse than a missing
+    confirmation.** Driving the failure path found that a dropped
+    connection while setting an outcome DESTROYED THE WHOLE PAGE: the
+    action's promise rejects, a rejection inside `startTransition` has
+    nowhere to go but the nearest error boundary, and the conversation
+    somebody was reading was replaced with "This screen did not load".
+    They lost the transcript because a tick box did not save.
+  - Six client components called a server action and not one caught
+    anything. `lib/dashboard/attempt.ts` turns a thrown error into the
+    same shape the action returns when it refuses, and all six use it. It
+    does not retry: a write that may or may not have landed is not
+    something to repeat on somebody's behalf.
+  - The picker now says "Saved" and clears itself after a moment; a
+    failure stays until the next attempt, because an error that vanishes
+    is an error nobody read. `BulkOutcome` rendered its failures with the
+    same tick and accent colour as its successes, so "That did not save."
+    arrived looking like confirmation; fixed too.
+  - Evidence, in a browser against the live backend: choosing an outcome
+    shows a tick and "Saved" which then clears; aborting the POST leaves
+    the page standing, keeps the picker on the STORED value rather than
+    the one asked for, and says so.
 
-- [ ] **U6** - Tell a new person what they are looking at
+- [x] **U6** - Tell a new person what they are looking at
   - Lowest priority and the easiest to get wrong. A line under the rail's
     heading, or one sentence per screen the first time it is empty: what
     "Needs a person" means, and why Inbox and Leads are different screens.
-  - Only worth doing if it can be done without adding a thing to dismiss.
-    A tour nobody asked for is worse than no explanation.
+  - **Deliberately not built, 2026-11-12.** The plan said this was only
+    worth doing if it added nothing to dismiss, and the explanations
+    already exist where somebody needs them.
+  - Every screen carries a one-sentence description in its own header:
+    "Who is being chased, and what goes out next", "Every message, on
+    every channel, newest first". A new person is told what a screen is
+    the moment they are on it.
+  - The zero-data case, which is what a brand-new account actually sees,
+    is already written: "Nothing has happened yet. As soon as the
+    assistant takes a call or a visitor types to it, it appears here."
+  - And the rail already carries "See it with example data", which
+    answers "what is this" better than a tour: it shows them.
+  - A fourth explanation on top of those three would be clutter defended
+    as onboarding. Closed without code, which is the outcome this plan
+    allowed for.
 
 - [x] **U7** - A row is one line, and the detail is behind a click
   - Raised by Rafiul from a screenshot: an appointment's free-text note was

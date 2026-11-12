@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { saveChannelSpend } from "@/app/lead-dashboard/settings/actions";
 import { sourceLabel, money } from "@/lib/dashboard/channels";
+import { attempt } from "@/lib/dashboard/attempt";
 
 /* =========================================================================
    What each channel costs, per month.
@@ -67,7 +68,7 @@ export function SpendTable({
     }
 
     start(async () => {
-      const r = await saveChannelSpend(channel, pounds);
+      const r = await attempt(() => saveChannelSpend(channel, pounds));
       setNote(r.ok ? null : (r.message ?? "That did not save."));
       if (!r.ok) setSpend(initial);
     });

@@ -5,6 +5,7 @@ import { setLeadOutcomes } from "@/app/lead-dashboard/leads/actions";
 import { useSelection } from "./Selection";
 import { outcomeLabel } from "@/lib/dashboard/channels";
 import { IconCheck } from "./icons";
+import { attempt } from "@/lib/dashboard/attempt";
 
 /* =========================================================================
    One outcome, applied to every ticked lead.
@@ -33,7 +34,10 @@ export function BulkOutcome({
 }) {
   const { ids, clear } = useSelection();
   const [pending, start] = useTransition();
-  const [said, setSaid] = useState<string | null>(null);
+  /* Whether it worked, not only what to say. A failure used to be rendered
+     with the same tick and the same accent colour as a success, so "That
+     did not save." arrived looking exactly like confirmation. */
+  const [said, setSaid] = useState<{ text: string; ok: boolean } | null>(null);
 
   if (!ids.length) return null;
 
@@ -43,16 +47,16 @@ export function BulkOutcome({
        banner is read once and this is the moment somebody would assume
        something had been saved. */
     if (demo) {
-      setSaid(`Example data. ${ids.length} would be marked "${outcomeLabel(outcome)}".`);
+      setSaid({ text: `Example data. ${ids.length} would be marked "${outcomeLabel(outcome)}".`, ok: false });
       return;
     }
     start(async () => {
-      const r = await setLeadOutcomes(ids, outcome);
+      const r = await attempt(() => setLeadOutcomes(ids, outcome));
       if (r.ok) {
-        setSaid(`${r.changed} marked "${outcomeLabel(outcome)}".`);
+        setSaid({ text: `${r.changed} marked "${outcomeLabel(outcome)}".`, ok: true });
         clear();
       } else {
-        setSaid(r.message ?? "That did not save.");
+        setSaid({ text: r.message ?? "That did not save.", ok: false });
       }
     });
   }
@@ -87,10 +91,12 @@ export function BulkOutcome({
       {said && (
         <span
           role="status"
-          className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[var(--dash-accent-text)]"
+          className={`inline-flex items-center gap-1.5 text-[13px] font-medium ${
+            said.ok ? "text-[var(--dash-accent-text)]" : "text-error"
+          }`}
         >
-          <IconCheck className="h-3.5 w-3.5" />
-          {said}
+          {said.ok && <IconCheck className="h-3.5 w-3.5" />}
+          {said.text}
         </span>
       )}
     </div>
