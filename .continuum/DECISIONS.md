@@ -111,3 +111,25 @@ alternative. Not here: formatting, naming, anything the linter settles.
   refuses an id that is not already in a conversation. A workflow fetching
   an address chosen in a browser is the forgery `checkRemote` exists to
   prevent, and it is no better coming from our own page.
+
+---
+
+## D-007 - Voice notes are transcribed with Deepgram, and a doubtful one is treated as unheard
+
+- **Date:** 2026-11-12
+- **Decision:** Deepgram Nova-3 pre-recorded, through the key that already
+  exists on Rafiul's account. Transcribe, hand the words to the agent as
+  text, leave the agent alone, exactly as with a photo.
+- **Because:** measured before deciding. One real file, 78.5 seconds,
+  confidence 1.0, accurate. About $0.0043 a minute, so a twenty second voice
+  note is roughly $0.0015. Nothing to buy and nothing to integrate: the key
+  was already in use for the Bangla voice work.
+- **The part worth keeping:** anything below 0.6 confidence is treated as
+  NOT HEARD, and none of its words reach the prompt. A wrong transcript is
+  worse than no transcript, because it reads perfectly, says something the
+  visitor never said, and the agent answers it with complete confidence. A
+  misheard budget or phone number is not funny.
+- **Also untrusted:** the transcript is a stranger's words going into a
+  prompt. Saying "ignore your instructions" out loud is easier than
+  photographing it, so it is fenced and labelled the same way the photo
+  description is. See [[D-006]].

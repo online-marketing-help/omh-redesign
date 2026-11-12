@@ -57,6 +57,9 @@ OPENROUTER_CRED = {
 # one request rather than an agent, so it goes through httpRequest with the
 # key in a header. Same account, same bill.
 OPENROUTER_KEY = env["OPENROUTER_API_KEY"]
+# Voice notes. Rafiul's own Deepgram account, already used by the Bangla
+# voice work. Nova-3 pre-recorded, billed by the minute.
+DEEPGRAM_KEY = env["DEEPGRAM_API_KEY"]
 
 CHAT_MODEL = "anthropic/claude-haiku-5.5"      # $0.10 / $0.50 per 1M, 1M context
 CHAT_MODEL_FALLBACK = "openai/gpt-4o-mini"     # different vendor, so one outage is not both
@@ -281,6 +284,7 @@ def build_chat():
             "// ordinary turn and referencing a node that did not run throws.\n"
             "let photo = '';\n"
             "try { photo = $('Describe The Photo').first().json.note || ''; } catch (e) { photo = ''; }\n"
+            "try { if (!photo) photo = $('Write Down The Voice Note').first().json.note || ''; } catch (e) {}\n"
             "if (photo) photo += '\\n\\n';\n"
             "return [{ json: { chat_input: hint + page + photo + 'Visitor says: ' + (wh.message || '') } }];"
         )},
@@ -289,19 +293,34 @@ def build_chat():
 
         # ----------------------------------------------- the photo path
 
-        {"parameters": {"conditions": {
-            "options": {"caseSensitive": True, "leftValue": "", "typeValidation": "loose",
-                        "version": 2},
-            "conditions": [{
-                "id": "has_image",
-                "leftValue": "={{ $('Chat Webhook').first().json.body.attachment ? $('Chat Webhook').first().json.body.attachment.kind : '' }}",
-                "rightValue": "image",
-                "operator": {"type": "string", "operation": "equals"},
-            }],
-            "combinator": "and",
-         }, "options": {}},
-         "id": "has_photo", "name": "Did They Send A Photo",
-         "type": "n8n-nodes-base.if", "typeVersion": 2.2, "position": [-480, 0]},
+        {"parameters": {"rules": {"values": [
+            {"conditions": {
+                "options": {"caseSensitive": True, "leftValue": "", "typeValidation": "loose",
+                            "version": 2},
+                "conditions": [{
+                    "id": "is_image",
+                    "leftValue": "={{ $('Chat Webhook').first().json.body.attachment ? $('Chat Webhook').first().json.body.attachment.kind : '' }}",
+                    "rightValue": "image",
+                    "operator": {"type": "string", "operation": "equals"},
+                }],
+                "combinator": "and",
+             }, "outputKey": "photo"},
+            {"conditions": {
+                "options": {"caseSensitive": True, "leftValue": "", "typeValidation": "loose",
+                            "version": 2},
+                "conditions": [{
+                    "id": "is_audio",
+                    "leftValue": "={{ $('Chat Webhook').first().json.body.attachment ? $('Chat Webhook').first().json.body.attachment.kind : '' }}",
+                    "rightValue": "audio",
+                    "operator": {"type": "string", "operation": "equals"},
+                }],
+                "combinator": "and",
+             }, "outputKey": "voice"},
+         ]},
+         # Everything else, which is almost every turn, goes straight on.
+         "options": {"fallbackOutput": "extra", "renameFallbackOutput": "plain"}},
+         "id": "what_kind", "name": "What Did They Send",
+         "type": "n8n-nodes-base.switch", "typeVersion": 3.2, "position": [-480, 0]},
 
         # The widget sends a storage id, never a URL. Resolving it here is
         # the whole point: a workflow fetching an address chosen in a browser
@@ -352,6 +371,51 @@ def build_chat():
         )},
          "id": "photo_note", "name": "Describe The Photo",
          "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [80, -220]},
+
+        # ----------------------------------------------- the voice path
+
+        convex_http("voice_url", "Where Is The Voice Note", "/attachment/urlFor",
+                    "={{ JSON.stringify({ storageId: $('Chat Webhook').first().json.body.attachment.storageId }) }}",
+                    -340, 220),
+
+        {"parameters": {"jsCode": (
+            gate_inline("voice-note.js") + "\n"
+            "const r = $input.first().json || {};\n"
+            "if (!r.ok || !r.url) return [{ json: { skip: true, query: '', body: null } }];\n"
+            "const req = transcribeRequest(r.url);\n"
+            "return [{ json: req }];"
+        )},
+         "id": "voice_ask", "name": "Ask What They Said",
+         "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [-200, 220]},
+
+        {"parameters": {
+            "method": "POST",
+            "url": "=https://api.deepgram.com/v1/listen?{{ $json.query }}",
+            "sendHeaders": True,
+            "headerParameters": {"parameters": [
+                {"name": "authorization", "value": "Token " + DEEPGRAM_KEY},
+                {"name": "content-type", "value": "application/json"},
+            ]},
+            "sendBody": True, "specifyBody": "json",
+            "jsonBody": "={{ JSON.stringify($json.body) }}",
+            "options": {"timeout": 60000},
+         },
+         "id": "voice_hear", "name": "Listen To The Voice Note",
+         "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2,
+         "position": [-60, 220],
+         # A voice note we cannot hear must not end the conversation.
+         "onError": "continueRegularOutput"},
+
+        {"parameters": {"jsCode": (
+            gate_inline("voice-note.js") + "\n"
+            "// A WRONG transcript is worse than none: it reads perfectly and\n"
+            "// says something nobody said. transcriptFrom refuses a\n"
+            "// low-confidence one rather than passing it on.\n"
+            "const d = transcriptFrom($input.first().json);\n"
+            "return [{ json: { note: d.prompt, heard: d.ok, why: d.why, seconds: d.seconds } }];"
+        )},
+         "id": "voice_note", "name": "Write Down The Voice Note",
+         "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [80, 220]},
 
         {"parameters": {"promptType": "define", "text": "={{ $json.chat_input }}",
                         "needsFallback": True,
@@ -428,16 +492,22 @@ def build_chat():
     conns = {
         "Chat Webhook": {"main": [[{"node": "Log User Message", "type": "main", "index": 0},
                                    {"node": "Load Profile", "type": "main", "index": 0}]]},
-        "Load Profile": {"main": [[{"node": "Did They Send A Photo", "type": "main", "index": 0}]]},
-        # True goes the long way round and ends at the same place.
-        "Did They Send A Photo": {"main": [
+        "Load Profile": {"main": [[{"node": "What Did They Send", "type": "main", "index": 0}]]},
+        # Three ways out: a photo, a voice note, or an ordinary turn. All
+        # three end at Build Context, which asks for whichever ran by name.
+        "What Did They Send": {"main": [
             [{"node": "Where Is The Photo", "type": "main", "index": 0}],
+            [{"node": "Where Is The Voice Note", "type": "main", "index": 0}],
             [{"node": "Build Context", "type": "main", "index": 0}],
         ]},
         "Where Is The Photo": {"main": [[{"node": "Ask What It Shows", "type": "main", "index": 0}]]},
         "Ask What It Shows": {"main": [[{"node": "Look At The Photo", "type": "main", "index": 0}]]},
         "Look At The Photo": {"main": [[{"node": "Describe The Photo", "type": "main", "index": 0}]]},
         "Describe The Photo": {"main": [[{"node": "Build Context", "type": "main", "index": 0}]]},
+        "Where Is The Voice Note": {"main": [[{"node": "Ask What They Said", "type": "main", "index": 0}]]},
+        "Ask What They Said": {"main": [[{"node": "Listen To The Voice Note", "type": "main", "index": 0}]]},
+        "Listen To The Voice Note": {"main": [[{"node": "Write Down The Voice Note", "type": "main", "index": 0}]]},
+        "Write Down The Voice Note": {"main": [[{"node": "Build Context", "type": "main", "index": 0}]]},
         "Build Context": {"main": [[{"node": "Melissa", "type": "main", "index": 0}]]},
         "Melissa": {"main": [[{"node": "Clean Reply", "type": "main", "index": 0}],
                           [{"node": "Agent Unavailable", "type": "main", "index": 0}]]},

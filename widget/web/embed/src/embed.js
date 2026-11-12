@@ -1031,9 +1031,13 @@ button,input{font:inherit;color:inherit;margin:0}
           role: "assistant",
           text:
             (d && d.reply) ||
+            /* Only reached when the reply itself did not arrive. The
+               assistant CAN hear a voice note and read a photo now; if
+               either fails it says so in its own words, through the
+               workflow. This is the network failing, not the model. */
             (kind === "audio"
-              ? "Thanks. I cannot listen to voice notes yet, but the team can. What is it about?"
-              : "Thanks. I could not open that one. Could you tell me what it shows?"),
+              ? "Thanks. That did not reach us properly. Could you type what you need?"
+              : "Thanks. That did not reach us properly. Could you tell me what it shows?"),
         });
       })
       .catch(function () {

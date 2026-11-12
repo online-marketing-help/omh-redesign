@@ -92,14 +92,28 @@ other developer deploys from it.
   - **Cost, measured:** $0.0001331 per photo, 806 prompt tokens and 105
     completion. About 7,500 photos per dollar.
 
-- [ ] **F4** - Decide what happens to a voice note
+- [x] **F4** - Decide what happens to a voice note
   - NOT a build task yet. A one-page answer to: transcribe with what, at what
     cost per minute, and is it worth it. Deepgram is in the secret store;
     OpenRouter may not take audio.
   - Until that is answered, a voice note is stored and shown and the
     assistant says it cannot listen to it yet, which is honest and is already
     what happens.
-  - Evidence: the decision written into DECISIONS.md, with the number.
+  - **Decided 2026-11-12: yes, Deepgram, and it is already built.** The
+    decision was meant to come first and it did: one real transcription
+    through the existing key, 78.5 seconds at confidence 1.0, before a line
+    of it was wired in. Nova-3 pre-recorded is about $0.0043 a minute, so a
+    twenty second voice note costs roughly $0.0015. The key already exists
+    and is already used by the Bangla voice work, so there was nothing to
+    buy and nothing to decide against.
+  - `gates/voice-note.js` + 27 assertions. The one that matters is not the
+    API shape: a WRONG transcript is worse than none, because it reads
+    perfectly and says something nobody said, and the agent will answer it
+    without hesitating. Anything under 0.6 confidence is treated as not
+    heard, and not one word of it reaches the prompt.
+  - Live: a real voice note transcribed and understood. The assistant
+    identified it as a builder's phone greeting and said OMH does not do
+    kitchen renovations, which is correct.
 
 - [ ] **F5** - Remind before, and chase a no-show, by email
   - Route G exists and nothing enrols onto it. A confirmed booking should be
