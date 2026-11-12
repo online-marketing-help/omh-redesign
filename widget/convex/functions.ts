@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query, internalMutation, internalQuery } from "./_generated/server";
+import { api } from "./_generated/api";
 import { findPerson, phoneKey, emailKey, attributionArg, classifySource, cleanAttribution } from "./visitors";
 
 /* =========================================================================
@@ -622,6 +623,30 @@ export const bookAppointment = mutation({
       at: now(),
     });
 
+    /* Put them on the reminder route, here rather than in n8n.
+
+       The rule for this project is that orchestration lives in n8n, and
+       this is the stated exception to it: a booking and its reminders must
+       not be able to disagree. If the reminder were enrolled by a separate
+       call, a failure between the two would leave either a booking nobody
+       is reminded about or, far worse, reminders for a booking that was
+       never written. In one transaction neither is reachable.
+
+       Best effort beyond that: a lead we cannot find is a booking without
+       a person attached, which is worth having anyway. */
+    const lead = await ctx.db
+      .query("leads")
+      .withIndex("by_session", (x) => x.eq("sessionId", a.sessionId))
+      .first();
+    if (lead) {
+      await ctx.runMutation(api.reminders.remindAbout, {
+        leadId: lead._id,
+        sessionId: a.sessionId,
+        preferredDate: a.preferredDate,
+        preferredTime: a.preferredTime,
+      });
+    }
+
     return {
       ok: true,
       reference,
@@ -631,6 +656,16 @@ export const bookAppointment = mutation({
     };
   },
 });
+
+/* The lead behind a booking, if there is one. A booking carries a session
+   id rather than a lead id: it is made mid-conversation, before anybody has
+   decided the conversation produced a lead. */
+async function leadForSession(ctx: any, sessionId: string) {
+  return await ctx.db
+    .query("leads")
+    .withIndex("by_session", (x: any) => x.eq("sessionId", sessionId))
+    .first();
+}
 
 export const manageBooking = mutation({
   args: {
@@ -669,6 +704,18 @@ export const manageBooking = mutation({
        quiet hours and the same lease as every other message. */
     if (a.action === "no_show") {
       await ctx.db.patch(b._id, { status: "no_show" });
+      /* They did not turn up, so there is nothing left to remind them
+         about. The no-show CHASE is route G and a separate decision; this
+         only stops the reminders for an appointment that has now been and
+         gone. */
+      {
+        const lead = await leadForSession(ctx, b.sessionId);
+        if (lead) {
+          await ctx.runMutation(api.reminders.cancelReminders, {
+            leadId: lead._id, why: "no_show",
+          });
+        }
+      }
       /* The session and the number come back so the caller can find the
          lead and chase it. A booking carries a session id rather than a
          lead id: it is made mid-conversation, before anybody has decided
@@ -684,6 +731,17 @@ export const manageBooking = mutation({
 
     if (a.action === "cancel") {
       await ctx.db.patch(b._id, { status: "cancelled" });
+      /* The one that matters most. Reminding somebody about an appointment
+         they cancelled tells them nobody was listening, and it is worse
+         than never reminding them at all. */
+      {
+        const lead = await leadForSession(ctx, b.sessionId);
+        if (lead) {
+          await ctx.runMutation(api.reminders.cancelReminders, {
+            leadId: lead._id, why: "cancelled",
+          });
+        }
+      }
       return { ok: true, reference: b.reference, status: "cancelled" };
     }
     if (a.action === "move") {
@@ -697,6 +755,20 @@ export const manageBooking = mutation({
         calendarEventId: undefined,
         calendarSyncedAt: undefined,
       });
+      /* Re-timed, not left alone. remindAbout stops whatever was running
+         and enrols against the new moment, so the old reminders cannot
+         survive a move. */
+      {
+        const lead = await leadForSession(ctx, b.sessionId);
+        if (lead) {
+          await ctx.runMutation(api.reminders.remindAbout, {
+            leadId: lead._id,
+            sessionId: b.sessionId,
+            preferredDate: a.preferredDate,
+            preferredTime: a.preferredTime,
+          });
+        }
+      }
       return {
         ok: true,
         reference: b.reference,

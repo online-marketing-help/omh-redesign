@@ -14,6 +14,7 @@ import type * as crons from "../crons.js";
 import type * as functions from "../functions.js";
 import type * as handover from "../handover.js";
 import type * as http from "../http.js";
+import type * as reminders from "../reminders.js";
 import type * as routing from "../routing.js";
 import type * as visitors from "../visitors.js";
 
@@ -30,6 +31,7 @@ declare const fullApi: ApiFromModules<{
   functions: typeof functions;
   handover: typeof handover;
   http: typeof http;
+  reminders: typeof reminders;
   routing: typeof routing;
   visitors: typeof visitors;
 }>;

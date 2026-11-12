@@ -115,7 +115,7 @@ other developer deploys from it.
     identified it as a builder's phone greeting and said OMH does not do
     kitchen renovations, which is correct.
 
-- [ ] **F5** - Remind before, and chase a no-show, by email
+- [x] **F5** - Remind before, and chase a no-show, by email
   - Route G exists and nothing enrols onto it. A confirmed booking should be
     enrolled so a reminder goes out before, and a no-show is chased after.
   - **The SMS steps cannot run without Twilio, and that is fine**: the worker
@@ -126,8 +126,33 @@ other developer deploys from it.
     London time, respects quiet hours, and STOPS if the booking is cancelled
     or moved. That last one is the whole risk: reminding somebody about an
     appointment they cancelled is worse than not reminding them.
-  - Evidence: assertions for the timing and the cancel case; one real email
-    reminder sent to an address Rafiul controls, after his approval.
+  - **Done 2026-11-12.** Route G (the no-show chase) already existed and
+    nothing enrolled onto it. There was no reminder-before route at all,
+    and there could not have been: every step in this engine is timed
+    FORWARD from enrolment, and a reminder is the first thing that has to
+    be timed BACKWARDS from a moment in the diary.
+  - So `StepWhen` gained `beforeMs`, `sequences` gained `anchorAt`, and
+    route H was added with two steps counted back from the appointment.
+    18 assertions on the timing, including the two that matter: a reminder
+    whose moment has already passed is not scheduled at all, and quiet
+    hours may move a reminder forward only while it stays before the
+    appointment. Forward from 03:00 is 08:00, which for an early booking
+    is after it has started.
+  - 13 more assertions on who gets one. The risk is not a missed reminder,
+    it is reminding somebody about an appointment they cancelled, which
+    tells them nobody was listening. Cancelling stops it, a no-show stops
+    it, and moving re-times it rather than leaving the old moment standing.
+  - Wired inside `bookAppointment` and `manageBooking` rather than in n8n,
+    which is the stated exception to "n8n is the brain": a booking and its
+    reminders must not be able to disagree, and in one transaction they
+    cannot.
+  - Live evidence: booked for Sat 21 Nov 14:00, reminder scheduled Fri 20
+    Nov 16:00 London - 22 hours before, inside quiet hours. Cancelled the
+    booking; the sequence went to `stopped`, reason `cancelled`, nothing
+    due.
+  - **Nothing sends them yet.** `08-sequence-worker` is inactive, and
+    activating it would also wake the SMS steps on routes that have no
+    Twilio behind them. That is a switch and a decision, not missing work.
 
 ## Order, and why
 

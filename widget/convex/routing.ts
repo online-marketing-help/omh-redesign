@@ -244,8 +244,12 @@ export const enrol = mutation({
        campaign, and recording one for it would make every report that groups
        by campaign meaningless. */
     campaignId: v.optional(v.id("campaigns")),
+    /* The appointment a reminder route counts back from. Ignored by every
+       other route, and a reminder route without one schedules nothing
+       rather than guessing. */
+    anchorAt: v.optional(v.number()),
   },
-  handler: async (ctx, { leadId, route, sessionId, campaignId }) => {
+  handler: async (ctx, { leadId, route, sessionId, campaignId, anchorAt }) => {
     if (!isRoute(route)) return { enrolled: false, why: "unknown_route" };
 
     const lead = await ctx.db.get(leadId);
@@ -287,7 +291,7 @@ export const enrol = mutation({
     }
 
     const now = Date.now();
-    const first = nextStep(route, now, 0, now);
+    const first = nextStep(route, now, 0, now, anchorAt);
 
     const id = await ctx.db.insert("sequences", {
       leadId,
@@ -297,6 +301,9 @@ export const enrol = mutation({
       status: first ? "active" : "completed",
       stopReason: first ? undefined : "exhausted",
       nextDueAt: first ? first.dueAt : undefined,
+      /* Kept so later steps can be re-timed from the same moment, and so a
+         moved booking can re-time the whole sequence from the new one. */
+      anchorAt,
       campaignId,
       attempts: 0,
       at: now,
@@ -568,7 +575,7 @@ async function advance(
   now: number,
   attemptDelta: number,
 ) {
-  const next = nextStep(route, seq.at, seq.step + 1, now);
+  const next = nextStep(route, seq.at, seq.step + 1, now, seq.anchorAt);
   if (!next) {
     await ctx.db.patch(seq._id, {
       status: "completed",

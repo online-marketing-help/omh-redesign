@@ -350,6 +350,16 @@ export default defineSchema({
     stopReason: v.optional(v.string()), // replied | booked | opted_out | exhausted |
                                         // manual | no_consent | suppressed | kill_switch
     nextDueAt: v.optional(v.number()),
+
+    /* The moment the route counts BACK from, where it has one.
+
+       Only reminder routes use it: "a day before the appointment" means
+       nothing without the appointment. Every other route times its steps
+       forward from enrolment and leaves this unset. Kept on the sequence
+       rather than looked up per step, because the booking can be moved and
+       the sequence then has to be re-timed from the new moment, which is a
+       decision made in one place. */
+    anchorAt: v.optional(v.number()),
     lastStepAt: v.optional(v.number()),
 
     /* The lease. Two worker runs can overlap: the cron fires every minute and

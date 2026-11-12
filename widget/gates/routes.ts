@@ -36,7 +36,14 @@ export type StepWhen =
   /* A short delay, where the minutes are the point. */
   | { afterMs: number }
   /* A wall-clock moment in London, where the time of day is the point. */
-  | { addDays: number; hour: number; minute?: number };
+  | { addDays: number; hour: number; minute?: number }
+  /* Counted BACK from something in the diary, not forward from enrolment.
+     A reminder is the only kind of step that works this way: "a day before
+     the appointment" means nothing without the appointment. Needs an
+     anchor, and schedules nothing without one, because a reminder that
+     guesses is a reminder that can land after the thing it reminds you
+     of. */
+  | { beforeMs: number };
 
 /**
  * Whether a step still applies by the time it comes round.
@@ -75,7 +82,7 @@ export type Route = {
   steps: Step[];
 };
 
-export type RouteId = "A" | "B" | "C" | "D" | "E" | "F" | "G";
+export type RouteId = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H";
 
 /* ------------------------------------------------------------------------ */
 
@@ -365,6 +372,43 @@ export const ROUTES: Record<RouteId, Route> = {
        where the person rang us or asked us to ring. Somebody who booked and
        forgot did neither at the moment we would be dialling. */
   },
+
+  H: {
+    id: "H",
+    name: "Booked, and it has not happened yet",
+    intent: "They chose a time. The job now is that they remember it.",
+    rule: "Two reminders, counted back from the appointment, then stop.",
+    marketing: false,
+    /* Nothing on enrolment. The booking confirmation is sent by the thing
+       that took the booking; a second message a minute later saying the
+       same thing is noise. */
+    immediate: [],
+    steps: [
+      {
+        key: "h_email_day_before",
+        /* Counted back from the APPOINTMENT, which is the only route here
+           that works that way. Twenty-two hours rather than twenty-four so
+           that a 09:00 appointment is reminded at 11:00 the day before
+           rather than at 11:00 the same morning, when it is too late to
+           move anything. */
+        when: { beforeMs: 22 * 60 * 60 * 1000 },
+        channel: "email",
+        gate: "no_reply",
+        label: "A reminder the day before",
+        why: "Far enough ahead that they can move it, close enough that they have not forgotten being reminded.",
+      },
+      {
+        key: "h_sms_same_day",
+        /* Two hours. Long enough to set off, short enough that it is the
+           thing they are about to do. */
+        when: { beforeMs: 2 * 60 * 60 * 1000 },
+        channel: "sms",
+        gate: "no_reply",
+        label: "A text two hours before",
+        why: "The one that actually stops a no-show. A text two hours out is read; an email that morning competes with everything else.",
+      },
+    ],
+  },
 };
 
 /* ------------------------------------------------------------------------ */
@@ -384,7 +428,26 @@ export function stepAt(route: RouteId, step: number): Step | undefined {
  * us at 02:00 is awake. Moving those to 08:00 would answer a 2am caller seven
  * hours later, which is worse than not promising it at all.
  */
-export function dueAt(enrolledAt: number, when: StepWhen): number {
+export function dueAt(enrolledAt: number, when: StepWhen, anchorAt?: number): number {
+  if ("beforeMs" in when) {
+    /* No appointment, no reminder. Returning 0 rather than a guess: the
+       caller treats it as "nothing to schedule", and a reminder nobody
+       can place is better absent than approximate. */
+    if (!anchorAt || !Number.isFinite(anchorAt)) return 0;
+
+    const wanted = anchorAt - when.beforeMs;
+    /* Already gone, because the booking was made at short notice. Not
+       scheduled at all: a "reminder" that arrives after the appointment
+       reads as incompetence to somebody who has already turned up. */
+    if (wanted <= Date.now()) return 0;
+
+    /* Quiet hours move a step FORWARD, which is right everywhere else and
+       wrong here: forward from 03:00 is 08:00, and for an early
+       appointment that could be after it has started. So the moved time is
+       only taken if it is still before the appointment. */
+    const moved = nextSendableAt(wanted);
+    return moved < anchorAt ? moved : 0;
+  }
   if ("afterMs" in when) {
     const at = enrolledAt + when.afterMs;
     return when.afterMs < 60 * 60 * 1000 ? at : nextSendableAt(at);
@@ -412,10 +475,15 @@ export function nextStep(
   enrolledAt: number,
   fromIndex: number,
   floor: number,
+  anchorAt?: number,
 ): { index: number; dueAt: number; step: Step } | null {
   const steps = ROUTES[route]?.steps ?? [];
   for (let i = fromIndex; i < steps.length; i++) {
-    const at = dueAt(enrolledAt, steps[i].when);
+    const at = dueAt(enrolledAt, steps[i].when, anchorAt);
+    /* 0 means "there is no moment for this": an anchored step with no
+       appointment, or one whose moment has already gone. Skipped rather
+       than fired. */
+    if (at === 0) continue;
     /* Strictly after, so two steps can never collide on one moment either. */
     if (at > floor) return { index: i, dueAt: at, step: steps[i] };
   }

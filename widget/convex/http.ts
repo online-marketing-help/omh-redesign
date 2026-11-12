@@ -565,6 +565,8 @@ http.route({
       leadId: b.leadId,
       route: String(b.route ?? ""),
       sessionId: b.sessionId || undefined,
+      /* The appointment, for a reminder route. Everything else ignores it. */
+      anchorAt: b.anchorAt ? Number(b.anchorAt) : undefined,
     }),
   ),
 });

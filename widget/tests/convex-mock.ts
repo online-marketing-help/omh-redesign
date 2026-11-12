@@ -234,8 +234,22 @@ export function ctx() {
      test at all and nobody noticed. It runs the handler against the same ctx,
      which is what Convex does inside one transaction. */
   const c: any = { db };
-  c.runMutation = (fn: any, args: any) => fn._handler(c, args);
-  c.runQuery = (fn: any, args: any) => fn._handler(c, args);
+  /* Every cross-function call this ctx makes, in order.
+     A mutation reached through the GENERATED `api` object is a reference,
+     not a function: there is no `_handler` on it and calling one threw,
+     which meant adding any such call broke every unrelated test that
+     happened to run through the same mutation. Recording it instead keeps
+     those tests honest - the call is visible in `ctx().calls` and can be
+     asserted - while a test that cares about the real behaviour overrides
+     runMutation with the imported handler. */
+  c.calls = [];
+  const run = (fn: any, args: any) => {
+    if (fn && typeof fn._handler === "function") return fn._handler(c, args);
+    c.calls.push({ args });
+    return { ok: true, _unresolved: true };
+  };
+  c.runMutation = run;
+  c.runQuery = run;
   /* File storage. Enough of it to assert what a function does with an
      attachment: that it resolves a URL at all, and which fields it passes
      on. A real storage id is opaque, so a predictable fake one is more
