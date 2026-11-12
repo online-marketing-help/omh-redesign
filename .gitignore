@@ -70,3 +70,6 @@ widget/n8n/*.json
 .forge/.edits
 .forge/.last-edit
 .forge/active
+
+# Browser-test screenshots: output, not source.
+widget/web/embed/test/shot-*.png

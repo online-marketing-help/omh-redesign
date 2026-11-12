@@ -81,3 +81,23 @@ nothing and said nothing.
 **Convex free plan.** It ran out mid-session on 2026-11-10 and every route,
 including the public site's assistant, returned "exceeded the free plan
 limits" for about an hour. It will recur. It is not a code fault.
+
+---
+
+**"Start call fetches a live Retell web-call token — HTTP 200, token missing".**
+Not a bug and not a regression. **The Retell account has no credit**, so the
+token endpoint answers 200 with nothing in it and the voice tab cannot
+connect. Confirmed by Rafiul 2026-11-12. `web/embed/test/verify.mjs` will
+keep reporting those two failures until the account is topped up; chat is
+unaffected and passes. Do not go looking for it in the code.
+
+---
+
+**"Where is the widget actually served from?"** Three copies exist and only
+one matters. `https://onlinemarketinghelp.co.uk/ohm-assistant.js`, the WEB
+ROOT of the WordPress host, is what the live site loads. The Vercel copy
+(`ohm-assistant-eight.vercel.app`) and the one in
+`wp-content/uploads/ohm/` are not used by any page. Grepping the homepage
+HTML for "ohm-assistant" finds nothing because the tag is injected at
+runtime: check in a browser (`window.__ohmAssistantLoaded`) and watch the
+network requests, not the served HTML.
