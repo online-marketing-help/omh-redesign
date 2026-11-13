@@ -1,4 +1,7 @@
 import { Fragment } from "react";
+import { Activity, Database, Gauge, Puzzle, RefreshCw, ShieldCheck } from "lucide-react";
+import { CapabilityShowcase, MonitorMock } from "@/components/services/CapabilityShowcase";
+import { ServiceHeroArt } from "@/components/services/ServiceHeroArt";
 import { Pointer } from "@/components/Pointer";
 import { Reveal } from "@/components/Reveal";
 import { ServiceFaqSection } from "@/components/services/ServiceFaqSection";
@@ -6,16 +9,12 @@ import { ServiceFitSection as SharedServiceFitSection } from "@/components/servi
 import { ServiceNextStepsCTA } from "@/components/services/ServiceNextStepsCTA";
 import { ServiceProcessTimeline } from "@/components/services/ServiceProcessTimeline";
 import { ServiceReasonGrid } from "@/components/services/ServiceReasonGrid";
-import {
-  CheckIcon as Check,
-  FeatureValue,
-  ServiceSectionIntro as SectionIntro,
-} from "@/components/services/ServicePrimitives";
+import { FeatureValue, ServiceSectionIntro as SectionIntro } from "@/components/services/ServicePrimitives";
 import { Button, TextLink } from "@/components/ui/Button";
 import { Eyebrow, Fpo, ReviewProof } from "@/components/ui/Proof";
-import { MediaFrame } from "@/components/ServiceMedia";
 import { ServiceBand as Band } from "@/components/services/ServiceBand";
 import { wordpressMaintenance as content } from "@/lib/content/wordpress-maintenance";
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 
 type Package = (typeof content.packages)[number];
 
@@ -25,7 +24,8 @@ export function MaintenanceHero() {
       <div className="container-omh pb-[clamp(56px,38px+2.9vw,88px)] pt-[clamp(48px,34px+2.3vw,80px)]">
         <div className="grid grid-cols-12 items-center gap-x-12 gap-y-12 max-lg:block">
           <div className="col-span-7 max-lg:mb-12">
-            <Reveal>
+            {/* CSS-only entrance, not <Reveal>: the JS-gated reveal held the headline at opacity 0 until hydration and delayed LCP. */}
+            <div className="hero-in">
               <Eyebrow>{content.hero.eyebrow}</Eyebrow>
               <h1 className="mb-6 mt-7 font-sans text-display font-semibold text-balance">
                 WordPress maintenance packages that keep your website{" "}
@@ -42,11 +42,7 @@ export function MaintenanceHero() {
                 >
                   {content.hero.primary.label}
                 </Button>
-                <Button
-                  href={content.hero.secondary.href}
-                  variant="secondary"
-                  data-event="maintenance_view_packages_click"
-                >
+                <Button href={content.hero.secondary.href} variant="secondary" arrow data-event="maintenance_view_packages_click">
                   {content.hero.secondary.label}
                 </Button>
               </div>
@@ -66,25 +62,17 @@ export function MaintenanceHero() {
                   </div>
                 ))}
               </dl>
-            </Reveal>
+            </div>
           </div>
 
-          <Reveal className="col-span-5 col-start-8">
+          <div className="hero-in hero-in-2 col-span-5 col-start-8">
             <Pointer>
               <div className="pointer-parallax">
-                <MediaFrame
-                  kind="screen"
-                  theme="maintenance"
-                  ratio="16/11"
-                  title="WordPress maintenance report"
-                  note="Replace with a real approved report, update log or monitoring screen with sensitive details removed."
-                  source="/images/Services/Images on the pages/After website maintenance.png"
-                  alt="WordPress admin dashboard after maintenance, with core, plugins and themes up to date and site health reporting no critical issues."
-                />
+                <ServiceHeroArt variant="maintenance" />
               </div>
             </Pointer>
             <ReviewProof serviceId="maintenance" heading="WordPress support with verified trust" className="mt-6" />
-          </Reveal>
+          </div>
         </div>
       </div>
     </section>
@@ -149,62 +137,26 @@ export function MaintenanceFitSection() {
 
 export function MaintenanceCapabilityGrid() {
   const [featured, ...rest] = content.capabilities;
+  const icons = [Gauge, RefreshCw, ShieldCheck, Database, Puzzle, Activity];
   return (
-    <Band label="Care">
-      <Reveal>
-        <SectionIntro
-          title="WordPress maintenance services covering routine care, monitoring and practical support"
-          accent="practical support"
-          body="The service range includes issue investigation, performance, software updates, security checks, backups, uptime monitoring and a monthly support rhythm."
-        />
-        <Pointer className="pointer-spotlight relative mt-12 overflow-hidden rounded-card bg-inverse p-10 text-oninverse max-sm:p-6">
-          <div className="relative z-10 grid grid-cols-12 items-start gap-x-10 gap-y-8 max-lg:block">
-            <div className="col-span-6">
-              <p className="text-[14px] font-semibold uppercase tracking-[0.16em] text-oninverse/55">
-                When something is already wrong
-              </p>
-              <h3 className="mt-5 font-sans text-h2 font-semibold">
-                {featured.title}
-              </h3>
-              <p className="mt-5 text-lead leading-relaxed text-oninverse/75">
-                {featured.body}
-              </p>
-            </div>
-            <ul className="col-span-5 col-start-8 grid gap-3 border-t border-oninverse/15 pt-6 max-lg:mt-8">
-              {featured.detail?.map((line) => (
-                <li
-                  key={line}
-                  className="flex gap-3 text-body leading-snug text-oninverse/85"
-                >
-                  <Check className="mt-0.5 size-4 shrink-0 text-[#f2c675]" />
-                  {line}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </Pointer>
-        <div className="mt-8 grid grid-cols-2 gap-x-10 max-lg:grid-cols-1">
-          {rest.map((item, index) => (
-            <article
-              key={item.title}
-              className="group grid grid-cols-[auto_1fr] gap-x-5 border-t border-line px-3 py-7 transition-colors hover:border-teal/50 hover:bg-surface"
-            >
-              <span className="font-sans text-[18px] font-semibold tabular-nums tracking-[0.1em] text-muted group-hover:text-amber">
-                {String(index + 2).padStart(2, "0")}
-              </span>
-              <div>
-                <h3 className="font-sans text-h4 font-semibold">
-                  {item.title}
-                </h3>
-                <p className="mt-2.5 text-body leading-relaxed text-ink/75">
-                  {item.body}
-                </p>
-              </div>
-            </article>
-          ))}
-        </div>
-      </Reveal>
-    </Band>
+    <CapabilityShowcase
+      label="Care"
+      intro={{
+        title: "WordPress maintenance services covering routine care, monitoring and practical support",
+        accent: "practical support",
+        body: "The service range includes issue investigation, performance, software updates, security checks, backups, uptime monitoring and a monthly support rhythm.",
+      }}
+      featured={{
+        eyebrow: "When something is already wrong",
+        title: featured.title,
+        body: featured.body,
+        detail: featured.detail,
+        primary: { label: "See the packages", href: "#packages", event: "maintenance_care_packages_click" },
+        secondary: { label: "Talk to us", href: "/contact", event: "maintenance_care_contact_click" },
+        aside: <MonitorMock />,
+      }}
+      items={rest.map((item, i) => ({ ...item, icon: icons[i] ?? Activity }))}
+    />
   );
 }
 
@@ -409,6 +361,7 @@ export function MaintenancePricingPackages() {
 }
 
 export function MaintenanceProofSection() {
+  if (!CASE_STUDIES_LIVE) return null;
   return (
     <Band label="Proof" tone="white">
       <Reveal>
@@ -439,6 +392,7 @@ export function MaintenanceProofSection() {
                   </li>
                 ))}
               </ul>
+              {CASE_STUDIES_LIVE && (
               <div className="mt-7">
                 <TextLink
                   href="/case-studies"
@@ -447,6 +401,7 @@ export function MaintenanceProofSection() {
                   View case studies
                 </TextLink>
               </div>
+              )}
             </div>
             <div className="col-span-12 mt-9">
               <div className="grid grid-cols-2 gap-5 max-sm:grid-cols-1">

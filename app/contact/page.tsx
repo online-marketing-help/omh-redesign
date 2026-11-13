@@ -6,7 +6,7 @@ import { company } from "@/lib/content/nav";
 
 export const metadata: Metadata = {
   title: "Contact",
-  alternates: { canonical: "https://onlinemarketinghelp.co.uk/contact-us/" },
+  alternates: { canonical: "https://onlinemarketinghelp.co.uk/contact" },
   description:
     "Tell us what you need your website or marketing to do and we'll recommend the most practical next step. UK-based, marketing and development under one roof.",
 };
@@ -21,13 +21,28 @@ export default function ContactPage() {
   return (
     <section className="hero-grid overflow-x-clip border-b border-line bg-warm">
       <div className="container-omh section-md">
-        <div className="grid grid-cols-12 gap-x-14 gap-y-12 max-lg:block">
-          {/* Left: intro, details, what happens next */}
-          <div className="col-span-5 max-lg:mb-12">
+        {/* Phones (client, 2 Nov 2026): title, then the form, then the intro, details and next steps. From lg the left
+            column stacks the title over the rest and the form spans both rows on the right. */}
+        <div className="grid gap-y-10 lg:grid-cols-12 lg:grid-rows-[auto_1fr] lg:gap-x-14 lg:gap-y-0">
+          <div className="lg:col-span-5">
             <Eyebrow>Contact</Eyebrow>
-            <h1 className="mb-5 mt-6 font-sans text-display font-semibold text-balance">
+            <h1 className="mt-6 font-sans text-display font-semibold text-balance">
               Tell us what you need and we&apos;ll recommend <span className="text-amber-deep">the next step</span>
             </h1>
+          </div>
+
+          <div className="lg:col-span-7 lg:col-start-6 lg:row-span-2 lg:row-start-1">
+            <ContactForm />
+            <p className="mt-5 text-bsm text-muted">
+              Prefer email? Write to{" "}
+              <Link href={`mailto:${company.email}`} className="font-semibold text-amber-deep underline underline-offset-4">
+                {company.email}
+              </Link>
+              .
+            </p>
+          </div>
+
+          <div className="lg:col-span-5 lg:row-start-2 lg:pt-5">
             <p className="text-lead leading-relaxed text-ink/75">
               Whether it&apos;s a new website, a redesign, WordPress support or wider marketing,
               send a few details and we&apos;ll come back with a practical recommendation. No
@@ -91,18 +106,6 @@ export default function ContactPage() {
                 ))}
               </ol>
             </div>
-          </div>
-
-          {/* Right: form */}
-          <div className="col-span-7 col-start-6">
-            <ContactForm />
-            <p className="mt-5 text-bsm text-muted">
-              Prefer email? Write to{" "}
-              <Link href={`mailto:${company.email}`} className="font-semibold text-amber-deep underline underline-offset-4">
-                {company.email}
-              </Link>
-              .
-            </p>
           </div>
         </div>
       </div>

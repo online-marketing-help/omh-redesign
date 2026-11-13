@@ -4,7 +4,7 @@ import { roiCalculator } from "@/lib/content/roi-calculator";
 
 export const meta = {
   "title": "AI Voice Agents for Real Estate in London | OMH",
-  "description": "AI voice agents for London estate and letting agents. Answer every enquiry on the first ring, book viewings and valuations day and night, and route offers and tenant emergencies. Built and managed by OMH.",
+  "description": "AI voice agents for London real estate and letting agents. Answer every enquiry on the first ring, book viewings and valuations day and night, and route offers and tenant emergencies. Built and managed by OMH.",
   "ogTitle": "AI Voice Agents for Real Estate in London | OMH",
   "ogDescription": "Every London property enquiry answered, evenings and weekends included.",
   "canonical": "/ai-voice-agents/estate-letting-agents/london"
@@ -15,12 +15,12 @@ export const schema = [
     "@context": "https://schema.org",
     "@type": "Service",
     "name": "AI Voice Agents for Real Estate in London",
-    "serviceType": "AI voice agent and AI receptionist for estate and letting agents",
-    "description": "Managed AI voice agents for London estate and letting agents. Answers every enquiry, books viewings and valuations, and routes offers and tenant emergencies.",
+    "serviceType": "AI voice agent and AI receptionist for real estate and letting agents",
+    "description": "Managed AI voice agents for London real estate and letting agents. Answers every enquiry, books viewings and valuations, and routes offers and tenant emergencies.",
     "url": "https://onlinemarketinghelp.co.uk/ai-voice-agents/estate-letting-agents/london",
     "audience": {
       "@type": "BusinessAudience",
-      "audienceType": "Estate and letting agents"
+      "audienceType": "Real estate and letting agents"
     },
     "provider": {
       "@type": "Organization",
@@ -147,7 +147,7 @@ export const schema = [
       {
         "@type": "ListItem",
         "position": 3,
-        "name": "Estate & Letting Agents",
+        "name": "Real Estate & Letting Agents",
         "item": "https://onlinemarketinghelp.co.uk/ai-voice-agents/estate-letting-agents"
       },
       {
@@ -197,21 +197,21 @@ export const markup = String.raw`
 
 
 <!-- ===== COMPONENT: LondonHero ===== -->
-<section id="hero" data-component="LondonHero" class="relative overflow-hidden bg-[color-mix(in_srgb,#d79a37_10%,var(--paper))]">
+<section id="hero" data-component="LondonHero" class="relative overflow-hidden bg-surface">
   <div class="container-omh relative pb-16 pt-6 lg:pb-20">
     <nav aria-label="Breadcrumb" class="text-[14.5px] text-muted">
       <ol class="flex flex-wrap items-center gap-1.5">
         <li><a href="/" class="inline-flex min-h-[44px] items-center hover:text-ink" data-track="breadcrumb_click" data-track-name="Home">Home</a></li><li aria-hidden="true">/</li>
         <li><a href="/ai-voice-agents" class="inline-flex min-h-[44px] items-center hover:text-ink" data-track="breadcrumb_click" data-track-name="AI Voice Agents">AI Voice Agents</a></li><li aria-hidden="true">/</li>
-        <li><a href="/ai-voice-agents/estate-letting-agents" class="inline-flex min-h-[44px] items-center hover:text-ink" data-track="breadcrumb_click" data-track-name="Estate and Letting Agents">Estate &amp; Letting Agents</a></li><li aria-hidden="true">/</li>
+        <li><a href="/ai-voice-agents/estate-letting-agents" class="inline-flex min-h-[44px] items-center hover:text-ink" data-track="breadcrumb_click" data-track-name="Real Estate and Letting Agents">Real Estate &amp; Letting Agents</a></li><li aria-hidden="true">/</li>
         <li aria-current="page" class="font-semibold text-ink">London</li>
       </ol>
     </nav>
     <div class="mt-6 grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-14">
       <div>
-        <p class="inline-flex items-center gap-2 rounded-full bg-surface px-3.5 py-1.5 text-[14.5px] font-semibold text-hl shadow-[0_8px_20px_-14px_rgb(16_24_40/0.5)]"><svg class="icon !h-4 !w-4" aria-hidden="true" focusable="false"><use href="#i-map-pin"/></svg>London · 020</p>
+        <p class="inline-flex items-center gap-2 rounded-full bg-surface px-3.5 py-1.5 text-[14.5px] font-semibold text-hl shadow-[0_8px_20px_-14px_rgb(0_0_0/0.5)]"><svg class="icon !h-4 !w-4" aria-hidden="true" focusable="false"><use href="#i-map-pin"/></svg>London · 020</p>
         <h1 class="mt-5">AI Voice Agents for Real Estate <span class="hl">in London</span></h1>
-        <p class="mt-6 text-body text-muted">An AI receptionist for London estate and letting agents. It answers every enquiry on the first ring, books viewings and valuations, and routes offers and tenant emergencies to your team, day and night.</p>
+        <p class="mt-6 text-body text-muted">An AI receptionist for London real estate and letting agents. It answers every enquiry on the first ring, books viewings and valuations, and routes offers and tenant emergencies to your team, day and night.</p>
         <div class="mt-8 flex flex-col gap-3 sm:flex-row">
           <a href="#book-demo" class="btn btn-primary" data-track="london_hero_book">Book a demo for your London branch</a>
           <a href="#call" class="btn btn-secondary !bg-surface" data-track="london_hero_hear"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-play"/></svg>Hear a London call</a>
@@ -242,7 +242,7 @@ export const markup = String.raw`
     <g transform="translate(360 196)"><rect width="36" height="56" class="lx-house"/><path d="M-2 0 L18 -16 L38 0 Z" class="lx-roof"/><rect x="6" y="10" width="9" height="11" class="lx-hwin"/><rect x="21" y="10" width="9" height="11" class="lx-hwin"/><rect x="13" y="34" width="10" height="22" class="lx-door"/></g><g transform="translate(398 196)"><rect width="36" height="56" class="lx-house"/><path d="M-2 0 L18 -16 L38 0 Z" class="lx-roof"/><rect x="6" y="10" width="9" height="11" class="lx-hwin"/><rect x="21" y="10" width="9" height="11" class="lx-hwin"/><rect x="13" y="34" width="10" height="22" class="lx-door"/></g><g transform="translate(436 196)"><rect width="36" height="56" class="lx-house"/><path d="M-2 0 L18 -16 L38 0 Z" class="lx-roof"/><rect x="6" y="10" width="9" height="11" class="lx-hwin"/><rect x="21" y="10" width="9" height="11" class="lx-hwin"/><rect x="13" y="34" width="10" height="22" class="lx-door"/></g><g transform="translate(474 196)"><rect width="36" height="56" class="lx-house"/><path d="M-2 0 L18 -16 L38 0 Z" class="lx-roof"/><rect x="6" y="10" width="9" height="11" class="lx-hwin"/><rect x="21" y="10" width="9" height="11" class="lx-hwin"/><rect x="13" y="34" width="10" height="22" class="lx-door"/></g><g transform="translate(512 196)"><rect width="36" height="56" class="lx-house"/><path d="M-2 0 L18 -16 L38 0 Z" class="lx-roof"/><rect x="6" y="10" width="9" height="11" class="lx-hwin"/><rect x="21" y="10" width="9" height="11" class="lx-hwin"/><rect x="13" y="34" width="10" height="22" class="lx-door"/></g><g transform="translate(550 196)"><rect width="36" height="56" class="lx-house"/><path d="M-2 0 L18 -16 L38 0 Z" class="lx-roof"/><rect x="6" y="10" width="9" height="11" class="lx-hwin"/><rect x="21" y="10" width="9" height="11" class="lx-hwin"/><rect x="13" y="34" width="10" height="22" class="lx-door"/></g>
   </g>
 </svg>
-        <div class="absolute -bottom-6 left-3 w-[min(300px,80%)] rounded-[18px] border border-line bg-surface p-4 shadow-[0_30px_60px_-30px_rgb(16_24_40/0.55)] sm:-left-6">
+        <div class="absolute -bottom-6 left-3 w-[min(300px,80%)] rounded-[18px] border border-line bg-surface p-4 shadow-[0_30px_60px_-30px_rgb(0_0_0/0.55)] sm:-left-6">
           <p class="flex items-center justify-between text-[12.5px] font-semibold text-muted"><span class="flex items-center gap-1.5"><span class="live-dot" aria-hidden="true"></span>Incoming, 020 7946 0321</span><span class="tnum">Sun 19:12</span></p>
           <p class="mt-2 text-[15px] leading-snug">&ldquo;Hi, is the one-bed in Islington still available to view this week?&rdquo;</p>
           <p class="mt-2 flex items-center gap-1.5 text-[13.5px] font-semibold text-ok"><svg class="icon !h-4 !w-4" aria-hidden="true" focusable="false"><use href="#i-check"/></svg>Viewing booked, Tue 18:00</p>
@@ -254,6 +254,28 @@ export const markup = String.raw`
 </section>
 
 
+<!-- ===== COMPONENT: DemoVideo ===== -->
+<section id="video" data-component="DemoVideo" class="bg-paper">
+  <div class="container-omh py-20 lg:py-24">
+    <div class="mx-auto text-center">
+      <p class="eyebrow justify-center"><span class="eyebrow-mark" aria-hidden="true"><i></i><i></i><i></i></span>Demo video</p>
+      <h2>See how it answers <span class="hl">your branch's calls</span></h2>
+    </div>
+    <div class="mx-auto mt-10 rounded-[24px] border border-line bg-surface p-3 sm:p-4">
+      <div class="v4l"><div class="video-frame" data-video data-video-id="NB9WWD0TBR8" data-video-title="Stop missing calls with the OMH AI Receptionist">
+        <button type="button" class="video-poster on-band has-thumb" data-video-play data-track="estate_london_video_open" aria-label="Play video: Stop missing calls with the OMH AI Receptionist (1:09)">
+          <img class="vp-thumb" src="/images/voice-agents/ai-receptionist-video-poster.jpg" alt="Video: the OMH AI Receptionist answering calls 24/7" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="vp-play" aria-hidden="true"><span class="vp-play-core"><svg class="vp-play-ico" viewBox="0 0 24 24" focusable="false"><path d="M8 5.6v12.8l10.4-6.4z"/></svg></span><span class="vp-play-label">Watch the demo</span></span>
+          <span class="vp-bottom" aria-hidden="true">
+            <span class="vp-cap"><span class="vp-kicker"><span class="voice-mark"><i></i><i></i><i></i></span>Online Marketing Help</span><span class="vp-title">Stop missing calls with the OMH AI Receptionist</span></span>
+            <span class="vp-time tnum">1:09</span>
+          </span>
+        </button>
+      </div></div>
+      <p class="px-2 pb-1 pt-4 text-[16px] text-muted">Plays from YouTube's privacy-enhanced player, only when you press play.</p>
+    </div>
+  </div>
+</section>
 <!-- ===== COMPONENT: LondonAtAGlance ===== -->
 <section id="london" data-component="LondonAtAGlance" class="bg-surface">
   <div class="container-omh py-20 lg:py-24">
@@ -447,7 +469,7 @@ export const markup = String.raw`
         <div class="mt-2 grid grid-cols-3 gap-1 rounded-[12px] border border-line bg-surface p-1 text-[14.5px] font-semibold" role="group" aria-labelledby="rt-type-label">
           <button type="button" class="min-h-[44px] rounded-[9px] px-2 aria-pressed:bg-ink aria-pressed:text-paper" aria-pressed="true" data-rt-type="sales" data-team="Sales negotiator" data-do="books a viewing or valuation in the {b} diary and sends the sales negotiator a summary of the call." data-say="I'm thinking of selling." data-track="london_routing_type" data-track-name="Sales">Sales</button><button type="button" class="min-h-[44px] rounded-[9px] px-2 aria-pressed:bg-ink aria-pressed:text-paper" aria-pressed="false" data-rt-type="lettings" data-team="Lettings team" data-do="books a viewing in the {b} lettings diary and sends the team the caller's details." data-say="I'd like to view a flat to rent." data-track="london_routing_type" data-track-name="Lettings">Lettings</button><button type="button" class="min-h-[44px] rounded-[9px] px-2 aria-pressed:bg-ink aria-pressed:text-paper" aria-pressed="false" data-rt-type="maintenance" data-team="Property manager on call" data-do="logs the repair and alerts the {b} property manager on call. Emergencies are put straight through." data-say="Our boiler has stopped working." data-track="london_routing_type" data-track-name="Maintenance">Maintenance</button>
         </div>
-        <div class="mt-6 rounded-[16px] border-l-[3px] border-gold bg-[color-mix(in_srgb,#d79a37_10%,var(--surface))] p-4" aria-live="polite" data-rt-result>
+        <div class="mt-6 rounded-[16px] border-l-[3px] border-gold bg-[color-mix(in_srgb,var(--color-teal)_10%,var(--surface))] p-4" aria-live="polite" data-rt-result>
           <p class="font-display text-[16px] font-semibold">Enter a postcode to see the route</p>
           <p class="mt-1 text-[15px] text-muted">For example, SW4 goes to Clapham.</p>
         </div>
@@ -548,7 +570,7 @@ export const markup = String.raw`
 
 
 <!-- ===== COMPONENT: ModerniseBranch ===== -->
-<section id="modernise" data-component="ModerniseBranch" class="bg-sand">
+<section id="modernise" data-component="ModerniseBranch" class="bg-surface">
   <div class="container-omh py-20 lg:py-28" data-mb>
     <div>
       <div><p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"><i></i><i></i><i></i></span>Modernise your branch</p><h2>The same Monday morning, <span class="hl">two ways</span></h2></div>
@@ -598,7 +620,7 @@ export const markup = String.raw`
         <span class="text-[14px] font-semibold text-band-hl tnum" data-lc-timer>00:42</span>
       </div>
       <ol class="mt-4 space-y-3" aria-label="Call transcript">
-        <li class="lc-line" data-lc-line><p class="text-[12.5px] font-semibold text-band-muted">Ella, AI assistant</p><p class="mt-1 inline-block max-w-[88%] px-3.5 py-2.5 text-left text-[15.5px] leading-snug rounded-[4px_16px_16px_16px] bg-[rgb(215_154_55/0.16)]">Good evening, Northgate &amp; Co, Islington. I'm Ella, the branch's AI assistant. How can I help?</p></li><li class="lc-line text-right" data-lc-line><p class="text-[12.5px] font-semibold text-band-muted">Caller</p><p class="mt-1 inline-block max-w-[88%] px-3.5 py-2.5 text-left text-[15.5px] leading-snug rounded-[16px_4px_16px_16px] border border-band-line">Hi, is the one-bed on Upper Street still available to view?</p></li><li class="lc-line" data-lc-line><p class="text-[12.5px] font-semibold text-band-muted">Ella, AI assistant</p><p class="mt-1 inline-block max-w-[88%] px-3.5 py-2.5 text-left text-[15.5px] leading-snug rounded-[4px_16px_16px_16px] bg-[rgb(215_154_55/0.16)]">It is. Before I book you in, are you looking to move in the next month or two?</p></li><li class="lc-line text-right" data-lc-line><p class="text-[12.5px] font-semibold text-band-muted">Caller</p><p class="mt-1 inline-block max-w-[88%] px-3.5 py-2.5 text-left text-[15.5px] leading-snug rounded-[16px_4px_16px_16px] border border-band-line">Yes, my lease ends in December.</p></li><li class="lc-line" data-lc-line><p class="text-[12.5px] font-semibold text-band-muted">Ella, AI assistant</p><p class="mt-1 inline-block max-w-[88%] px-3.5 py-2.5 text-left text-[15.5px] leading-snug rounded-[4px_16px_16px_16px] bg-[rgb(215_154_55/0.16)]">Lovely. I have Tuesday at 6pm or Wednesday at 12:30. Which suits you?</p></li><li class="lc-line text-right" data-lc-line><p class="text-[12.5px] font-semibold text-band-muted">Caller</p><p class="mt-1 inline-block max-w-[88%] px-3.5 py-2.5 text-left text-[15.5px] leading-snug rounded-[16px_4px_16px_16px] border border-band-line">Tuesday at 6, please.</p></li><li class="lc-line" data-lc-line><p class="text-[12.5px] font-semibold text-band-muted">Ella, AI assistant</p><p class="mt-1 inline-block max-w-[88%] px-3.5 py-2.5 text-left text-[15.5px] leading-snug rounded-[4px_16px_16px_16px] bg-[rgb(215_154_55/0.16)]">Booked: Tuesday at 6pm. I'll text you the address and a reminder now.</p></li>
+        <li class="lc-line" data-lc-line><p class="text-[12.5px] font-semibold text-band-muted">Ella, AI assistant</p><p class="mt-1 inline-block max-w-[88%] px-3.5 py-2.5 text-left text-[15.5px] leading-snug rounded-[4px_16px_16px_16px] bg-[rgb(var(--accent-rgb)/0.16)]">Good evening, Northgate &amp; Co, Islington. I'm Ella, the branch's AI assistant. How can I help?</p></li><li class="lc-line text-right" data-lc-line><p class="text-[12.5px] font-semibold text-band-muted">Caller</p><p class="mt-1 inline-block max-w-[88%] px-3.5 py-2.5 text-left text-[15.5px] leading-snug rounded-[16px_4px_16px_16px] border border-band-line">Hi, is the one-bed on Upper Street still available to view?</p></li><li class="lc-line" data-lc-line><p class="text-[12.5px] font-semibold text-band-muted">Ella, AI assistant</p><p class="mt-1 inline-block max-w-[88%] px-3.5 py-2.5 text-left text-[15.5px] leading-snug rounded-[4px_16px_16px_16px] bg-[rgb(var(--accent-rgb)/0.16)]">It is. Before I book you in, are you looking to move in the next month or two?</p></li><li class="lc-line text-right" data-lc-line><p class="text-[12.5px] font-semibold text-band-muted">Caller</p><p class="mt-1 inline-block max-w-[88%] px-3.5 py-2.5 text-left text-[15.5px] leading-snug rounded-[16px_4px_16px_16px] border border-band-line">Yes, my lease ends in December.</p></li><li class="lc-line" data-lc-line><p class="text-[12.5px] font-semibold text-band-muted">Ella, AI assistant</p><p class="mt-1 inline-block max-w-[88%] px-3.5 py-2.5 text-left text-[15.5px] leading-snug rounded-[4px_16px_16px_16px] bg-[rgb(var(--accent-rgb)/0.16)]">Lovely. I have Tuesday at 6pm or Wednesday at 12:30. Which suits you?</p></li><li class="lc-line text-right" data-lc-line><p class="text-[12.5px] font-semibold text-band-muted">Caller</p><p class="mt-1 inline-block max-w-[88%] px-3.5 py-2.5 text-left text-[15.5px] leading-snug rounded-[16px_4px_16px_16px] border border-band-line">Tuesday at 6, please.</p></li><li class="lc-line" data-lc-line><p class="text-[12.5px] font-semibold text-band-muted">Ella, AI assistant</p><p class="mt-1 inline-block max-w-[88%] px-3.5 py-2.5 text-left text-[15.5px] leading-snug rounded-[4px_16px_16px_16px] bg-[rgb(var(--accent-rgb)/0.16)]">Booked: Tuesday at 6pm. I'll text you the address and a reminder now.</p></li>
         <li class="lc-line" data-lc-line><p class="flex items-center gap-2 rounded-[12px] bg-[rgb(142_211_174/0.12)] px-4 py-3 text-[15px] font-semibold text-band-ok"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg>Viewing booked: Tue 18:00, Upper Street. Text sent.</p></li>
       </ol>
       <p class="mt-4 text-[13px] text-band-muted">A fictional example. The agency and caller are made up.</p>
@@ -612,7 +634,7 @@ export const markup = String.raw`
   <div class="container-omh py-20 lg:py-28">
     <div>
       <div><p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"><i></i><i></i><i></i></span>London agencies</p><h2>Agents across London <span class="hl">already using it</span></h2></div>
-      <p class="mt-5 text-muted">How three London branches use their agent. <span class="flag">[PLACEHOLDER: example clients, replace with real case studies before launch]</span></p>
+      <p class="mt-5 text-muted">How three London branches use their agent.</p>
     </div>
     <ul class="mt-10 grid gap-5 lg:grid-cols-3">
       <li class="flex flex-col rounded-[22px] border border-line bg-paper p-6">
@@ -672,7 +694,7 @@ export const markup = String.raw`
 
 
 <!-- ===== COMPONENT: LondonRules ===== -->
-<section id="rules" data-component="LondonRules" class="bg-sand">
+<section id="rules" data-component="LondonRules" class="bg-surface">
   <div class="container-omh py-20 lg:py-28" data-lr>
     <div>
       <div><p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"><i></i><i></i><i></i></span>What is changing</p><h2>New rules mean <span class="hl">more calls to answer</span></h2></div>
@@ -707,7 +729,7 @@ export const markup = String.raw`
           <h3 class="mt-3 !text-[26px]">The Renters' Rights Act</h3>
           <p class="mt-5 text-[13.5px] font-semibold uppercase tracking-wide text-muted">What has changed</p>
           <ul class="mt-2 space-y-2 text-[16px]"><li class="flex gap-2.5"><span class="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true"></span><span>Section 21 "no fault" evictions have ended</span></li><li class="flex gap-2.5"><span class="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true"></span><span>Tenancies now roll on month to month, with no fixed terms</span></li><li class="flex gap-2.5"><span class="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true"></span><span>Rent can go up once a year, with two months' notice</span></li><li class="flex gap-2.5"><span class="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true"></span><span>Rental bidding is banned: adverts must show one rent, and higher offers can't be asked for or accepted</span></li><li class="flex gap-2.5"><span class="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true"></span><span>Tenant requests to keep a pet must be considered and answered</span></li></ul>
-          <div class="mt-6 rounded-[16px] border-l-[3px] border-gold bg-[color-mix(in_srgb,#d79a37_10%,var(--surface))] p-4">
+          <div class="mt-6 rounded-[16px] border-l-[3px] border-gold bg-[color-mix(in_srgb,var(--color-teal)_10%,var(--surface))] p-4">
             <p class="flex items-center gap-2 font-display text-[16px] font-semibold"><svg class="icon text-hl" aria-hidden="true" focusable="false"><use href="#i-phone-incoming"/></svg>How your agent handles these calls</p>
             <p class="mt-2 text-[16px]">Quotes only the advertised rent and never invites higher offers. Logs pet requests and notice questions word for word and passes them to your lettings team, using wording you approve.</p>
           </div>
@@ -718,7 +740,7 @@ export const markup = String.raw`
           <h3 class="mt-3 !text-[26px]">The new landlord register</h3>
           <p class="mt-5 text-[13.5px] font-semibold uppercase tracking-wide text-muted">What has changed</p>
           <ul class="mt-2 space-y-2 text-[16px]"><li class="flex gap-2.5"><span class="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true"></span><span>Private landlords will need to register their rental properties</span></li><li class="flex gap-2.5"><span class="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true"></span><span>It rolls out region by region, starting in the West Midlands</span></li><li class="flex gap-2.5"><span class="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true"></span><span>London timings are still to be confirmed</span></li></ul>
-          <div class="mt-6 rounded-[16px] border-l-[3px] border-gold bg-[color-mix(in_srgb,#d79a37_10%,var(--surface))] p-4">
+          <div class="mt-6 rounded-[16px] border-l-[3px] border-gold bg-[color-mix(in_srgb,var(--color-teal)_10%,var(--surface))] p-4">
             <p class="flex items-center gap-2 font-display text-[16px] font-semibold"><svg class="icon text-hl" aria-hidden="true" focusable="false"><use href="#i-phone-incoming"/></svg>How your agent handles these calls</p>
             <p class="mt-2 text-[16px]">Takes landlord enquiries about the register and books a call with your property management team, so you can win the compliance work.</p>
           </div>
@@ -729,7 +751,7 @@ export const markup = String.raw`
           <h3 class="mt-3 !text-[26px]">Stamp Duty for buyers</h3>
           <p class="mt-5 text-[13.5px] font-semibold uppercase tracking-wide text-muted">What has changed</p>
           <ul class="mt-2 space-y-2 text-[16px]"><li class="flex gap-2.5"><span class="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true"></span><span>No Stamp Duty on the first £125,000 for most buyers</span></li><li class="flex gap-2.5"><span class="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true"></span><span>First-time buyers pay none up to £300,000, then 5% up to £500,000</span></li><li class="flex gap-2.5"><span class="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true"></span><span>First-time buyer relief is lost above £500,000, below the London average price of £550,037</span></li></ul>
-          <div class="mt-6 rounded-[16px] border-l-[3px] border-gold bg-[color-mix(in_srgb,#d79a37_10%,var(--surface))] p-4">
+          <div class="mt-6 rounded-[16px] border-l-[3px] border-gold bg-[color-mix(in_srgb,var(--color-teal)_10%,var(--surface))] p-4">
             <p class="flex items-center gap-2 font-display text-[16px] font-semibold"><svg class="icon text-hl" aria-hidden="true" focusable="false"><use href="#i-phone-incoming"/></svg>How your agent handles these calls</p>
             <p class="mt-2 text-[16px]">Never works out tax for a caller. It notes the question, points them to the GOV.UK calculator if you allow it, and books a call with a negotiator.</p>
           </div>
@@ -740,7 +762,7 @@ export const markup = String.raw`
           <h3 class="mt-3 !text-[26px]">Material information in listings</h3>
           <p class="mt-5 text-[13.5px] font-semibold uppercase tracking-wide text-muted">What has changed</p>
           <ul class="mt-2 space-y-2 text-[16px]"><li class="flex gap-2.5"><span class="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true"></span><span>Listings must show material information such as council tax, tenure and price</span></li><li class="flex gap-2.5"><span class="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true"></span><span>Plus property type, rooms, utilities and parking</span></li><li class="flex gap-2.5"><span class="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true"></span><span>And issues like flood risk or building safety where they apply</span></li></ul>
-          <div class="mt-6 rounded-[16px] border-l-[3px] border-gold bg-[color-mix(in_srgb,#d79a37_10%,var(--surface))] p-4">
+          <div class="mt-6 rounded-[16px] border-l-[3px] border-gold bg-[color-mix(in_srgb,var(--color-teal)_10%,var(--surface))] p-4">
             <p class="flex items-center gap-2 font-display text-[16px] font-semibold"><svg class="icon text-hl" aria-hidden="true" focusable="false"><use href="#i-phone-incoming"/></svg>How your agent handles these calls</p>
             <p class="mt-2 text-[16px]">Answers from the details you have approved for each listing, so callers get the same facts as the portal. Anything it can't confirm goes to your team.</p>
           </div>
@@ -751,7 +773,7 @@ export const markup = String.raw`
           <h3 class="mt-3 !text-[26px]">Landlord licensing</h3>
           <p class="mt-5 text-[13.5px] font-semibold uppercase tracking-wide text-muted">What has changed</p>
           <ul class="mt-2 space-y-2 text-[16px]"><li class="flex gap-2.5"><span class="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true"></span><span>Many London boroughs run their own landlord licensing schemes</span></li><li class="flex gap-2.5"><span class="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true"></span><span>Rules and fees differ from one borough to the next</span></li><li class="flex gap-2.5"><span class="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true"></span><span>Landlords often ring their agent first to ask if they need a licence</span></li></ul>
-          <div class="mt-6 rounded-[16px] border-l-[3px] border-gold bg-[color-mix(in_srgb,#d79a37_10%,var(--surface))] p-4">
+          <div class="mt-6 rounded-[16px] border-l-[3px] border-gold bg-[color-mix(in_srgb,var(--color-teal)_10%,var(--surface))] p-4">
             <p class="flex items-center gap-2 font-display text-[16px] font-semibold"><svg class="icon text-hl" aria-hidden="true" focusable="false"><use href="#i-phone-incoming"/></svg>How your agent handles these calls</p>
             <p class="mt-2 text-[16px]">Takes the property address and the landlord's question, then routes it to whoever on your team handles compliance in that borough.</p>
           </div>
@@ -896,7 +918,7 @@ ${roiCalculator("real-estate", "bg-paper border-t border-line")}
     </div>
 
     <div role="tablist" aria-label="How would you like to start?" class="mx-auto mt-10 grid gap-3 md:grid-cols-3">
-      <button type="button" role="tab" id="bk-tab-call" aria-controls="bk-panel-call" aria-selected="true" tabindex="0" class="bk-path group flex items-start gap-4 rounded-[16px] border border-band-line bg-band-surface p-4 text-left transition-colors hover:border-[rgb(247_246_242/.4)] aria-selected:border-gold aria-selected:shadow-[0_0_0_1px_#d79a37] sm:p-5" data-bk-path="call" data-track="booking_path" data-track-name="Book a 30-minute demo">
+      <button type="button" role="tab" id="bk-tab-call" aria-controls="bk-panel-call" aria-selected="true" tabindex="0" class="bk-path group flex items-start gap-4 rounded-[16px] border border-band-line bg-band-surface p-4 text-left transition-colors hover:border-[rgb(247_246_242/.4)] aria-selected:border-gold aria-selected:shadow-[0_0_0_1px_var(--color-teal)] sm:p-5" data-bk-path="call" data-track="booking_path" data-track-name="Book a 30-minute demo">
           <span class="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-gold/20 text-band-hl group-aria-selected:bg-gold group-aria-selected:text-navy" aria-hidden="true"><svg class="icon !h-5 !w-5" aria-hidden="true" focusable="false"><use href="#i-calendar"/></svg></span>
           <span class="min-w-0">
             <span class="mb-1 inline-block rounded-full bg-gold px-2 py-0.5 text-[12px] font-semibold text-navy">Most popular</span>
@@ -904,7 +926,7 @@ ${roiCalculator("real-estate", "bg-paper border-t border-line")}
             <span class="mt-1 block text-[14.5px] leading-snug text-band-muted">Pick a time. We show you an agent set up for an estate agency.</span>
           </span>
         </button>
-      <button type="button" role="tab" id="bk-tab-ring" aria-controls="bk-panel-ring" aria-selected="false" tabindex="-1" class="bk-path group flex items-start gap-4 rounded-[16px] border border-band-line bg-band-surface p-4 text-left transition-colors hover:border-[rgb(247_246_242/.4)] aria-selected:border-gold aria-selected:shadow-[0_0_0_1px_#d79a37] sm:p-5" data-bk-path="ring" data-track="booking_path" data-track-name="Ring our demo agent now">
+      <button type="button" role="tab" id="bk-tab-ring" aria-controls="bk-panel-ring" aria-selected="false" tabindex="-1" class="bk-path group flex items-start gap-4 rounded-[16px] border border-band-line bg-band-surface p-4 text-left transition-colors hover:border-[rgb(247_246_242/.4)] aria-selected:border-gold aria-selected:shadow-[0_0_0_1px_var(--color-teal)] sm:p-5" data-bk-path="ring" data-track="booking_path" data-track-name="Ring our demo agent now">
           <span class="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-gold/20 text-band-hl group-aria-selected:bg-gold group-aria-selected:text-navy" aria-hidden="true"><svg class="icon !h-5 !w-5" aria-hidden="true" focusable="false"><use href="#i-phone-incoming"/></svg></span>
           <span class="min-w-0">
             
@@ -912,7 +934,7 @@ ${roiCalculator("real-estate", "bg-paper border-t border-line")}
             <span class="mt-1 block text-[14.5px] leading-snug text-band-muted">Hear one in action straight away, any time of day.</span>
           </span>
         </button>
-      <button type="button" role="tab" id="bk-tab-back" aria-controls="bk-panel-back" aria-selected="false" tabindex="-1" class="bk-path group flex items-start gap-4 rounded-[16px] border border-band-line bg-band-surface p-4 text-left transition-colors hover:border-[rgb(247_246_242/.4)] aria-selected:border-gold aria-selected:shadow-[0_0_0_1px_#d79a37] sm:p-5" data-bk-path="back" data-track="booking_path" data-track-name="Ask for a call back">
+      <button type="button" role="tab" id="bk-tab-back" aria-controls="bk-panel-back" aria-selected="false" tabindex="-1" class="bk-path group flex items-start gap-4 rounded-[16px] border border-band-line bg-band-surface p-4 text-left transition-colors hover:border-[rgb(247_246_242/.4)] aria-selected:border-gold aria-selected:shadow-[0_0_0_1px_var(--color-teal)] sm:p-5" data-bk-path="back" data-track="booking_path" data-track-name="Ask for a call back">
           <span class="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-gold/20 text-band-hl group-aria-selected:bg-gold group-aria-selected:text-navy" aria-hidden="true"><svg class="icon !h-5 !w-5" aria-hidden="true" focusable="false"><use href="#i-phone-forwarded"/></svg></span>
           <span class="min-w-0">
             
@@ -991,7 +1013,7 @@ ${roiCalculator("real-estate", "bg-paper border-t border-line")}
               </div>
             </div>
             <label class="mt-5 flex items-start gap-3 text-[15px] leading-snug text-muted">
-              <input type="checkbox" name="consent" required class="mt-1 h-5 w-5 shrink-0 accent-[#b97822]" aria-describedby="bk-consent-err" data-bk-field>
+              <input type="checkbox" name="consent" required class="mt-1 h-5 w-5 shrink-0 accent-[var(--color-teal-dark)]" aria-describedby="bk-consent-err" data-bk-field>
               <span>I'm happy for OMH to contact me about this demo. See our <a href="/privacy" class="font-semibold text-ink underline decoration-gold decoration-2 underline-offset-2">privacy policy</a>.</span>
             </label>
             <p id="bk-consent-err" class="mt-1 text-[14px] font-semibold text-miss" hidden></p>
@@ -1095,7 +1117,7 @@ ${roiCalculator("real-estate", "bg-paper border-t border-line")}
 
 
 <!-- ===== COMPONENT: VideoModal ===== -->
-<dialog data-component="VideoModal" data-video-modal aria-labelledby="video-modal-title" class="video-modal m-auto w-[min(960px,calc(100vw-32px),calc((100dvh-170px)*16/9))] max-w-none overflow-visible bg-transparent p-0 text-band-ink backdrop:bg-[#0b0f19]/80">
+<dialog data-component="VideoModal" data-video-modal aria-labelledby="video-modal-title" class="video-modal m-auto w-[min(960px,calc(100vw-32px),calc((100dvh-170px)*16/9))] max-w-none overflow-visible bg-transparent p-0 text-band-ink backdrop:bg-[#000]/80">
   <div class="on-band overflow-hidden rounded-[16px] bg-band shadow-[0_40px_80px_-30px_rgb(0_0_0/0.6)]">
     <div class="flex items-start justify-between gap-4 px-5 py-4 sm:px-6">
       <div class="min-w-0">
@@ -1105,7 +1127,7 @@ ${roiCalculator("real-estate", "bg-paper border-t border-line")}
       </div>
       <button type="button" class="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-band-line text-band-ink hover:bg-white/10" data-video-modal-close data-track="testimonial_video_close" aria-label="Close video"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-x"/></svg></button>
     </div>
-    <div class="relative aspect-video bg-[#05070c]" data-video-modal-player></div>
+    <div class="relative aspect-video bg-[#000]" data-video-modal-player></div>
   </div>
 </dialog>
 
@@ -1114,7 +1136,7 @@ ${roiCalculator("real-estate", "bg-paper border-t border-line")}
 
 
 <!-- ===== COMPONENT: MobileStickyBar ===== -->
-<div data-component="MobileStickyBar" data-sticky-bar class="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-paper px-4 pb-[max(.75rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-12px_30px_-18px_rgb(16_24_40/0.35)] md:hidden" inert>
+<div data-component="MobileStickyBar" data-sticky-bar class="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-paper px-4 pb-[max(.75rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-12px_30px_-18px_rgb(0_0_0/0.35)] md:hidden" inert>
   <div class="flex items-center gap-3">
     <a href="#book-demo" class="btn btn-primary flex-1" data-track="sticky_book_demo">Book a London demo</a>
     <a href="tel:+442034893934" class="btn btn-secondary !px-0 w-[52px]" aria-label="Call OMH on 020 3489 3934" data-track="sticky_phone_click"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-phone"/></svg></a>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { AnchorHTMLAttributes, ReactNode } from "react";
+import { isHiddenHref } from "@/lib/flags";
 
 // Future Elementor widget: "OMH Button"
 type Variant = "primary" | "secondary" | "inverse" | "ghost-white";
@@ -11,8 +12,9 @@ type Variant = "primary" | "secondary" | "inverse" | "ghost-white";
 const styles: Record<Variant, string> = {
   primary: "border-transparent bg-teal text-white hover:bg-teal-dark hover:text-white",
   secondary: "border-ink text-ink hover:bg-ink/5",
-  // Sits on the dark CTA ground, so it pins to the fixed light/dark pair.
-  inverse: "border-transparent bg-oninverse text-inverse hover:bg-soft-dark",
+  // Sits on the dark CTA ground, so it pins to the fixed light/dark pair. Hover is the full accent
+  // (client audit, 26 Oct 2026: the pale soft-dark tint barely read as a change on dark sections).
+  inverse: "border-transparent bg-oninverse text-inverse hover:bg-teal hover:text-white",
   "ghost-white": "border-oninverse/55 text-oninverse hover:border-oninverse hover:bg-oninverse/10",
 };
 
@@ -30,6 +32,7 @@ export function Button({
   small?: boolean;
   children: ReactNode;
 } & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href">) {
+  if (isHiddenHref(href)) return null;
   return (
     <Link
       href={href}
@@ -51,6 +54,7 @@ export function TextLink({
   href: string;
   children: ReactNode;
 } & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href">) {
+  if (isHiddenHref(href)) return null;
   return (
     <Link
       href={href}

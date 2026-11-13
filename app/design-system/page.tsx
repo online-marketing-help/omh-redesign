@@ -16,8 +16,8 @@ export const metadata: Metadata = {
 const swatches = [
   { hex: "#F7F6F2", name: "Warm White", use: "page ground, softer sections", cls: "bg-warm" },
   { hex: "#FFFFFF", name: "White", use: "cards, forms, contrast", cls: "bg-surface" },
-  { hex: "#101828", name: "Ink", use: "text, one CTA band per page", cls: "bg-inverse" },
-  { hex: "#D79A37", name: "Warm Amber", use: "actions, links, active states only", cls: "bg-teal" },
+  { hex: "#000", name: "Ink", use: "text, one CTA band per page", cls: "bg-inverse" },
+  { hex: "#7D5C33", name: "Warm Amber", use: "actions, links, active states only", cls: "bg-teal" },
   { hex: "#F8EDDC", name: "Soft Amber", use: "tinted panels, tags, hovers", cls: "bg-soft" },
   { hex: "#667085", name: "Slate", use: "secondary text, metadata", cls: "bg-muted" },
   { hex: "#D9DDD8", name: "Border", use: "hairlines, card borders", cls: "bg-line" },
@@ -207,7 +207,7 @@ export default function DesignSystem() {
             <VerifiedSlot>REAL TESTIMONIAL TO BE INSERTED</VerifiedSlot>
           </div>
           <div className="w-72">
-            <Fpo ratio="16/10" tag="Photo · 16:10" title="Real asset required" note="Hatched frame states exactly what is needed." source="/images/home/agency-collaboration.png" alt="Agency collaboration" />
+            <Fpo ratio="16/10" tag="Photo · 16:10" title="Real asset required" note="Hatched frame states exactly what is needed." source="/images/home/agency-collaboration.webp" alt="Agency collaboration" />
           </div>
         </div>
         <p className="mt-5 text-bsm text-muted">

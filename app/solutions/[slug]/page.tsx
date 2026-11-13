@@ -48,14 +48,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: meta.seoTitle ? { absolute: meta.seoTitle } : meta.title,
     description: meta.description,
-    alternates: { canonical: `https://onlinemarketinghelp.co.uk/solutions/${slug}/` },
+    alternates: { canonical: `https://onlinemarketinghelp.co.uk/solutions/${slug}` },
     openGraph: {
       title: meta.seoTitle ?? `${meta.title} | Online Marketing Help`,
       description: meta.description,
       type: "website",
       images: defaultOgImages,
       locale: "en_GB",
-      url: `https://onlinemarketinghelp.co.uk/solutions/${slug}/`,
+      url: `https://onlinemarketinghelp.co.uk/solutions/${slug}`,
     },
   };
 }
@@ -76,7 +76,7 @@ export default async function Page({ params }: Props) {
       url: "https://onlinemarketinghelp.co.uk/",
     },
     areaServed: { "@type": "Country", name: "United Kingdom" },
-    url: `https://onlinemarketinghelp.co.uk/solutions/${slug}/`,
+    url: `https://onlinemarketinghelp.co.uk/solutions/${slug}`,
   };
 
   return (
@@ -86,7 +86,8 @@ export default async function Page({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }}
       />
       <SolutionPage content={content} />
-      <BookDemo />
+      {/* Client, 26 Oct 2026: the enquiry-form section is gone; its eyebrow and title now head the booking section. */}
+      <BookDemo id="enquire" eyebrow={content.final.eyebrow ?? "Start with the real problem"} heading={content.final.title} />
     </>
   );
 }

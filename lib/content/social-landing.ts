@@ -1,3 +1,4 @@
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 // Verbatim copy from the live /facebook-marketing-agency/ and
 // /instagram-marketing-agency/ pages (docs/legacy-pages-plan.md Phase 3).
 //
@@ -28,7 +29,7 @@ export const socialLanding = {
     { label: "How We Can Help", href: "#how-can-help" },
     { label: "Get In Touch", href: "#get-in-touch" },
     { label: "Packages", href: "#packages" },
-    { label: "Case Studies", href: "#case-studies" },
+    ...(CASE_STUDIES_LIVE ? [{ label: "Case Studies", href: "#case-studies" }] : []),
   ],
 
   goals: {

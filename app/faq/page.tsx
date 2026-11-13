@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: "Frequently Asked Questions",
   description:
     "Answers to the questions UK businesses ask Online Marketing Help most often, covering how we work, cost, design, development, maintenance and contact.",
-  alternates: { canonical: "https://onlinemarketinghelp.co.uk/faq/" },
+  alternates: { canonical: "https://onlinemarketinghelp.co.uk/faq" },
 };
 
 // FAQPage schema built from the same data the page renders, so the two can't drift.

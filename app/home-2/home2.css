@@ -1,0 +1,199 @@
+/*
+  /home-2 preview: black and white with one gold accent, after the Instagram launch post.
+  Every utility on the site compiles to var(--color-*), so swapping the variables on this wrapper recolours
+  the shared Header, Footer, Button and every home section without touching them. No @theme here on purpose:
+  tokens must stay in globals.css (see the note at its top).
+
+  System
+  - Surfaces: one ground per theme (white / #0a0a0a). No grey fills. Cards, tiles and rows are hairline
+    outlines (1px --color-line, radius 12px) that darken to ink on hover. No drop shadows, no textures.
+  - Type: nothing under 18px on this page (header excluded: its nav tiers are width-tuned in Header.tsx).
+    Labels are sentence case, not tracked capitals.
+  - Gold (var(--accent-dark) on white, var(--accent) on black): hero headline, eyebrow labels, hover states. Always white type on gold.
+  - The closing CTA and footer are the one black block in the light theme.
+  To adopt site-wide: move the two palettes into :root / :root[data-theme="dark"] in globals.css.
+*/
+
+/* ---- Light (default) ---- */
+.home2 {
+  --color-ink: #0a0a0a;
+  --color-muted: #666666;
+  --color-line: #e3e3e3;
+  --color-warm: #ffffff;
+  --color-surface: #ffffff;
+  --color-soft: #f4f4f2;
+  --color-soft-dark: #e6e6e6;
+  --color-inverse: #0a0a0a;
+  --color-oninverse: #ffffff;
+  --color-teal: var(--accent-dark);
+  --color-teal-dark: var(--accent);
+  --color-amber: var(--accent-dark);
+  --color-amber-deep: #0a0a0a;
+  --color-tint-blue: #ffffff;
+  --color-tint-green: #ffffff;
+  --color-tint-amber: #ffffff;
+  --color-tint-rose: #ffffff;
+  --home2-btn-bg: #0a0a0a;
+  --home2-btn-fg: #ffffff;
+  color-scheme: light;
+  background: var(--color-warm);
+  color: var(--color-ink);
+}
+/* Mid-page sections built on the dark ground sit on the same white in the light theme. */
+.home2 section.dark-grid {
+  --color-inverse: #ffffff;
+  --color-oninverse: #0a0a0a;
+}
+
+/* ---- Dark ---- */
+:root[data-theme="dark"] .home2,
+:root[data-theme="dark"] .home2 section.dark-grid {
+  --color-ink: #ffffff;
+  --color-muted: #9c9c9c;
+  --color-line: #262626;
+  --color-warm: #0a0a0a;
+  --color-surface: #0a0a0a;
+  --color-soft: #161616;
+  --color-soft-dark: #242424;
+  --color-inverse: #0a0a0a;
+  --color-oninverse: #ffffff;
+  --color-teal: var(--accent);
+  --color-teal-dark: var(--accent-light);
+  --color-amber: var(--accent);
+  --color-amber-deep: #ffffff;
+  --color-tint-blue: #0a0a0a;
+  --color-tint-green: #0a0a0a;
+  --color-tint-amber: #0a0a0a;
+  --color-tint-rose: #0a0a0a;
+  --home2-btn-bg: #ffffff;
+  --home2-btn-fg: #0a0a0a;
+  color-scheme: dark;
+}
+/* Closing block goes to true black in the dark theme. */
+:root[data-theme="dark"] .home2 :is(section.scroll-mt-20, footer) {
+  --color-inverse: #000000;
+}
+
+/* The one gold headline: the hero. */
+.home2 .hero-grid {
+  --color-amber-deep: var(--color-amber);
+}
+
+/* The root layout still renders the site header and footer; this page carries its own recoloured pair. */
+body:has(.home2) > header,
+body:has(.home2) > footer {
+  display: none;
+}
+
+/* ---- Type ---- */
+/* 18px floor for everything outside the header; Tailwind arbitrary classes are matched by name. */
+.home2 :is(.text-\[14px\], .text-\[13\.5px\], .text-\[15px\], .text-\[16px\]):where(:not(header *)) {
+  font-size: 1.125rem;
+  line-height: 1.45;
+}
+/* Sentence-case labels read as editorial rather than templated. */
+.home2 .uppercase:where(:not(header *)) {
+  text-transform: none;
+  letter-spacing: 0.01em;
+}
+
+/* ---- Gold always carries white type ---- */
+.home2 a.bg-teal {
+  background-color: var(--home2-btn-bg);
+  color: var(--home2-btn-fg);
+}
+.home2 a.bg-teal:hover {
+  background-color: var(--color-teal);
+  color: #ffffff;
+}
+.home2 div.bg-teal,
+.home2 div.bg-teal * {
+  color: #ffffff;
+}
+
+/* ---- Flat surfaces ---- */
+/* The dark-theme grid rules in globals.css are :root[data-theme="dark"] .x (0,3,0); this needs (0,3,1) to win.
+   The hero grid stays (client, 25 Oct 2026); only its glow is flattened below. */
+html .home2 .dark-grid,
+html .home2 .recognition-field,
+html[data-theme] .home2 .recognition-field {
+  background-image: none;
+}
+html .home2 .hero-grid::after,
+html .home2 .program-card::after,
+html .home2 .pointer-spotlight::after {
+  content: none;
+}
+.home2 [class*="shadow-["]:where(:not(header *)),
+.home2 :is(.program-card, .recognition-tile, .quote-feature, .surface-card, .media-card, .case-row, .service-row, .insight-row),
+.home2 :is(.program-card, .recognition-tile, .quote-feature, .surface-card, .media-card):hover {
+  box-shadow: none;
+}
+
+/* ---- Cards: hairline outline, ink on hover ---- */
+.home2 :is(.program-card, .recognition-tile, .quote-feature, .surface-card, .media-card) {
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  background: transparent;
+}
+.home2 :is(.quote-feature, .media-card, .surface-card.bg-inverse) {
+  background: var(--color-inverse);
+}
+.home2 :is(.surface-card, .media-card):hover {
+  border-color: var(--color-ink);
+}
+
+.home2 .program-card {
+  padding: 40px 32px;
+}
+.home2 .program-card:hover {
+  border-color: var(--color-ink);
+  background: transparent;
+  transform: translateY(-4px);
+}
+.home2 .program-icon {
+  width: 64px;
+  height: 64px;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-oninverse);
+}
+.home2 .program-card:hover .program-icon {
+  border-color: var(--color-teal);
+  background: var(--color-teal);
+  color: #ffffff;
+  transform: none;
+}
+.home2 .program-link {
+  color: var(--color-oninverse);
+  font-size: 1.125rem;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.home2 :is(.service-row, .case-row, .insight-row):hover {
+  background: color-mix(in srgb, var(--color-ink) 4%, transparent);
+}
+
+.home2 .recognition-tile {
+  font-weight: 600;
+}
+.home2 .recognition-tile svg:first-child {
+  color: var(--color-ink);
+}
+.home2 .recognition-tile:hover {
+  border-color: var(--color-teal);
+  background: var(--color-teal);
+  color: #ffffff;
+  transform: translateY(-3px);
+}
+.home2 .recognition-tile:hover svg:first-child,
+.home2 .recognition-tile .recognition-arrow {
+  color: #ffffff;
+}
+
+/* The closing CTA hard-codes pale gold; keep it white. */
+.home2 .text-\[\#7d5c33\] {
+  color: var(--color-oninverse);
+}

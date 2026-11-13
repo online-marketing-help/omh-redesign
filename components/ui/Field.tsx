@@ -16,6 +16,7 @@ export function Field({
   type = "text",
   placeholder,
   defaultValue,
+  autoComplete,
 }: {
   label: string;
   /* Defaults to the visible label so submitted enquiries read as the questions
@@ -29,6 +30,7 @@ export function Field({
   type?: string;
   placeholder?: string;
   defaultValue?: string;
+  autoComplete?: string;
 }) {
   const id = useId();
   const describedBy = error ? `${id}-err` : help ? `${id}-help` : undefined;
@@ -49,6 +51,7 @@ export function Field({
         type={type}
         placeholder={placeholder}
         defaultValue={defaultValue}
+        autoComplete={autoComplete}
         disabled={disabled}
         required={required}
         aria-invalid={error ? true : undefined}

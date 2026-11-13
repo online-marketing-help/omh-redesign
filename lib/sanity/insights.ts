@@ -1,5 +1,6 @@
 import { groq } from "next-sanity";
 import { cacheOptions, client } from "@/lib/sanity/client";
+import { readToken } from "@/lib/sanity/token";
 import { toArticleHtml } from "@/lib/sanity/portable-text";
 import type {
   InsightIndexEntry,
@@ -107,21 +108,48 @@ export async function getInsightSlugs(): Promise<string[]> {
   return client.fetch<string[]>(groq`*[${published}].slug.current`, {}, cacheOptions);
 }
 
-export async function getInsight(slug: string): Promise<InsightPost | null> {
-  const raw = await client.fetch<(RawEntry & { body: unknown; tags: InsightTopic[] | null; seoTitle: string | null; seoDescription: string | null; focusKeywords: string[] | null }) | null>(
-    groq`*[${published} && slug.current == $slug][0]{
+// Draft preview (Studio → Presentation, or a post's "Open preview"): the "drafts" perspective returns the
+// latest draft where one exists, published content otherwise. Never cached, read with the server-only token.
+const previewClient = () =>
+  client.withConfig({ token: readToken, apiVersion: "2025-02-19", perspective: "drafts", useCdn: false });
+
+/** `preview`: true while Next.js draft mode is on, to show unpublished changes. */
+export async function getInsight(slug: string, preview = false): Promise<InsightPost | null> {
+  const query = groq`*[${preview ? `_type == "post" && defined(slug.current)` : published} && slug.current == $slug][0]{
       ${indexFields},
       seoTitle,
       seoDescription,
       focusKeywords,
       "tags": tags[]->{ "slug": slug.current, name },
-      body[]{ ..., _type == "image" => { ..., "src": asset->url } }
-    }`,
-    { slug },
-    cacheOptions,
-  );
+      body[]{
+        ...,
+        markDefs[]{
+          ...,
+          _type == "fileLink" => { ..., "url": file.asset->url, "filename": file.asset->originalFilename }
+        },
+        _type == "image" => { ..., "src": asset->url },
+        _type == "download" => {
+          ...,
+          "url": file.asset->url,
+          "filename": file.asset->originalFilename,
+          "size": file.asset->size,
+          "extension": file.asset->extension
+        }
+      }
+    }`;
+  type Raw = RawEntry & { body: unknown; tags: InsightTopic[] | null; seoTitle: string | null; seoDescription: string | null; focusKeywords: string[] | null };
+  const raw = preview
+    ? await previewClient().fetch<Raw | null>(query, { slug }, { cache: "no-store" })
+    : await client.fetch<Raw | null>(query, { slug }, cacheOptions);
 
   if (!raw) return null;
+  if (preview) {
+    // A draft can be missing fields the article template needs; fill them so the preview still renders.
+    raw.publishedAt ??= raw.modifiedAt;
+    raw.author ??= { id: "", name: "Online Marketing Help" } as RawEntry["author"];
+    raw.topic ??= { slug: "", name: "Draft" } as RawEntry["topic"];
+    raw.title ??= "Untitled draft";
+  }
 
   return {
     ...toEntry(raw),
@@ -147,4 +175,21 @@ export async function getRelatedInsights(post: InsightPost, limit = 3): Promise<
     cacheOptions,
   );
   return rows.map(toEntry);
+}
+
+// Draft preview only: every post with unpublished changes, newest edit first, for the Drafts list that
+// /insights shows while draft mode is on. "raw" so draft documents can be told apart by their drafts. id.
+export async function getDraftInsights(): Promise<Array<{ slug: string; title: string | null; updatedAt: string; published: boolean }>> {
+  return client
+    .withConfig({ token: readToken, apiVersion: "2025-02-19", perspective: "raw", useCdn: false })
+    .fetch(
+      groq`*[_type == "post" && _id in path("drafts.**") && defined(slug.current)] | order(_updatedAt desc){
+        "slug": slug.current,
+        title,
+        "updatedAt": _updatedAt,
+        "published": defined(*[_id == string::split(^._id, "drafts.")[1]][0]._id)
+      }`,
+      {},
+      { cache: "no-store" },
+    );
 }

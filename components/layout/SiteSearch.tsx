@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Search } from "lucide-react";
 import type { SearchEntry } from "@/lib/content/search-index";
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 
 /*
   Native <dialog> does the modal work — focus trap, inert background, Escape —
@@ -25,6 +26,12 @@ export function SiteSearch({ entries }: { entries: SearchEntry[] }) {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
+      /* `key` is optional on KeyboardEvent and genuinely arrives undefined:
+         password managers and browser autofill dispatch synthetic keydowns
+         without it, which is why this threw on the sign-in screen rather
+         than anywhere a person was actually typing. A global listener sees
+         every one of those, so it has to survive them. */
+      if (typeof event.key !== "string") return;
       if (event.key.toLowerCase() !== "k" || !(event.metaKey || event.ctrlKey)) return;
       event.preventDefault();
       const dialog = dialogRef.current;
@@ -63,14 +70,14 @@ export function SiteSearch({ entries }: { entries: SearchEntry[] }) {
         <div className="field-shell flex items-center gap-3 border-b border-line px-5 transition-colors">
           <Search className="size-5 shrink-0 text-muted" aria-hidden />
           <label htmlFor="site-search-input" className="sr-only">
-            Search pages, case studies and insights
+            {CASE_STUDIES_LIVE ? "Search pages, case studies and insights" : "Search pages and insights"}
           </label>
           <input
             id="site-search-input"
             autoFocus
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search pages, case studies and insights"
+            placeholder={CASE_STUDIES_LIVE ? "Search pages, case studies and insights" : "Search pages and insights"}
             className="min-w-0 flex-1 bg-transparent py-4 text-body outline-none placeholder:text-muted/70"
           />
           <button

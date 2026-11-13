@@ -188,7 +188,7 @@ const INDUSTRIES = {
 
   "real-estate": {
     slug: "real-estate",
-    name: "Estate and letting agents",
+    name: "Real estate and letting agents",
     askValue: "What do you earn on one instruction?",
     headline: "What are the valuations you never hear about worth?",
     lede:

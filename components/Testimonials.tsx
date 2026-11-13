@@ -8,6 +8,9 @@ import { siteTestimonials } from "@/lib/content/testimonials";
 export type Testimonial = {
   quote: string;
   name: string;
+  /** Role and company, shown after the name when known. Never guessed. */
+  role?: string;
+  company?: string;
   context?: string;
 };
 
@@ -113,15 +116,20 @@ export function ServiceTestimonials({
                     aria-roledescription="slide"
                     aria-label={`${index + 1} of ${count}`}
                     aria-hidden={index === current ? undefined : true}
-                    className={`flex min-h-[360px] w-full shrink-0 flex-col rounded-card border p-[clamp(28px,4vw,48px)] ${dark ? "border-oninverse/12 bg-oninverse/[0.04]" : "border-line bg-surface"}`}
+                    className={`flex w-full shrink-0 flex-col rounded-card border p-[clamp(24px,3vw,36px)] ${dark ? "border-oninverse/12 bg-oninverse/[0.04]" : "border-line bg-surface"}`}
                   >
-                    <span className={`font-body text-[52px] leading-none ${dark ? "text-[#9bc3f3]" : "text-amber"}`} aria-hidden>“</span>
+                    <span className={`font-body text-[40px] leading-none ${dark ? "text-[#9bc3f3]" : "text-amber"}`} aria-hidden>“</span>
                     {/* Slides share the tallest quote's height; auto margins centre shorter quotes
                         instead of leaving a gap above the attribution. */}
-                    <blockquote className={`my-auto py-4 font-body text-[clamp(21px,1.5vw,27px)] leading-[1.38] ${dark ? "text-oninverse/88" : "text-ink/88"}`}>{testimonialItem.quote}</blockquote>
-                    <footer className={`mt-8 border-t pt-5 ${rule}`}>
+                    <blockquote className={`my-auto py-3 font-body text-[clamp(19px,1.3vw,22px)] leading-[1.42] ${dark ? "text-oninverse/88" : "text-ink/88"}`}>{testimonialItem.quote}</blockquote>
+                    <footer className={`mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 border-t pt-4 ${rule}`}>
                       <p className="font-sans text-body font-semibold">{testimonialItem.name}</p>
-                      {testimonialItem.context && <p className={`mt-1 text-body ${secondary}`}>{testimonialItem.context}</p>}
+                      {(testimonialItem.role || testimonialItem.company) && (
+                        <p className={`text-body ${secondary}`}>{[testimonialItem.role, testimonialItem.company].filter(Boolean).join(", ")}</p>
+                      )}
+                      {testimonialItem.context && (
+                        <p className={`rounded-full border px-3 py-0.5 text-[14px] font-semibold uppercase tracking-[0.12em] ${dark ? "border-oninverse/20 text-oninverse/70" : "border-line text-muted"}`}>{testimonialItem.context}</p>
+                      )}
                     </footer>
                   </article>
                 ))}
@@ -153,7 +161,7 @@ export function SiteTestimonials({
   label,
   eventPrefix,
   title = "What customers said about working with OMH.",
-  body = "These eight reviews were published on the original OMH service pages. They are customer comments, not evidence of a guaranteed result.",
+  body = "Eight client reviews published on the original OMH service pages. They are customer comments, not evidence of a guaranteed result.",
   eyebrow = "Published customer reviews",
   tone = "navy",
   accent,

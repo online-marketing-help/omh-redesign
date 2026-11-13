@@ -8,7 +8,8 @@ import type { TocItem } from "@/lib/content/insight-toc";
    viewport is marked current, earlier ones are dimmed as done, and the counter
    shows how far through the article they are. On phones the list collapses
    behind the heading so it does not push the body down. */
-export function InsightContents({ items }: { items: TocItem[] }) {
+/** `idSuffix` keeps ids unique when the post renders a second copy (the phone layout puts one above the body). */
+export function InsightContents({ items, idSuffix = "" }: { items: TocItem[]; idSuffix?: string }) {
   const [active, setActive] = useState(items[0]?.id);
   const [open, setOpen] = useState(false);
 
@@ -35,15 +36,15 @@ export function InsightContents({ items }: { items: TocItem[] }) {
   );
 
   return (
-    <nav aria-labelledby="article-contents" className="border-t border-line pt-5">
+    <nav aria-labelledby={`article-contents${idSuffix}`} className="border-t border-line pt-5">
       <p className="flex items-center justify-between max-lg:hidden">
-        <span id="article-contents" className="text-[14px] font-semibold uppercase tracking-[0.15em] text-muted">On this page</span>
+        <span id={`article-contents${idSuffix}`} className="text-[14px] font-semibold uppercase tracking-[0.15em] text-muted">On this page</span>
         {counter}
       </p>
       <button
         type="button"
         aria-expanded={open}
-        aria-controls="article-contents-list"
+        aria-controls={`article-contents-list${idSuffix}`}
         onClick={() => setOpen((value) => !value)}
         className="flex w-full items-center justify-between gap-4 lg:hidden"
       >
@@ -53,7 +54,7 @@ export function InsightContents({ items }: { items: TocItem[] }) {
           <ChevronDown className={`size-4 text-muted transition-transform ${open ? "rotate-180" : ""}`} aria-hidden />
         </span>
       </button>
-      <ol id="article-contents-list" className={`mt-4 grid gap-2.5 max-lg:mt-5 ${open ? "" : "max-lg:hidden"}`}>
+      <ol id={`article-contents-list${idSuffix}`} className={`mt-4 grid gap-2.5 max-lg:mt-5 ${open ? "" : "max-lg:hidden"}`}>
         {items.map((item, i) => {
           const isActive = item.id === active;
           const done = i < index;

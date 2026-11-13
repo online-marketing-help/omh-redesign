@@ -10,6 +10,7 @@ const groups = [
   { id: "websites", title: "Websites & maintenance", description: "Build a website, launch a store or look after the site you have.", services: ["wordpress", "Shopify", "maintenence", "website-designs"] },
   { id: "search", title: "Search & advertising", description: "Reach people searching for your business, locally and beyond.", services: ["seo", "local-seo", "ppc", "amazon-ppc"] },
   { id: "social", title: "Social media", description: "Compare ongoing content management with paid social campaigns.", services: ["smm", "facebook", "instagram", "smp"] },
+  { id: "ai", title: "AI services", description: "An AI voice agent that answers every call, books appointments and follows up, set up and managed for you.", services: ["ai-voice-agents"] },
 ];
 
 function Value({ value }: { value: PriceCell }) {
@@ -91,7 +92,9 @@ export function PriceListHero() {
   );
 }
 
-export function PriceTables() {
+/** `voicePricingHtml`: the AI voice agent plan cards (lib/content/ai-voice-agents-markup.ts), built on the server
+    and passed in so the markup stays out of this client bundle. */
+export function PriceTables({ voicePricingHtml }: { voicePricingHtml: string }) {
   useEffect(() => {
     const openLinkedService = () => {
       const target = document.getElementById(window.location.hash.slice(1));
@@ -122,6 +125,20 @@ export function PriceTables() {
               <p className="mt-2 text-body text-muted">{group.description}</p>
               <div className="mt-6 border-t border-line">
                 {group.services.map(id => {
+                  // AI voice agents: the same plan cards as /ai-voice-agents, in the voice page's own styles.
+                  if (id === "ai-voice-agents") return (
+                    <details key={id} id={id} name="pricing-service" className="group/service scroll-mt-28 min-w-0 border-b border-line bg-surface">
+                      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 max-sm:flex-wrap transition-colors hover:bg-warm focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-amber group-open/service:bg-warm [&::-webkit-details-marker]:hidden sm:p-6">
+                        <span className="min-w-0"><span className="block font-sans text-[19px] font-semibold leading-snug text-ink">AI Voice Agents</span><span className="mt-1 block text-body text-muted">3 plans to compare, billed monthly</span></span>
+                        <span className="flex shrink-0 items-center gap-3 max-sm:w-full max-sm:justify-between sm:gap-5"><span className="text-right max-sm:text-left"><span className="block text-body text-muted">Starting from</span><span className="block font-sans text-xl font-semibold text-amber-deep">£249 a month</span></span><ChevronDown className="size-5 text-amber-deep transition-transform group-open/service:rotate-180 motion-reduce:transition-none" aria-hidden /></span>
+                      </summary>
+                      <div className="border-t border-line p-4 sm:p-6">
+                        <p className="text-body leading-relaxed text-ink/75">Three plans, billed monthly, no minimum contract. Every plan includes a managed agent, a British voice, a summary of every call and a monthly report. Prices exclude VAT.</p>
+                        <div id="va-page" className="va-page" dangerouslySetInnerHTML={{ __html: voicePricingHtml }} />
+                        <div className="mt-5 flex flex-wrap items-center justify-between gap-4"><p className="text-body text-muted">See what it sounds like before choosing a plan.</p><Button href="/ai-voice-agents" data-event="pricing_service_enquiry" data-service={id}>See AI voice agents</Button></div>
+                      </div>
+                    </details>
+                  );
                   const table = priceList.tables.find(item => item.id === id)!;
                   const pricing = table.rows.find(row => row.label.startsWith("Pricing"));
                   const importantNotes = table.notes.filter(note => /Monthly Payment|advertising spend|cost of Shopify|minimum 3 month/i.test(note));

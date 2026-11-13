@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   title: { absolute: "Google Ads Agency UK | PPC Management Services | OMH" },
   description:
     "OMH is a Google Ads agency for UK businesses, with PPC management services across Search, Shopping and remarketing. Request a scoped account review.",
-  alternates: { canonical: "https://onlinemarketinghelp.co.uk/google-adwords-ppc/" },
+  alternates: { canonical: "https://onlinemarketinghelp.co.uk/google-adwords-ppc" },
   openGraph: { title: "Google Ads Agency UK | PPC Management Services", images: defaultOgImages },
 };
 

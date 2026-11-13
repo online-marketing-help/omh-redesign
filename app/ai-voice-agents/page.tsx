@@ -1,121 +1,94 @@
 import type { Metadata } from "next";
-import { BookDemo } from "@/components/BookDemo";
-import { LandingV4Script } from "@/components/voice-agents/LandingV4Script";
-import { VoiceAgentsScript } from "@/components/voice-agents/VoiceAgentsScript";
+import { type Runs, VoiceLanding, sectionsOf } from "@/components/voice-agents/VoiceLanding";
 import { landingV4Markup } from "@/lib/content/ai-voice-agents-landing-v4";
-import { voiceAgentsMarkup } from "@/lib/content/ai-voice-agents-markup";
-import { JsonLd, SITE, faqSchema } from "@/lib/schema";
+import { legacyMarkup } from "@/lib/content/ai-voice-agents-legacy";
+import { voiceAgentsMarkup, voiceFaqs } from "@/lib/content/ai-voice-agents-markup";
+import { SITE, faqSchema } from "@/lib/schema";
 
 const path = "/ai-voice-agents";
+// No trailing slash: /ai-voice-agents/ redirects here, and a canonical must name the final URL (SEO brief §2.3).
+const url = `${SITE}${path}`;
+const ogTitle = "AI Voice Agent for UK Businesses | OMH";
+const ogDescription = "An AI voice agent that answers, books and follows up, day and night. Built, tested and managed by a UK team.";
 
+// SEO pack from the brief (OMH-AI-Voice-Agent-Page-SEO-Optimisation, 19 Oct 2026). The share image and its
+// alt text come from ./opengraph-image.tsx.
 export const metadata: Metadata = {
-  title: { absolute: "AI Voice Agents & AI Receptionist for UK Businesses | London, Manchester & More | OMH" },
+  title: { absolute: "AI Voice Agent & AI Receptionist for UK Businesses | OMH" },
   description:
-    "AI voice agents that answer calls, book appointments and follow up day and night. Built and managed by OMH for UK service businesses in London, Manchester and more.",
-  alternates: { canonical: `${SITE}${path}/` },
-  openGraph: {
-    type: "website",
-    locale: "en_GB",
-    siteName: "Online Marketing Help",
-    title: "AI Voice Agents & AI Receptionist for UK Businesses | OMH",
-    description: "An AI receptionist that answers, books and follows up, day and night. Built, tested and managed by a UK team.",
-    url: `${SITE}${path}/`,
-  },
+    "An AI voice agent that answers every call on the first ring, books appointments and follows up leads, day and night. Set up and managed by a UK team.",
+  alternates: { canonical: url },
+  openGraph: { type: "website", locale: "en_GB", siteName: "Online Marketing Help", title: ogTitle, description: ogDescription, url },
+  twitter: { card: "summary_large_image", title: ogTitle, description: ogDescription },
 };
 
-// The questions the page's FAQ section shows, word for word (brief §25).
-const faqs = [
-  ["Will callers know they are talking to an AI?",
-    "Yes. We set every agent up to say it is an AI assistant at the start of the call. Callers deserve to know, and it avoids awkward moments later in the conversation."],
-  ["Can the agent transfer a call to a real person?",
-    "Yes. You set the rules. Emergencies, existing clients, complaints and anyone who asks for a person can be put through to the right phone. Outside your opening hours the agent takes a detailed message and sends it to your team."],
-  ["Which calendars and systems does it work with?",
-    "The agent needs somewhere to put bookings and call notes, usually your calendar and your CRM or practice system. We check your exact tools during discovery and tell you plainly what connects directly, what needs a workaround and what is not possible yet."],
-  ["Can we keep our existing phone number, or get a local one?",
-    "In most cases you keep your number and divert calls to the agent, either all of them or only the ones your team cannot answer. If you want a new local number, for example an 0161 number for Manchester, we can arrange one as part of setup."],
-  ["Are calls recorded, and how does that fit with UK GDPR?",
-    "Calls can be recorded and transcribed so you can review them, and callers are told at the start of the call. You remain the data controller and OMH acts as your processor under a written agreement. We agree retention periods with you and delete recordings on that schedule."],
-  ["What are the rules for outbound calls?",
-    "The agent only calls people who have given appropriate consent, such as customers who asked for a reminder or a call back. We follow the UK PECR rules, screen lists against the Telephone Preference Service where required and act on opt-outs straight away. We do not run cold calling campaigns to bought or non-consented lists."],
-  ["Is it suitable for dental clinics and healthcare providers?",
-    "Yes, for bookings, routing and practical questions such as opening hours, fees and directions. The agent never gives clinical or medical advice. Anything clinical goes to your team, and urgent calls follow the emergency route you set."],
-  ["Is it suitable for law firms?",
-    "Yes, for taking new enquiries, booking consultations and routing existing clients. The agent never gives legal advice and does not comment on the merits of a matter. It collects the details and gets the caller to the right person."],
-  ["We are not in one of your six cities. Can we still work with you?",
-    "Yes. We are based in Hullbridge, Essex and work with businesses across the UK remotely. London, Birmingham, Manchester, Leeds, Liverpool and Bristol are where we focus our voice agent work at the moment."],
-  ["How long does setup take?",
-    "It depends on how many types of call you have and what the agent needs to connect to. A simple booking agent is quicker than one covering several departments. We give you a realistic timeline after the discovery call, before you commit to anything. Starter is live in 3 working days, Growth in 5 to 7, Scale in 12 to 15. The clock starts when we have your content and your diary access."],
-  ["What happens when the agent does not know the answer?",
-    "It says so. The agent answers only from information you have approved, so when a question falls outside that, it offers to take a message or transfer the call. We review those moments every month and add the answers worth adding."],
-  ["Is there a minimum contract?",
-    "We set out the terms in writing before you start, including the notice period, what is included each month and what counts as extra. There are no hidden usage fees. Every invoice shows your included minutes and any overage. Billed monthly, 30 days notice."],
-] as const;
-
-const service = {
-  "@context": "https://schema.org",
-  "@type": "Service",
-  name: "AI Voice Agents",
-  serviceType: "AI voice agent and AI receptionist setup and management",
-  description:
-    "Managed AI voice agents that answer calls, book appointments and follow up with consenting contacts for UK service businesses.",
-  provider: { "@id": `${SITE}/#organisation` },
-  areaServed: ["London", "Birmingham", "Manchester", "Leeds", "Liverpool", "Bristol"].map((name) => ({ "@type": "City", name })),
-  url: `${SITE}${path}/`,
-};
-
-// Splits a markup string at each top-level <section>, keyed by its id (or aria-labelledby).
-// `head` is whatever comes before the first section (the icon sprite).
-function sectionsOf(html: string, className: string) {
-  const [head, ...parts] = html.split(/(?=<section[\s>])/);
-  const byKey = new Map(parts.map((p) => [p.match(/^<section[^>]*?\s(?:id|aria-labelledby)="([^"]+)"/)![1], p]));
-  return { head, byKey, className };
-}
-
-const v4 = sectionsOf(landingV4Markup, "v4l");
-const va = sectionsOf(voiceAgentsMarkup, "va-page");
-
-// The client's running order. The two designs are styled by their own wrapper class, so each run of
-// one design's sections gets its own wrapper.
-const runs: [typeof v4, string[]][] = [
-  [v4, ["top", "benefits-title", "features-title", "use-cases"]],
-  [va, ["industries", "feedback"]],
-  [v4, ["how", "cities"]],
-  [va, ["why-omh", "branding", "right-fit", "roi-calculator", "pricing", "compare", "faq", "related"]],
-];
-const placed = runs.flatMap(([, keys]) => keys);
-for (const src of [v4, va])
-  for (const key of src.byKey.keys()) if (!placed.includes(key)) throw new Error(`/ai-voice-agents: section "${key}" has no place in runs`);
-const runHtml = runs.map(([src, keys], i) => {
-  const html = keys.map((k) => {
-    const part = src.byKey.get(k);
-    if (!part) throw new Error(`/ai-voice-agents: no section "${k}"`);
-    return part;
-  });
-  // The icon sprite goes in the first wrapper of its design.
-  return (runs.findIndex(([s]) => s === src) === i ? src.head : "") + html.join("");
+const offer = (name: string, price: number, minutes: number, setup: string) => ({
+  "@type": "Offer",
+  name,
+  description: `${minutes} minutes included, then 60p a minute. ${setup} one-off setup. Prices exclude VAT.`,
+  url,
+  priceSpecification: { "@type": "UnitPriceSpecification", price, priceCurrency: "GBP", unitText: "MONTH", valueAddedTaxIncluded: false },
 });
 
+// Part 6 of the brief. The Organization item is left out: the layout already publishes one as #organisation.
+const graph = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Service",
+      "@id": `${url}#service`,
+      name: "AI Voice Agent for UK Businesses",
+      serviceType: "AI voice agent",
+      description:
+        "An AI voice agent is software that answers and makes phone calls for your business in natural, spoken conversation. It understands what the caller wants, answers from information you have approved, books appointments into your calendar and passes anything it can't handle to a person on your team, with a summary of the call.",
+      url,
+      areaServed: { "@type": "Country", name: "United Kingdom" },
+      provider: { "@id": `${SITE}/#organisation` },
+      offers: [offer("Starter", 249, 300, "£795"), offer("Growth", 449, 500, "£1,295"), offer("Scale", 849, 900, "£1,995")],
+    },
+    { ...faqSchema(voiceFaqs), "@id": `${url}#faq` },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: `${SITE}/` },
+        { "@type": "ListItem", position: 2, name: "AI Voice Agents", item: url },
+      ],
+    },
+  ],
+};
+
+const fresh = sectionsOf(voiceAgentsMarkup, "va-page"); // rebuilt 20 Oct 2026
+const legacy = sectionsOf(legacyMarkup, "va-page"); // kept from the previous page
+const v4 = sectionsOf(landingV4Markup, "v4l"); // how it works, local cover
+
+/*
+  Running order. The rebuild (docs/ai-voice-agents-cro/) supplies the problem/solution pair, the definition,
+  the capability cards, the industry tabs and the pricing cards; the hero is the previous one (client's call); the client asked for the previous
+  page's other sections back (20 Oct 2026), so they follow in their old order. The previous page is frozen as
+  git tag `oldv2` and route /ai-voice-agents-oldv2.
+*/
+const runs: Runs = [
+  [v4, ["top"]],
+  [fresh, ["what-is", "features"]],
+  [v4, ["how"]],
+  [fresh, ["use-cases"]],
+  [legacy, ["industries", "feedback", "compare", "right-fit", "roi-calculator"]],
+  [fresh, ["pricing"]],
+  [v4, ["cities"]],
+  [legacy, ["faq"]],
+];
 export default function AiVoiceAgentsPage() {
   return (
-    <>
-      <JsonLd data={[service, faqSchema(faqs)]} />
-      {/* One root for both page scripts; they find their widgets by data-* hooks inside it. */}
-      <div id="va-page">
-        {runs.map(([src], i) => (
-          <div key={i} className={src.className} dangerouslySetInnerHTML={{ __html: runHtml[i] }} />
-        ))}
-      </div>
-      <LandingV4Script />
-      {/* The booking tabs every "Book a Demo" / "Call Me Now" button on the page points at. */}
-      <BookDemo
-        id="book-demo-form"
-        heading={
-          <>
-            Hear a voice agent answer <span className="text-[#f2c675]">as your business</span>
-          </>
-        }
-      />
-      <VoiceAgentsScript />
-    </>
+    <VoiceLanding
+      runs={runs}
+      breadcrumb
+      graph={graph}
+      page="/ai-voice-agents"
+      demoHeading={
+        <>
+          Book an AI voice agent demo, <span className="text-[#7d5c33]">by video or phone</span>
+        </>
+      }
+    />
   );
 }

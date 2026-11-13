@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { defaultOgImages } from "@/lib/schema";
+import { draftMode } from "next/headers";
 import { notFound } from "next/navigation";
+import { DraftPreviewBar } from "@/components/insights/DraftPreviewBar";
 import { InsightArticle } from "@/components/insights/InsightArticle";
 import { getInsight, getInsightSlugs } from "@/lib/sanity/insights";
 
@@ -17,13 +19,16 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = await getInsight(slug);
-  if (!post) return {};
+  const { isEnabled: preview } = await draftMode();
+  const post = await getInsight(slug, preview);
+  if (!post) return { title: "Page not found" };
   return {
+    // Draft preview is never indexed (client, 21 Oct 2026). Only an editor with the draft-mode cookie sees it.
+    ...(preview && { robots: { index: false, follow: false, nocache: true } }),
     title: post.title,
     description: post.seo.description ?? post.summary,
     authors: [{ name: post.author.name }],
-    alternates: { canonical: `https://onlinemarketinghelp.co.uk/${post.slug}/` },
+    alternates: { canonical: `https://onlinemarketinghelp.co.uk/${post.slug}` },
     openGraph: {
       type: "article",
       title: post.title,
@@ -37,8 +42,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function InsightPostPage({ params }: Props) {
   const { slug } = await params;
-  const post = await getInsight(slug);
+  const { isEnabled: preview } = await draftMode();
+  const post = await getInsight(slug, preview);
   if (!post) notFound();
-  return <InsightArticle post={post} />;
+  return (
+    <>
+      {preview && <DraftPreviewBar slug={post.slug} />}
+      <InsightArticle post={post} />
+    </>
+  );
 }
 

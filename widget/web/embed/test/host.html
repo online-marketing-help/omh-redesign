@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fake WordPress host</title>
+<style>
+  /* A deliberately hostile theme. Every rule here is something a real
+     WordPress theme does and that would wreck a widget injected into the
+     normal DOM. If the panel still looks right, the shadow root is doing its
+     job. */
+  *{box-sizing:content-box!important}
+  button{all:unset;display:block;width:100%;background:#f0f!important;color:#0f0!important;
+         font-family:"Comic Sans MS",cursive!important;font-size:28px!important;
+         border:6px dashed #0ff!important;padding:40px!important;text-transform:uppercase!important}
+  input{width:100%!important;height:120px!important;background:#ff0!important;
+        border:8px solid #f00!important;font-size:40px!important}
+  svg{width:200px!important;height:200px!important;fill:#f00!important}
+  div,section,header,footer,form,p,h3{margin:60px!important;padding:30px!important;
+        background:#fdd!important;border:4px solid #c00!important}
+  section{position:static!important;float:left!important}
+  em,strong,i,span{font-size:34px!important;color:#f0f!important}
+  body{margin:0;font-family:Georgia,serif;background:#fff}
+  .theme{padding:24px}
+</style>
+</head>
+<body>
+  <div class="theme">
+    <h1>Online Marketing Help (test host)</h1>
+    <p>This page exists only to prove the embed survives a theme that fights it.</p>
+    <button id="theme-btn">A theme button, styled by the theme</button>
+    <input placeholder="A theme input, styled by the theme">
+  </div>
+
+  <!-- Included twice on purpose: WordPress sites routinely load the same
+       script from both a theme and a plugin. The second copy must do nothing. -->
+  <script src="/ohm-assistant.js"></script>
+  <script src="/ohm-assistant.js"></script>
+</body>
+</html>

@@ -1,4 +1,7 @@
 import { Fragment } from "react";
+import { ArrowRightLeft, Blocks, Palette, Plug, Puzzle, Wrench } from "lucide-react";
+import { CapabilityShowcase, StorefrontMock } from "@/components/services/CapabilityShowcase";
+import { ServiceHeroArt } from "@/components/services/ServiceHeroArt";
 import { Pointer } from "@/components/Pointer";
 import { Reveal } from "@/components/Reveal";
 import { ServiceFaqSection } from "@/components/services/ServiceFaqSection";
@@ -6,17 +9,13 @@ import { ServiceFitSection as SharedServiceFitSection } from "@/components/servi
 import { ServiceNextStepsCTA } from "@/components/services/ServiceNextStepsCTA";
 import { ServiceProcessTimeline } from "@/components/services/ServiceProcessTimeline";
 import { ServiceReasonGrid } from "@/components/services/ServiceReasonGrid";
-import {
-  CheckIcon as Check,
-  FeatureValue,
-  HighlightedText,
-  ServiceSectionIntro as SectionIntro,
-} from "@/components/services/ServicePrimitives";
+import { FeatureValue, HighlightedText, ServiceSectionIntro as SectionIntro } from "@/components/services/ServicePrimitives";
 import { Button, TextLink } from "@/components/ui/Button";
 import { Eyebrow, ReviewProof } from "@/components/ui/Proof";
 import { MediaFrame } from "@/components/ServiceMedia";
 import { ServiceBand as Band } from "@/components/services/ServiceBand";
 import { shopifyDevelopment as content } from "@/lib/content/shopify-development";
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 
 type Package = (typeof content.packages)[number];
 
@@ -26,7 +25,8 @@ export function ShopifyHero() {
       <div className="container-omh pb-[clamp(56px,38px+2.9vw,88px)] pt-[clamp(48px,34px+2.3vw,80px)]">
         <div className="grid grid-cols-12 items-center gap-x-12 gap-y-12 max-lg:block">
           <div className="col-span-7 max-lg:mb-12">
-            <Reveal>
+            {/* CSS-only entrance, not <Reveal>: the JS-gated reveal held the headline at opacity 0 until hydration and delayed LCP. */}
+            <div className="hero-in">
               <Eyebrow>{content.hero.eyebrow}</Eyebrow>
               <h1 className="mb-6 mt-7 font-sans text-display font-semibold text-balance">
                 <HighlightedText text={content.hero.title} highlight={"high-\u2060performing stores"} />
@@ -36,7 +36,7 @@ export function ShopifyHero() {
                 <Button href={content.hero.primary.href} arrow data-event="shopify_hero_cta_click">
                   {content.hero.primary.label}
                 </Button>
-                <Button href={content.hero.secondary.href} variant="secondary" data-event="shopify_view_packages_click">
+                <Button href={content.hero.secondary.href} variant="secondary" arrow data-event="shopify_view_packages_click">
                   {content.hero.secondary.label}
                 </Button>
               </div>
@@ -52,17 +52,17 @@ export function ShopifyHero() {
                   </div>
                 ))}
               </dl>
-            </Reveal>
+            </div>
           </div>
 
-          <Reveal className="col-span-5 col-start-8">
+          <div className="hero-in hero-in-2 col-span-5 col-start-8">
             <Pointer>
               <div className="pointer-parallax">
-                <MediaFrame kind="image" theme="shopify" ratio="4/5" title="Shopify storefront feature" note="Replace with a real product, collection or storefront view from an approved client project." source="/images/Services/Shopify Development.jpg" alt="A Shopify storefront product page shown on screen." />
+                <ServiceHeroArt variant="shopify" />
               </div>
             </Pointer>
             <ReviewProof serviceId="shopify" heading="Verified client trust" className="mt-6" />
-          </Reveal>
+          </div>
         </div>
       </div>
     </section>
@@ -117,48 +117,26 @@ export function ShopifyFitSection() {
 
 export function ShopifyCapabilityGrid() {
   const [featured, ...rest] = content.capabilities;
-
+  const icons = [Palette, Wrench, Puzzle, Blocks, ArrowRightLeft, Plug];
   return (
-    <Band label="Build">
-      <Reveal>
-        <SectionIntro
-          title="Our Shopify development services"
-          accent="Shopify development"
-          body="From a brand-new store to one tricky integration, our Shopify development services cover the full picture: builds, themes, apps, migrations and everything in between."
-        />
-
-        <Pointer className="pointer-spotlight relative mt-12 overflow-hidden rounded-card bg-inverse p-10 text-oninverse max-sm:p-6">
-          <div className="relative z-10 grid grid-cols-12 items-start gap-x-10 gap-y-8 max-lg:block">
-            <div className="col-span-6">
-              <p className="text-[14px] font-semibold uppercase tracking-[0.16em] text-oninverse/55">Most projects start here</p>
-              <h3 className="mt-5 font-sans text-h2 font-semibold">{featured.title}</h3>
-              <p className="mt-5 text-lead leading-relaxed text-oninverse/75">{featured.body}</p>
-            </div>
-            <ul className="col-span-5 col-start-8 grid gap-3 border-t border-oninverse/15 pt-6 max-lg:mt-8">
-              {featured.detail?.map((line) => (
-                <li key={line} className="flex gap-3 text-body leading-snug text-oninverse/85">
-                  <Check className="mt-0.5 size-4 shrink-0 text-[#f2c675]" /> {line}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </Pointer>
-
-        <div className="mt-8 grid grid-cols-2 gap-x-10 max-lg:grid-cols-1">
-          {rest.map((item, index) => (
-            <article key={item.title} className="group grid grid-cols-[auto_1fr] gap-x-5 border-t border-line px-3 py-7 transition-colors hover:border-teal/50 hover:bg-surface">
-              <span className="font-sans text-[18px] font-semibold tabular-nums tracking-[0.1em] text-muted group-hover:text-amber">
-                {String(index + 2).padStart(2, "0")}
-              </span>
-              <div>
-                <h3 className="font-sans text-h4 font-semibold">{item.title}</h3>
-                <p className="mt-2.5 text-body leading-relaxed text-ink/75">{item.body}</p>
-              </div>
-            </article>
-          ))}
-        </div>
-      </Reveal>
-    </Band>
+    <CapabilityShowcase
+      label="Build"
+      intro={{
+        title: "Our Shopify development services",
+        accent: "Shopify development",
+        body: "From a brand-new store to one tricky integration, our Shopify development services cover the full picture: builds, themes, apps, migrations and everything in between.",
+      }}
+      featured={{
+        eyebrow: "Most projects start here",
+        title: featured.title,
+        body: featured.body,
+        detail: featured.detail,
+        primary: { label: "Explore store development", href: "#packages", event: "shopify_build_packages_click" },
+        secondary: { label: "Talk to us", href: "/contact", event: "shopify_build_contact_click" },
+        aside: <StorefrontMock />,
+      }}
+      items={rest.map((item, i) => ({ ...item, icon: icons[i] ?? Blocks }))}
+    />
   );
 }
 
@@ -278,6 +256,7 @@ export function ShopifyPricingPackages() {
 }
 
 export function ShopifyCaseStudyFeature() {
+  if (!CASE_STUDIES_LIVE) return null;
   return (
     <Band label="Proof" tone="white">
       <Reveal>
@@ -296,7 +275,7 @@ export function ShopifyCaseStudyFeature() {
                   <li key={field} className="border-b border-soft-dark py-3 text-body text-ink/70">{field}</li>
                 ))}
               </ul>
-              <div className="mt-7"><TextLink href="/case-studies" data-event="shopify_case_study_click">View case studies</TextLink></div>
+              {CASE_STUDIES_LIVE && <div className="mt-7"><TextLink href="/case-studies" data-event="shopify_case_study_click">View case studies</TextLink></div>}
             </div>
 
             <div className="col-span-12 mt-9">

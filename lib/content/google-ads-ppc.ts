@@ -194,7 +194,7 @@ export const googleAdsPpc = {
     ["Make the destination work", "Ads can deliver relevant visits, but a clear, fast landing page and reliable forms or checkout are needed to convert them."],
   ],
   reasons: [
-    ["Campaigns start with a measurable goal", "Calls, forms, bookings, purchases or other useful actions are agreed before optimisation decisions are made."],
+    ["Campaigns start with a measurable goal", "Calls, forms, bookings, purchases or other useful actions are agreed before optimisation decisions are made. Pair your ads with an [AI voice agent](/ai-voice-agents) so every call from a click gets answered, even out of hours."],
     ["Search intent stays visible", "Keywords, search terms and negative keywords are reviewed so the account remains connected to what customers need."],
     ["Ads and landing pages are considered together", "Copy, offer clarity and the destination experience are treated as one journey rather than isolated tasks."],
     ["Reporting leads to next actions", "Performance updates should identify what changed, what was learned and what deserves attention next."],

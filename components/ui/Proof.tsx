@@ -2,9 +2,9 @@ import Image from "@/components/ui/SiteImage";
 import Link from "next/link";
 import { BadgeCheck, Quote, Star, TrendingUp } from "lucide-react";
 import type { ReactNode } from "react";
-import { about } from "@/lib/content/about";
 import { caseStudies } from "@/lib/content/case-studies";
 import { siteTestimonials } from "@/lib/content/testimonials";
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 
 /*
   Placeholder discipline (brief §1): unverified facts never render as if they
@@ -37,10 +37,11 @@ export const REVIEW_PROOF = "47 Reviews Across Trustpilot & Google";
 const serviceProof = {
   seo: { study: ["fine-dining", "Organic-traffic increase"], review: ["Paige Dalby", "It’s given me some great direction"] },
   "google-ads": { study: ["car-showroom", "Conversion-value increase"], review: ["Tania Smyths", "Really grateful for the support with our ads on google"] },
-  amazon: { fact: `${about.team.members.length} specialists in one UK team`, review: ["Gary Smart", "Good listeners and certainly in my case delivering exactly what I wanted"] },
+  amazon: { fact: "36 specialists in one UK team", review: ["Gary Smart", "Good listeners and certainly in my case delivering exactly what I wanted"] },
   wordpress: { study: ["bar", "Reservation increase"], review: ["Natasha Kendle", "The process was so easy and Sarah was fantastic in presenting me with ideas"] },
   maintenance: { fact: "Est. 2019 · Companies House no. 12328533", review: ["Ricky Catt", "didn’t try to over exaggerate the work that needed done"] },
   shopify: { study: ["clothing-business", "Purchase-conversion increase"], review: ["Kiera Taylor-Elton", "Great to work with a company that aren’t so pushy on the sales front"] },
+  "ecommerce-seo": { study: ["clothing-business", "Organic-traffic increase"], review: ["Ricky Catt", "she was so polite and professional"] },
   "social-media": { fact: "13 services under one roof", review: ["Karl Weller", "Now with Online Marketing Helps support I can put my feet up and relax"] },
   "paid-social": { fact: "100% UK business focus", review: ["Natasha Kendle", "FB paid ads and I am really happy with the results"] },
 } satisfies Record<string, { study?: [slug: string, resultLabel: string]; fact?: string; review: [name: string, excerpt: string] }>;
@@ -75,7 +76,7 @@ export function ReviewProof({ heading, serviceId, className = "" }: { heading: s
           <Star className="size-4 shrink-0 fill-amber text-amber" aria-hidden="true" />
           {REVIEW_PROOF}
         </li>
-        {study && (
+        {study && CASE_STUDIES_LIVE && (
           <li>
             <Link href={study.href} aria-label={`Read the ${study.client} case study`} className={`${pill} transition-colors hover:border-ink/40`}>
               <TrendingUp className="size-4 shrink-0 text-amber-deep" aria-hidden="true" />
@@ -131,7 +132,7 @@ export function Eyebrow({ children, light = false }: { children: ReactNode; ligh
           : "gap-2.5 tracking-[0.16em] text-muted"
       }`}
     >
-      <span aria-hidden className={`h-0.5 w-5 ${light ? "bg-[#f2c675]" : "bg-amber"}`} />
+      <span aria-hidden className={`h-0.5 w-5 ${light ? "bg-[#7d5c33]" : "bg-amber"}`} />
       {children}
     </p>
   );

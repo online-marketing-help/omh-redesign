@@ -45,3 +45,31 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Security reports: findings about this site, never in a public repo
+SECURITY-AUDIT-*.md
+security-audit*.md
+
+# The widget's node_modules is a symlink to the working copy's, so the test
+# suite can resolve `convex/*` from widget/convex. Anchored ignores like
+# /node_modules do not cover it, and `git add -A` would otherwise sweep the
+# whole tree in.
+widget/node_modules
+
+# Built by widget/tests/run.sh before each run. Generated output, and two of
+# them are over 100KB of bundled source that would be re-written on every run.
+widget/tests/*.bundle.mjs
+
+# The generated n8n workflows: every one bakes the Convex shared secret, and
+# two carry the Retell key. The BUILDER is tracked (n8n is the brain, and an
+# untracked brain is one that can be lost); its output never is.
+widget/n8n/*.json
+
+# Forge: per-session scratch, not project state. The artifacts under
+# docs/engineering/ and the evidence ledger are what belong in history.
+.forge/.edits
+.forge/.last-edit
+.forge/active
+
+# Browser-test screenshots: output, not source.
+widget/web/embed/test/shot-*.png

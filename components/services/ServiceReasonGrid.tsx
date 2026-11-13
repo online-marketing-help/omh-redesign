@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Reveal } from "@/components/Reveal";
 import { ServiceBand, type ServiceBandTone } from "@/components/services/ServiceBand";
-import { CheckIcon, ServiceSectionIntro } from "@/components/services/ServicePrimitives";
+import { CheckIcon, ServiceSectionIntro, withLinks } from "@/components/services/ServicePrimitives";
 
 export function ServiceReasonGrid({
   title,
@@ -37,7 +37,7 @@ export function ServiceReasonGrid({
                 {reasonTitle}
               </h3>
               <p className="mt-2.5 pl-7 text-body leading-relaxed text-ink/75">
-                {reasonBody}
+                {withLinks(reasonBody)}
               </p>
             </article>
           ))}

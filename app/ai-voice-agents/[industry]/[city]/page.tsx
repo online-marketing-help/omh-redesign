@@ -4,7 +4,7 @@ import { industryPaths } from "@/lib/content/voice-industry";
 
 type Props = { params: Promise<{ industry: string; city: string }> };
 
-export const dynamicParams = false;
+// Not `dynamicParams = false`: see ../page.tsx (it lets app/[...slug] take over after a revalidate).
 
 export function generateStaticParams() {
   return industryPaths

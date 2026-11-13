@@ -2,10 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { Clock3 } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { formatInsightDate } from "@/components/insights/InsightMeta";
 import { InsightContents } from "@/components/insights/InsightContents";
 import { ShareRow } from "@/components/insights/ShareRow";
 import { ArrowRight, Button, TextLink } from "@/components/ui/Button";
+import { BookDemo } from "@/components/BookDemo";
 import { FinalCta } from "@/components/ui/FinalCta";
 import { Eyebrow } from "@/components/ui/Proof";
 import { splitAtMiddle, withContents } from "@/lib/content/insight-toc";
@@ -14,36 +16,77 @@ import { insightHref, type InsightPost } from "@/lib/content/insights-types";
 import { SITE } from "@/lib/schema";
 import { AccentTitle } from "@/components/services/ServicePrimitives";
 
+function Byline({ post, className }: { post: InsightPost; className: string }) {
+  const wasUpdated = post.modifiedAt.slice(0, 10) !== post.publishedAt.slice(0, 10);
+  return (
+    <dl className={`flex flex-wrap items-center gap-x-10 gap-y-4 text-body ${className}`}>
+      <div className="flex items-center gap-2.5">
+        <dt className="text-muted">Written by</dt>
+        <dd className="font-semibold">{post.author.name}</dd>
+      </div>
+      <div className="flex items-center gap-2.5">
+        <dt className="text-muted">Published</dt>
+        <dd className="font-semibold">
+          <time dateTime={post.publishedAt}>{formatInsightDate(post.publishedAt)}</time>
+        </dd>
+      </div>
+      {wasUpdated && (
+        <div className="flex items-center gap-2.5">
+          <dt className="text-muted">Updated</dt>
+          <dd className="font-semibold">
+            <time dateTime={post.modifiedAt}>{formatInsightDate(post.modifiedAt)}</time>
+          </dd>
+        </div>
+      )}
+    </dl>
+  );
+}
+
+// Tags, share and the archive link. The topic itself is already in the hero, so it is not repeated here.
+function ArticleExtras({ post, url }: { post: InsightPost; url: string }) {
+  const tags = post.categories.map((category) => category.name).filter((name) => name !== post.topic.name);
+  return (
+    <>
+      {tags.length > 0 && (
+        <div className="mt-8 border-t border-line pt-5">
+          <p className="text-[14px] font-semibold uppercase tracking-[0.15em] text-muted">Related topics</p>
+          <p className="mt-2 text-body leading-relaxed text-ink/65">{tags.join(" · ")}</p>
+        </div>
+      )}
+      <div className="mt-8 border-t border-line pt-5">
+        <ShareRow title={post.title} url={url} />
+      </div>
+      <div className="mt-8 border-t border-line pt-5">
+        <TextLink href="/insights">All insights</TextLink>
+      </div>
+    </>
+  );
+}
+
 export async function InsightArticle({ post }: { post: InsightPost }) {
   const related = await getRelatedInsights(post);
-  const wasUpdated = post.modifiedAt.slice(0, 10) !== post.publishedAt.slice(0, 10);
   const { html, items } = withContents(post.contentHtml);
   const [head, tail] = splitAtMiddle(html, items);
-  const url = `${SITE}${insightHref(post)}/`;
+  const url = `${SITE}${insightHref(post)}`;
 
   return (
     <article>
       <div aria-hidden className="read-progress" />
 
       <header className="hero-grid overflow-x-clip border-b border-line bg-warm">
-        <div className="container-omh section-md">
+        {/* pt-4 puts the trail where SiteBreadcrumbs draws it on every other page; its margin then brings the
+            heading back to the usual section-md start (16px + 24px trail + this = the section's top padding). */}
+        <div className="container-omh section-md pt-4!">
           <Reveal>
-            <nav
-              aria-label="Breadcrumb"
-              className="mb-10 flex flex-wrap items-center gap-2 text-[18px] text-muted"
-            >
-              <Link href="/insights" className="hover:text-amber-deep hover:underline underline-offset-4">
-                Insights
-              </Link>
-              <span aria-hidden>/</span>
-              <span>{post.topic.name}</span>
-            </nav>
+            <Breadcrumbs
+              items={[{ name: "Home", href: "/" }, { name: "Insights", href: "/insights" }, { name: post.title }]}
+              className="mb-[clamp(24px,7.4px+4.42vw,64px)]"
+            />
 
             <p className="flex flex-wrap items-center gap-x-3 gap-y-2 font-sans text-[14px] font-semibold uppercase tracking-[0.14em] text-muted">
+              {/* Topic and reading time only: the date sits once, in the byline (client, 2 Nov 2026). */}
+              {/* No "·" between the two: on a phone it was left dangling at the end of the first line. */}
               <span className="text-amber-deep">{post.topic.name}</span>
-              <span aria-hidden>·</span>
-              <time dateTime={post.publishedAt}>{formatInsightDate(post.publishedAt)}</time>
-              <span aria-hidden>·</span>
               <span className="inline-flex items-center gap-1.5 normal-case tracking-normal">
                 <Clock3 className="size-4" aria-hidden />
                 {post.readingTime} min read
@@ -65,7 +108,7 @@ export async function InsightArticle({ post }: { post: InsightPost }) {
                   because many lead images are graphics with text in them. */}
               {post.featuredImage && (
                 <div className="col-span-6 max-lg:mt-9">
-                  <div className="overflow-hidden rounded-media border border-line bg-soft shadow-[0_30px_70px_-50px_rgb(16_24_40/0.55)]">
+                  <div className="overflow-hidden rounded-media border border-line bg-soft shadow-[0_30px_70px_-50px_rgb(0_0_0/0.55)]">
                     {post.featuredImage.width && post.featuredImage.height ? (
                       <Image
                         src={post.featuredImage.src}
@@ -95,22 +138,7 @@ export async function InsightArticle({ post }: { post: InsightPost }) {
 
             {/* One byline strip instead of a floating meta panel — the old 3-column
                 card left a tall empty gap beside the heading on every post. */}
-            <dl className="mt-10 flex flex-wrap items-center gap-x-10 gap-y-4 border-t border-line pt-6 text-body">
-              <div className="flex items-center gap-2.5">
-                <dt className="text-muted">Written by</dt>
-                <dd className="font-semibold">{post.author.name}</dd>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <dt className="text-muted">Published</dt>
-                <dd className="font-semibold">{formatInsightDate(post.publishedAt)}</dd>
-              </div>
-              {wasUpdated && (
-                <div className="flex items-center gap-2.5">
-                  <dt className="text-muted">Updated</dt>
-                  <dd className="font-semibold">{formatInsightDate(post.modifiedAt)}</dd>
-                </div>
-              )}
-            </dl>
+            <Byline post={post} className="mt-10 border-t border-line pt-6 max-lg:hidden" />
           </Reveal>
         </div>
       </header>
@@ -120,35 +148,21 @@ export async function InsightArticle({ post }: { post: InsightPost }) {
           {/* Full container width: contents rail plus a body column that fills
               whatever is left, rather than a narrow centred island. */}
           <div className="grid grid-cols-[minmax(200px,240px)_minmax(0,1fr)] gap-x-[clamp(48px,5vw,88px)] gap-y-10 max-lg:block">
-            <aside className="max-lg:mb-12">
-              <div className="sticky top-28 max-lg:static">
+            <aside className="max-lg:hidden">
+              <div className="sticky top-28">
                 {items.length > 1 && <InsightContents items={items} />}
-
-                <div className="mt-8 border-t border-line pt-5">
-                  <p className="text-[14px] font-semibold uppercase tracking-[0.15em] text-muted">
-                    Filed under
-                  </p>
-                  <p className="mt-2 font-sans text-body font-semibold text-amber-deep">
-                    {post.topic.name}
-                  </p>
-                  {post.categories.length > 0 && (
-                    <p className="mt-3 text-body leading-relaxed text-ink/65">
-                      {post.categories.map((category) => category.name).join(" · ")}
-                    </p>
-                  )}
-                </div>
-
-                <div className="mt-8 border-t border-line pt-5">
-                  <ShareRow title={post.title} url={url} />
-                </div>
-
-                <div className="mt-8 border-t border-line pt-5">
-                  <TextLink href="/insights">All insights</TextLink>
-                </div>
+                <ArticleExtras post={post} url={url} />
               </div>
             </aside>
 
+            {/* Phones (client, 2 Nov 2026): lead image, then contents, then the article, then byline, share and
+                the archive link at the end, instead of all of it stacked above the first paragraph. */}
             <Reveal className="min-w-0">
+              {items.length > 1 && (
+                <div className="mb-10 lg:hidden">
+                  <InsightContents items={items} idSuffix="-mobile" />
+                </div>
+              )}
               <div className="insight-prose" dangerouslySetInnerHTML={{ __html: head }} />
               {tail && (
                 <>
@@ -164,6 +178,10 @@ export async function InsightArticle({ post }: { post: InsightPost }) {
                   <div className="insight-prose" dangerouslySetInnerHTML={{ __html: tail }} />
                 </>
               )}
+              <div className="mt-14 lg:hidden">
+                <Byline post={post} className="flex-col items-start! gap-y-2! border-t border-line pt-6" />
+                <ArticleExtras post={post} url={url} />
+              </div>
             </Reveal>
           </div>
         </div>
@@ -213,6 +231,7 @@ export async function InsightArticle({ post }: { post: InsightPost }) {
         primary={{ label: "Discuss Your Priorities", event: "insight_cta_click" }}
         contactEvents={{ phone: "insight_phone_click", email: "insight_email_click" }}
       />
+      <BookDemo />
     </article>
   );
 }

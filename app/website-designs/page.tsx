@@ -6,7 +6,7 @@ import { websiteDesigns } from "@/lib/content/website-designs";
 export const metadata: Metadata = {
   title: { absolute: websiteDesigns.seo.title },
   description: websiteDesigns.seo.description,
-  alternates: { canonical: "https://onlinemarketinghelp.co.uk/website-designs/" },
+  alternates: { canonical: "https://onlinemarketinghelp.co.uk/website-designs" },
 };
 
 export default function Page() {

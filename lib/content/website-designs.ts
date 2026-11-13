@@ -31,8 +31,12 @@ export const websiteDesigns = {
   },
 
   help: {
-    eyebrow: "How",
-    heading: "We can help with WordPress website design",
+    // Client audit, 26 Oct 2026: the sector list became icon cards with this heading and intro.
+    eyebrow: "Who we work with",
+    heading: "WordPress Website Design for Your Industry",
+    intro: "Every sector has its own customers, questions and reasons to get in touch. We plan the pages, content and enquiry routes around how people in your industry actually choose a provider.",
+    tradesTitle: "Trades and local services",
+    tradesCta: "Don’t see yours? Ask us",
     sectors: [
       "Construction Websites",
       "Accountancy Websites",
@@ -166,6 +170,7 @@ export const websiteDesigns = {
   contact: {
     eyebrow: "Get in touch",
     heading: "Need help with your website?",
+    body: "Tell us what the website needs to do and what is getting in the way. A real person reviews every enquiry and comes back with a practical next step.",
     phone: "+44 20 3489 3934",
   },
 
@@ -181,12 +186,40 @@ export const websiteDesigns = {
       "After years of experience, we are confident in the service and support we provide. Our aim is to help with the technical side of your website and give you clear, practical guidance throughout the project. To show our confidence in what we do, our CEO offers a money-back guarantee designed to make the decision to work with our web design company a little easier.",
       "Start working with Online Marketing Help today and take the next step towards a website that supports your business goals.",
     ],
+    // Each point restates the guarantee copy above; the terms live on /warranty.
+    points: [
+      ["Clear scope before we start.", "You know what will be delivered, when, and for how much."],
+      ["Practical guidance throughout.", "We handle the technical side and explain each decision in plain English."],
+      ["A money-back guarantee from our CEO.", "If we do not deliver what we agreed, the guarantee protects you. Read the terms for the details."],
+    ] as [string, string][],
   },
 
   caseStudies: {
     eyebrow: "Case studies",
     heading: "Web design projects and what changed after launch",
+    cta: {
+      eyebrow: "Your project",
+      heading: "Could your website be our next case study?",
+      body: "Tell us what your site needs to do and we will show you how we would approach it.",
+      label: "Book a free consultation",
+    },
   },
+
+  related: [
+    { title: "WordPress Development", href: "/wordpress-development", body: "The build itself: new sites, redesigns, landing pages and the functionality behind them, from £200." },
+    { title: "WordPress Website Maintenance", href: "/wordpress-website-maintenance", body: "Updates, backups, monitoring and support once the site is live, from £300 a month." },
+    { title: "Search Engine Optimisation", href: "/seo-services", body: "Plan the pages, content and technical setup so the new site can be found for the right searches." },
+  ],
+
+  // Answers draw on the WordPress development page's published packages and process.
+  faqs: [
+    ["How much does a website design cost?", "Our WordPress website packages start at £200 and are published on the [pricing page](/pricing). The final scope depends on pages, content, functionality and support requirements, and we recommend the right package during the free consultation."],
+    ["How long does a new website take?", "Package turnaround times start from 4 weeks once content and decisions are in place. Larger builds are scoped properly before a date is agreed."],
+    ["Do you design custom websites or customise themes?", "Both. We can build a fully custom WordPress website or professionally customise a theme template, depending on the budget, the brand and what the site needs to do."],
+    ["Will I be able to edit the website myself?", "Yes. The sites are built in WordPress so day-to-day content changes can be made without a developer. Advanced layouts, integrations and features may still need support."],
+    ["Can you redesign my existing website?", "Yes, once we have reviewed the current site and understood what the redesign needs to achieve. We also fix sites built by other developers after a review of the setup, plugins, theme and hosting."],
+    ["What happens after the website launches?", "You can add a [WordPress maintenance package](/wordpress-website-maintenance) for updates, backups and monitoring, and our [SEO](/seo-services) and [Google Ads](/google-adwords-ppc) services can bring the right visitors to the new site."],
+  ] as [string, string][],
 
   reviewsHeading: "What customers say about working with OMH",
 

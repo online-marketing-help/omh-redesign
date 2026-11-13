@@ -3,14 +3,19 @@ import Image from "@/components/ui/SiteImage";
 import Link from "next/link";
 import {
   Activity,
+  BadgeCheck,
   BarChart3,
   Blocks,
   Crown,
   Gauge,
   Globe2,
+  Landmark,
   Layers3,
+  MapPin,
+  MessageSquare,
   MonitorUp,
   MousePointerClick,
+  PhoneCall,
   Quote,
   Search,
   ShoppingBag,
@@ -20,9 +25,11 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react";
+import { InstagramFeed } from "@/components/InstagramFeed";
 import { Reveal } from "@/components/Reveal";
 import { Pointer } from "@/components/Pointer";
 import { ArrowRight, Button } from "@/components/ui/Button";
+import { BookDemo } from "@/components/BookDemo";
 import { FinalCta } from "@/components/ui/FinalCta";
 import { Accordion } from "@/components/ui/Accordion";
 import { withLinks } from "@/components/services/ServicePrimitives";
@@ -44,7 +51,8 @@ import {
   whoWeWorkWith,
 } from "@/lib/content/home";
 import { getFeaturedInsights } from "@/lib/sanity/insights";
-import { insightHref } from "@/lib/content/insights-types";
+import { imageRatio, insightHref } from "@/lib/content/insights-types";
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 
 export const metadata: Metadata = {
   title: { absolute: homeMeta.title },
@@ -64,7 +72,7 @@ const whoIcons: LucideIcon[] = [Store, ShoppingBag, Layers3, Users];
 
 function StarRating({ label }: { label: string }) {
   return (
-    <p className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-body font-semibold text-ink shadow-[0_12px_28px_-24px_rgb(16_24_40/0.55)]">
+    <p className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-body font-semibold text-ink shadow-[0_12px_28px_-24px_rgb(0_0_0/0.55)]">
       {/* ponytail: no star glyphs — five stars next to no rating reads as a
           review score, which brief §6/§33 forbids inventing. Restore only
           alongside a real, attributed rating. */}
@@ -76,7 +84,7 @@ function StarRating({ label }: { label: string }) {
 
 function CardArrow({ className = "" }: { className?: string }) {
   return (
-    <span className={`inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-line bg-warm text-amber-deep transition-[color,background-color,border-color,box-shadow,transform] duration-500 ease-[cubic-bezier(.2,.8,.2,1)] group-hover:scale-[1.035] group-hover:border-teal group-hover:bg-teal group-hover:text-white group-hover:shadow-[0_12px_26px_-18px_rgb(215_154_55/0.8)] max-sm:size-10 ${className}`}>
+    <span className={`inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-line bg-warm text-amber-deep transition-[color,background-color,border-color,box-shadow,transform] duration-500 ease-[cubic-bezier(.2,.8,.2,1)] group-hover:scale-[1.035] group-hover:border-teal group-hover:bg-teal group-hover:text-white group-hover:shadow-[0_12px_26px_-18px_rgb(var(--accent-rgb)/0.8)] max-sm:size-10 ${className}`}>
       <ArrowRight className="size-5 transition-transform duration-500 ease-[cubic-bezier(.2,.8,.2,1)] group-hover:translate-x-0.5" />
     </span>
   );
@@ -91,16 +99,26 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 }
 
 const programIcons: LucideIcon[] = [Zap, Activity, MonitorUp, Crown];
-const recognitionIcons: LucideIcon[] = [
-  Target,
-  MousePointerClick,
-  BarChart3,
-  Gauge,
-  Blocks,
-  Globe2,
-  Search,
-  Layers3,
-];
+// One per stat, in the order of `stats` (client audit, 26 Oct 2026).
+const statIcons: LucideIcon[] = [Users, Layers3, Landmark, MapPin];
+// Double-height tiles; see the note on `recognition` in lib/content/home.ts.
+const tallTiles = new Set([1, 5, 10, 12]);
+const recognitionIcons: Record<string, LucideIcon> = {
+  "Google Ads": Target,
+  "AI Voice Agents": PhoneCall,
+  "Meta Ads": MousePointerClick,
+  GA4: BarChart3,
+  "Tag Manager": Gauge,
+  WordPress: Blocks,
+  WooCommerce: Globe2,
+  "Local SEO": Search,
+  "Landing Pages": Layers3,
+  Reporting: Target,
+  "Conversion Rate": MousePointerClick,
+  "Technical SEO": BarChart3,
+  "Account Support": Gauge,
+  "AI Chatbots": MessageSquare,
+};
 
 export default async function Home() {
   const featured = await getFeaturedInsights();
@@ -116,7 +134,9 @@ export default async function Home() {
     <>
       <section className="hero-grid relative overflow-x-clip border-b border-line bg-warm">
         <div className="container-omh grid min-h-[680px] grid-cols-[minmax(0,0.92fr)_minmax(440px,0.78fr)] items-center gap-[clamp(48px,7vw,116px)] py-[clamp(40px,3.5vw,60px)] max-lg:min-h-0 max-lg:grid-cols-1 max-lg:gap-8 max-sm:gap-8">
-          <Reveal className="relative z-10">
+          {/* Above the fold: a CSS entrance (.hero-in) rather than <Reveal>, which waits for JS and held the
+              headline back from painting (PageSpeed, 21 Oct 2026). */}
+          <div className="hero-in relative z-10">
             <StarRating label={hero.eyebrow} />
             <h1 className="mb-7 mt-8 font-sans text-display font-semibold max-lg:max-w-none">
               Full-service digital marketing agency for <span className="text-amber-deep">UK businesses</span>
@@ -128,7 +148,7 @@ export default async function Home() {
               <Button href={hero.primaryCta.href} arrow>
                 {hero.primaryCta.label}
               </Button>
-              <Button href={hero.secondaryCta.href} variant="secondary">
+              <Button href={hero.secondaryCta.href} variant="secondary" arrow>
                 {hero.secondaryCta.label}
               </Button>
             </div>
@@ -140,36 +160,36 @@ export default async function Home() {
                 </p>
               ))}
             </div>
-          </Reveal>
+          </div>
 
-          <Reveal className="relative max-lg:mx-auto max-lg:w-full max-lg:max-w-[760px]">
+          <div className="hero-in hero-in-2 relative max-lg:mx-auto max-lg:w-full max-lg:max-w-[760px]">
             <Pointer className="hero-media relative mb-9">
               <div className="pointer-parallax relative">
-              <div className="image-hover-frame media-shine relative aspect-[4/5] overflow-hidden rounded-[8px] bg-inverse shadow-[0_36px_90px_-42px_rgb(16_24_40/0.48)] max-lg:aspect-[16/10] max-sm:aspect-[4/5]">
+              <div className="image-hover-frame media-shine relative aspect-[4/5] overflow-hidden rounded-[8px] bg-inverse shadow-[0_36px_90px_-42px_rgb(0_0_0/0.48)] max-lg:aspect-[16/10] max-sm:aspect-[4/5]">
                 <Image
-                  src="/images/home/campaign-review.png"
+                  src="/images/home/campaign-review.webp"
                   alt="Full-service digital marketing agency team reviewing campaign and website performance"
                   fill
                   priority
                   sizes="(max-width: 1024px) 100vw, 44vw"
                   className="object-cover"
                 />
-                <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_48%,rgb(16_24_40/0.72)_100%)]" />
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_48%,rgb(0_0_0/0.72)_100%)]" />
                 <p className="absolute bottom-36 left-7 right-7 font-sans text-[22px] font-semibold leading-snug text-oninverse max-sm:bottom-32 max-sm:text-body">
                   Decisions grounded in the campaign, the website, and the numbers.
                 </p>
               </div>
-              <div className="absolute -bottom-7 -left-8 w-[250px] rounded-[8px] border border-oninverse/15 bg-inverse p-5 text-oninverse shadow-[0_24px_60px_-24px_rgb(16_24_40/0.65)] max-sm:-bottom-10 max-sm:left-4">
+              <div className="absolute -bottom-7 -left-8 w-[250px] rounded-[8px] border border-oninverse/15 bg-inverse p-5 text-oninverse shadow-[0_24px_60px_-24px_rgb(0_0_0/0.65)] max-sm:-bottom-10 max-sm:left-4">
                 <p className="text-[14px] font-semibold uppercase tracking-[0.12em] text-amber">Connected delivery</p>
                 <p className="mt-2 text-body font-semibold">Plan &rarr; Build &rarr; Measure</p>
               </div>
-              <div className="absolute -right-5 top-9 flex size-24 flex-col items-center justify-center rounded-[8px] bg-teal text-center text-white shadow-[0_20px_45px_-22px_rgb(215_154_55/0.75)] max-sm:right-3 max-sm:top-4 max-sm:size-20">
+              <div className="absolute -right-5 top-9 flex size-24 flex-col items-center justify-center rounded-[8px] bg-teal text-center text-white shadow-[0_20px_45px_-22px_rgb(var(--accent-rgb)/0.75)] max-sm:right-3 max-sm:top-4 max-sm:size-20">
                 <Gauge className="mb-1 size-7" aria-hidden />
                 <span className="text-[14px] font-semibold">Growth ready</span>
               </div>
               </div>
             </Pointer>
-          </Reveal>
+          </div>
         </div>
       </section>
 
@@ -181,7 +201,7 @@ export default async function Home() {
                 Our programs
               </p>
               <h2 className="mt-5 font-sans text-h2 font-semibold">
-                Digital marketing programs for <span className="text-[#f2c675]">growing UK businesses</span>
+                Digital marketing programs for <span className="text-[#7d5c33]">growing UK businesses</span>
               </h2>
               <p className="mx-auto mt-5 max-w-[850px] text-body leading-relaxed text-oninverse/68">
                 Pick the starting point that matches your goal. Each program brings paid ads, SEO,
@@ -197,7 +217,7 @@ export default async function Home() {
                     <div className="program-icon">
                       <ProgramIcon className="size-8" strokeWidth={1.8} aria-hidden />
                     </div>
-                    <p className="mt-7 inline-flex self-start rounded-full bg-teal/20 px-3 py-1.5 text-[14px] font-semibold uppercase tracking-[0.1em] text-[#f5d394]">
+                    <p className="mt-7 inline-flex self-start rounded-full bg-teal/20 px-3 py-1.5 text-[14px] font-semibold uppercase tracking-[0.1em] text-[var(--accent-light)]">
                       {program.range}
                     </p>
                     <h3 className="mt-5 font-sans text-[clamp(25px,22px+0.45vw,31px)] font-semibold leading-tight">
@@ -217,18 +237,25 @@ export default async function Home() {
       </section>
 
       <section className="border-y border-line bg-surface text-ink">
-        <div className="stats-grid container-omh grid grid-cols-4 divide-x divide-line max-lg:grid-cols-2 max-lg:divide-x-0 max-sm:grid-cols-1">
-          {stats.map((stat) => (
-            <div key={stat.label} className="stat-item px-8 py-11 first:pl-0 max-lg:px-6 max-sm:px-0">
-              <p className="font-sans text-[clamp(38px,30px+1.6vw,54px)] font-semibold leading-none text-amber-deep whitespace-nowrap">
-                {stat.value}
-              </p>
-              <p className="mt-3 text-body font-semibold text-ink/65">{stat.label}</p>
-            </div>
-          ))}
+        <div className="stats-grid container-omh grid grid-cols-4 divide-x divide-line max-lg:grid-cols-2 max-lg:divide-x-0">
+          {stats.map((stat, index) => {
+            const StatIcon = statIcons[index] ?? Users;
+            return (
+              <div key={stat.label} className="stat-item px-8 py-11 first:pl-0 max-lg:px-6 max-lg:odd:pl-0 max-sm:py-8 max-sm:pr-3">
+                <span className="grid size-12 place-items-center rounded-[8px] bg-teal/15 text-amber-deep" aria-hidden>
+                  <StatIcon className="size-6" strokeWidth={1.7} />
+                </span>
+                <p className="mt-5 font-sans text-[clamp(28px,22px+2.2vw,54px)] font-semibold leading-none text-amber-deep whitespace-nowrap">
+                  {stat.value}
+                </p>
+                <p className="mt-3 text-body font-semibold text-ink/65">{stat.label}</p>
+              </div>
+            );
+          })}
         </div>
       </section>
 
+      {CASE_STUDIES_LIVE && (
       <section id="proof" className="container-omh py-[clamp(72px,8vw,128px)]">
         <Reveal>
           <div className="grid grid-cols-[0.74fr_1.26fr] items-start gap-[clamp(48px,7vw,112px)] max-lg:grid-cols-1 max-sm:gap-10">
@@ -257,7 +284,6 @@ export default async function Home() {
                     fill
                     sizes="(max-width: 1024px) 100vw, 58vw"
                     className="object-cover"
-                    priority
                   />
                 </div>
                 <div className="grid grid-cols-[0.42fr_1fr] gap-8 p-8 max-sm:grid-cols-1 max-sm:p-6">
@@ -295,6 +321,7 @@ export default async function Home() {
           </div>
         </Reveal>
       </section>
+      )}
 
       <section className="dark-grid border-y border-oninverse/10 bg-inverse py-[clamp(72px,8vw,128px)] text-oninverse">
         <div className="container-omh">
@@ -304,7 +331,7 @@ export default async function Home() {
                 <div className="pointer-parallax relative pb-16 pr-14 max-sm:pb-14 max-sm:pr-0">
                 <div className="image-hover-frame media-shine relative aspect-[5/4] overflow-hidden rounded-[8px] border border-oninverse/10 bg-black shadow-[0_34px_80px_-32px_rgb(0_0_0/0.78)] max-sm:aspect-[4/5]">
                   <Image
-                    src="/images/home/agency-collaboration.png"
+                    src="/images/home/agency-collaboration.webp"
                     alt="Online Marketing Help team planning a digital marketing strategy"
                     fill
                     sizes="(max-width: 1024px) 100vw, 52vw"
@@ -320,7 +347,7 @@ export default async function Home() {
                     className="object-cover"
                   />
                 </div>
-                <div className="absolute bottom-5 right-2 flex size-28 flex-col items-center justify-center rounded-[8px] bg-teal text-center text-white shadow-[0_0_42px_rgb(215_154_55/0.42)] max-sm:bottom-4 max-sm:size-20">
+                <div className="absolute bottom-5 right-2 flex size-28 flex-col items-center justify-center rounded-[8px] bg-teal text-center text-white shadow-[0_0_42px_rgb(var(--accent-rgb)/0.42)] max-sm:bottom-4 max-sm:size-20">
                   <span className="font-sans text-[26px] font-semibold">One</span>
                   <span className="mt-1 text-[14px] font-semibold uppercase tracking-[0.1em] text-inverse/70">joined-up team</span>
                 </div>
@@ -332,7 +359,7 @@ export default async function Home() {
                   Why choose us
                 </p>
                 <h2 className="mt-6 font-sans text-h2 font-semibold">
-                  Why UK businesses choose <span className="text-[#f2c675]">a full-service agency</span>
+                  Why UK businesses choose <span className="text-[#7d5c33]">a full-service agency</span>
                 </h2>
                 <p className="mt-6 text-body leading-relaxed text-oninverse/70">
                   When strategy, ads, SEO, design and reporting sit with separate suppliers, things get
@@ -391,10 +418,11 @@ export default async function Home() {
               </h2>
               <p className="mt-5 text-body leading-relaxed text-ink/75">
                 Use one specialist service or combine several around a single commercial goal. The
-                same team delivers all of them, so your campaigns, website and reporting stay joined up.
+                same team delivers all of them, so your campaigns, website and reporting stay joined up.{" "}
+                {withLinks("Never miss a call again with an [AI voice agent](/ai-voice-agents) that answers, books and follows up for you.")}
               </p>
               <div className="mt-8">
-                <Button href="/services" variant="secondary" arrow>
+                <Button href="/pricing" variant="secondary" arrow>
                   Explore all services
                 </Button>
               </div>
@@ -408,14 +436,15 @@ export default async function Home() {
           <Reveal>
             <div className="mb-12">
               <div>
-                <StarRating label="Client success stories" />
+                <StarRating label={CASE_STUDIES_LIVE ? "Client success stories" : "Client reviews"} />
                 <h2 className="mt-6 font-sans text-h2 font-semibold">
                   What our <span className="text-amber-deep">clients say</span>
                 </h2>
               </div>
               <p className="mt-5 text-body leading-relaxed text-ink/70">
-                Feedback from published client case studies across SEO, paid media and web
-                development.
+                {CASE_STUDIES_LIVE
+                  ? "Feedback from published client case studies across SEO, paid media and web development."
+                  : "Published reviews from our clients on Trustpilot and Google."}
               </p>
             </div>
 
@@ -436,15 +465,21 @@ export default async function Home() {
                     key={testimonial.name}
                     className="surface-card group flex flex-col justify-between rounded-[8px] border border-teal/20 bg-surface p-8"
                   >
-                    <blockquote className="text-[22px] leading-relaxed text-ink/85">
-                      &ldquo;{testimonial.quote}&rdquo;
-                    </blockquote>
+                    <div>
+                      <Quote className="size-9 text-amber transition-transform duration-500 ease-[cubic-bezier(.2,.8,.2,1)] group-hover:-translate-y-1 group-hover:rotate-[-4deg]" strokeWidth={1.5} aria-hidden />
+                      <blockquote className="mt-5 text-[22px] leading-relaxed text-ink/85">
+                        &ldquo;{testimonial.quote}&rdquo;
+                      </blockquote>
+                    </div>
                     <figcaption className="mt-8 flex items-center justify-between gap-4 text-body font-semibold max-sm:flex-col max-sm:items-start">
                       {testimonial.name}
                       {/* ponytail: no star row — these are named, real reviewers
                           who never gave a score, so five stars would be an
                           invented rating (brief §6). */}
-                      <span className="text-[14px] font-normal text-muted">Client review</span>
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-teal/40 bg-teal/10 px-3 py-1 text-[14px] font-semibold uppercase tracking-[0.08em] text-amber-deep">
+                        <BadgeCheck className="size-4" aria-hidden />
+                        Client review
+                      </span>
                     </figcaption>
                   </figure>
                 ))}
@@ -453,6 +488,8 @@ export default async function Home() {
           </Reveal>
         </div>
       </section>
+
+      <InstagramFeed />
 
       <section className="recognition-field overflow-hidden border-y border-line bg-warm py-[clamp(72px,8vw,128px)]">
         <div className="container-omh">
@@ -484,9 +521,9 @@ export default async function Home() {
 
               <div className="recognition-masonry">
                 {recognition.map((item, index) => {
-                  const RecognitionIcon = recognitionIcons[index % recognitionIcons.length];
+                  const RecognitionIcon = recognitionIcons[item] ?? Target;
                   return (
-                    <div key={item} className={`recognition-tile recognition-tile-${(index % 4) + 1}`}>
+                    <div key={item} className={`recognition-tile${tallTiles.has(index) ? " recognition-tile-2" : ""}`}>
                       <RecognitionIcon className="size-7" strokeWidth={1.7} aria-hidden />
                       <span>{item}</span>
                       <ArrowRight className="recognition-arrow size-4" />
@@ -510,7 +547,7 @@ export default async function Home() {
                 </p>
                 <h2 className="mt-6 font-sans text-h2 font-semibold">
                   A digital marketing agency for{" "}
-                  <span className="text-[#f2c675]">small businesses and growing UK brands</span>
+                  <span className="text-[#7d5c33]">small businesses and growing UK brands</span>
                 </h2>
                 <p className="mt-6 text-body leading-relaxed text-oninverse/70">{whoWeWorkWith.body}</p>
                 <p className="mt-6 border-l-2 border-amber pl-5 text-body leading-relaxed text-oninverse/85">
@@ -526,8 +563,8 @@ export default async function Home() {
                 {whoWeWorkWith.items.map((item, index) => {
                   const WhoIcon = whoIcons[index] ?? Store;
                   return (
-                    <li key={item} className="rounded-[8px] border border-oninverse/12 bg-oninverse/[0.04] p-7">
-                      <span className="grid size-12 place-items-center rounded-[8px] bg-teal/20 text-[#f5d394]">
+                    <li key={item} className="surface-card group rounded-[8px] border border-oninverse/12 bg-oninverse/[0.04] p-7 hover:bg-oninverse/[0.09]">
+                      <span className="grid size-12 place-items-center rounded-[8px] bg-teal/20 text-[var(--accent-light)] transition-colors duration-500 group-hover:bg-teal group-hover:text-white">
                         <WhoIcon className="size-6" strokeWidth={1.7} aria-hidden />
                       </span>
                       <p className="mt-6 font-sans text-[clamp(19px,18px+0.3vw,22px)] font-semibold leading-snug">{item}</p>
@@ -579,54 +616,40 @@ export default async function Home() {
               </Button>
             </div>
 
-            <div className="grid grid-cols-[1.12fr_0.88fr] gap-8 max-lg:grid-cols-1">
-              <Link
-                href={insights[0].href}
-                className="surface-card group relative isolate flex min-h-[520px] flex-col justify-between overflow-hidden rounded-[8px] bg-inverse p-[clamp(28px,4vw,52px)] text-oninverse max-sm:min-h-0 max-sm:gap-20"
-              >
-                {/* The card stretches to the three rows beside it; the post's cover fills that height. */}
-                {insights[0].image && (
-                  <>
-                    <Image src={insights[0].image.src} alt="" fill sizes="(max-width: 1024px) 100vw, 56vw" className="-z-20 object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
-                    <div className="absolute inset-0 -z-10 bg-linear-to-t from-inverse via-inverse/80 to-inverse/40" aria-hidden />
-                  </>
-                )}
-                <div className="flex items-center justify-between gap-4">
-                  <p className="text-[18px] font-semibold uppercase tracking-[0.14em] text-amber">
-                    {insights[0].category}
-                  </p>
-                  <CardArrow />
-                </div>
-                <div>
-                  <h3 className="font-sans text-[clamp(32px,26px+1.5vw,50px)] font-semibold leading-tight">
-                    {insights[0].title}
-                  </h3>
-                  <p className="mt-5 text-body leading-relaxed text-oninverse/70">
-                    {insights[0].body}
-                  </p>
-                </div>
-              </Link>
-
-              <div className="border-t border-line">
-                {insights.slice(1).map((post) => (
-                  <Link
-                    key={post.title}
-                    href={post.href}
-                    className="insight-row group grid min-h-[250px] grid-cols-[1fr_auto] content-between gap-6 border-b border-line py-8"
-                  >
-                    <div>
-                      <p className="text-[18px] font-semibold uppercase tracking-[0.14em] text-amber-deep">
-                        {post.category}
-                      </p>
-                      <h3 className="mt-4 font-sans text-[27px] font-semibold leading-tight">
-                        {post.title}
-                      </h3>
+            {/* Client audit (26 Oct 2026): a compact four-up grid instead of the tall feature card
+                plus three rows. Each thumbnail keeps its own ratio (client, 22 Oct 2026). */}
+            <div className="grid grid-cols-4 gap-6 max-xl:grid-cols-2 max-sm:grid-cols-1">
+              {insights.slice(0, 4).map((post) => (
+                <Link
+                  key={post.title}
+                  href={post.href}
+                  className="surface-card group flex flex-col overflow-hidden rounded-[8px] border border-line bg-warm"
+                >
+                  {post.image ? (
+                    <div className="relative aspect-[16/10] overflow-hidden bg-inverse" style={imageRatio({ featuredImage: post.image })}>
+                      <Image
+                        src={post.image.src}
+                        alt=""
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
+                        className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                      />
                     </div>
-                    <CardArrow />
-                    <p className="col-span-2 text-body leading-relaxed text-ink/70">{post.body}</p>
-                  </Link>
-                ))}
-              </div>
+                  ) : (
+                    <div className="fpo-hatch aspect-[16/10]" aria-hidden />
+                  )}
+                  <div className="flex flex-1 flex-col p-6">
+                    <p className="text-[14px] font-semibold uppercase tracking-[0.14em] text-amber-deep">
+                      {post.category}
+                    </p>
+                    <h3 className="mt-3 font-sans text-[22px] font-semibold leading-tight">{post.title}</h3>
+                    <p className="mt-auto flex items-center justify-between gap-4 pt-6 text-body font-semibold text-ink/70">
+                      Read article
+                      <CardArrow className="size-10" />
+                    </p>
+                  </div>
+                </Link>
+              ))}
             </div>
           </Reveal>
         </div>
@@ -645,6 +668,7 @@ export default async function Home() {
         ]}
         contactEvents={{ phone: "home_phone_click", email: "home_email_click" }}
       />
+      <BookDemo />
     </>
   );
 }

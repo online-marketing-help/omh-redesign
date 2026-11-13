@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   description:
     "A UK Amazon PPC agency managing Sponsored Products, Brands, Display and DSP, with tight control of ad spend, search terms and attributed sales.",
   alternates: {
-    canonical: "https://onlinemarketinghelp.co.uk/amazon-ppc-advertising-agency-uk/",
+    canonical: "https://onlinemarketinghelp.co.uk/amazon-ppc-advertising-agency-uk",
   },
 };
 

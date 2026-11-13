@@ -9,10 +9,10 @@ type MediaTheme = "wordpress" | "shopify" | "maintenance" | "ppc" | "amazon" | "
 const themeStyles: Record<MediaTheme, string> = {
   wordpress: "border-ink/25 bg-tint-amber text-ink",
   shopify: "border-[#7fb49b]/45 bg-tint-green text-ink",
-  maintenance: "border-[#f2c675]/40 bg-[#111d2d] text-oninverse",
-  ppc: "border-[#b8ef3e]/45 bg-[#11130f] text-oninverse",
-  amazon: "border-[#ff9900]/55 bg-[#17130e] text-oninverse",
-  seo: "border-[#76a9e8]/50 bg-[#0e2035] text-oninverse",
+  maintenance: "border-[#7d5c33]/40 bg-[#000] text-oninverse",
+  ppc: "border-[#b8ef3e]/45 bg-[#000] text-oninverse",
+  amazon: "border-[#ff9900]/55 bg-[#000] text-oninverse",
+  seo: "border-ink/25 bg-[#000] text-oninverse",
 };
 
 export function MediaFrame({ kind, theme, title, ratio = "16/10", className = "", source, poster, alt }: {
@@ -67,7 +67,7 @@ export function WordPressVisualStory() {
 
 export function ShopifyStorefrontShowcase() {
   return (
-    <section className="overflow-hidden bg-[#16382c] text-oninverse">
+    <section className="overflow-hidden bg-inverse text-oninverse">
       <div className="container-omh section-md">
         <Reveal>
           <div>
@@ -93,16 +93,16 @@ export function ShopifyStorefrontShowcase() {
 
 export function MaintenanceControlRoom() {
   return (
-    <section className="overflow-hidden bg-[#0b1523] text-oninverse">
+    <section className="overflow-hidden bg-inverse text-oninverse">
       <div className="container-omh section-md">
         <Reveal>
           <div className="grid grid-cols-12 gap-x-10 gap-y-8 max-lg:block">
             <div className="col-span-4 max-lg:mb-9">
-              <p className="text-[14px] font-semibold uppercase tracking-[0.16em] text-[#f2c675]">Maintenance control room</p>
+              <p className="text-[14px] font-semibold uppercase tracking-[0.16em] text-[#7d5c33]">Maintenance control room</p>
               <h2 className="mt-5 font-sans text-h2 font-semibold">Show the WordPress maintenance and support work that normally happens quietly.</h2>
               <p className="mt-5 text-body leading-relaxed text-oninverse/65">Uptime monitoring, update logs and a monthly report you can actually read: the ongoing care that keeps a site reliable.</p>
               <div className="mt-8 grid gap-3 text-body">
-                {["Uptime and fault alerts", "Updates and backup checks", "Monthly work summary"].map((label) => <div key={label} className="flex items-center gap-3 rounded-lg border border-oninverse/10 bg-oninverse/[0.035] px-4 py-3"><span className="size-2 rounded-full bg-[#f2c675] shadow-[0_0_14px_rgba(242,198,117,.65)]" />{label}</div>)}
+                {["Uptime and fault alerts", "Updates and backup checks", "Monthly work summary"].map((label) => <div key={label} className="flex items-center gap-3 rounded-lg border border-oninverse/10 bg-oninverse/[0.035] px-4 py-3"><span className="size-2 rounded-full bg-[#7d5c33] shadow-[0_0_14px_rgba(125,92,51,.65)]" />{label}</div>)}
               </div>
             </div>
             <div className="col-span-8 grid grid-cols-8 gap-5">
@@ -119,7 +119,7 @@ export function MaintenanceControlRoom() {
 
 export function PpcCampaignStudio() {
   return (
-    <section className="overflow-hidden bg-[#090a08] text-oninverse">
+    <section className="overflow-hidden bg-inverse text-oninverse">
       <div className="container-omh section-md">
         <Reveal>
           <div className="grid grid-cols-12 items-center gap-x-12 gap-y-9 max-lg:block">
@@ -144,7 +144,7 @@ export function PpcCampaignStudio() {
 
 export function AmazonMarketplaceWorkbench() {
   return (
-    <section className="overflow-hidden bg-[#17130e] text-oninverse">
+    <section className="overflow-hidden bg-inverse text-oninverse">
       <div className="container-omh section-md">
         <Reveal>
           <div className="grid grid-cols-12 items-end gap-x-12 gap-y-9 max-lg:block">
@@ -192,7 +192,7 @@ export function SeoSearchLandscape() {
           </div>
           <div className="mt-6 grid grid-cols-4 gap-3 max-md:grid-cols-2 max-sm:grid-cols-1">
             {["Discover", "Understand", "Choose a page", "Take action"].map((label, index) => (
-              <div key={label} className="border-t border-[#10243a]/15 pt-4">
+              <div key={label} className="border-t border-[#000]/15 pt-4">
                 <span className="mr-3 text-body font-semibold text-amber-deep">0{index + 1}</span>
                 <span className="text-[14px] font-semibold uppercase tracking-[0.1em] text-ink/72">{label}</span>
               </div>

@@ -5,7 +5,7 @@ import { newWebsiteQuestionnaire } from "@/lib/content/quote-forms";
 export const metadata: Metadata = {
   title: newWebsiteQuestionnaire.seo.title,
   description: newWebsiteQuestionnaire.seo.description,
-  alternates: { canonical: "https://onlinemarketinghelp.co.uk/new-website-development-quotation-questionnaire/" },
+  alternates: { canonical: "https://onlinemarketinghelp.co.uk/new-website-development-quotation-questionnaire" },
 };
 
 export default function Page() {

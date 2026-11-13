@@ -64,14 +64,7 @@ export const shopifyDevelopment = {
       title: "Shopify Integrations",
       body: "Connections with the databases, fulfilment tools, payment services, marketing platforms and systems your business relies on.",
     },
-    {
-      title: "Testing & Optimisation",
-      body: "Checks across devices, browsers and buying journeys, followed by practical improvements where friction is found.",
-    },
-    {
-      title: "Goal-led Workflow",
-      body: "Clear objectives, responsibilities and decision points so the project keeps moving and changes are understood.",
-    },
+    // Testing and workflow dropped from the list (client audit, 26 Oct 2026): they describe how we work, not a service.
   ],
   process: [
     ["Discovery", "Understand the products, customers, business model, current platform and required functionality."],

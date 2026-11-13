@@ -5,7 +5,7 @@ import { cookiePolicy } from "@/lib/content/legal";
 export const metadata: Metadata = {
   title: "Cookie Policy",
   description: "How Online Marketing Help uses cookies on this website.",
-  alternates: { canonical: "https://onlinemarketinghelp.co.uk/cookie-policy/" },
+  alternates: { canonical: "https://onlinemarketinghelp.co.uk/cookies" },
 };
 
 export default function CookiePolicyPage() {

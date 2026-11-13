@@ -19,7 +19,7 @@ export function InsightMeta({ post, inverse = false }: { post: InsightIndexEntry
         inverse ? "text-oninverse/62" : "text-muted"
       }`}
     >
-      <span className={inverse ? "text-[#f5d394]" : "text-amber-deep"}>{post.topic.name}</span>
+      <span className={inverse ? "text-[var(--accent-light)]" : "text-amber-deep"}>{post.topic.name}</span>
       <span aria-hidden>·</span>
       <time dateTime={post.publishedAt}>{formatInsightDate(post.publishedAt)}</time>
       <span aria-hidden>·</span>

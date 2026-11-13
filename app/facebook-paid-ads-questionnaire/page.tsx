@@ -5,7 +5,7 @@ import { facebookAdsQuestionnaire } from "@/lib/content/quote-forms";
 export const metadata: Metadata = {
   title: facebookAdsQuestionnaire.seo.title,
   description: facebookAdsQuestionnaire.seo.description,
-  alternates: { canonical: "https://onlinemarketinghelp.co.uk/facebook-paid-ads-questionnaire/" },
+  alternates: { canonical: "https://onlinemarketinghelp.co.uk/facebook-paid-ads-questionnaire" },
 };
 
 export default function Page() {

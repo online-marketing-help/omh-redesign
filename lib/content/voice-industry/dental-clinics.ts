@@ -266,7 +266,7 @@ export const markup = String.raw`
       </div>
 
       <figure class="relative" data-fd>
-        <div class="rounded-[22px] border border-line bg-surface shadow-[0_50px_90px_-55px_rgb(16_24_40/0.6)]">
+        <div class="rounded-[22px] border border-line bg-surface shadow-[0_50px_90px_-55px_rgb(0_0_0/0.6)]">
           <div class="flex items-center justify-between border-b border-line px-5 py-3">
             <span class="flex gap-1.5" aria-hidden="true"><i class="block h-2.5 w-2.5 rounded-full bg-[#e6a29a]"></i><i class="block h-2.5 w-2.5 rounded-full bg-[#ecc77a]"></i><i class="block h-2.5 w-2.5 rounded-full bg-[#9fd1b3]"></i></span>
             <span class="flex items-center gap-2 text-[13px] font-semibold text-muted"><span class="fd-live" aria-hidden="true"></span>Live front desk</span>
@@ -422,7 +422,7 @@ export const markup = String.raw`
             </button>
           </div>
             </div>
-            <div class="pd-tip pointer-events-none absolute z-10 hidden w-[210px] rounded-[12px] border border-line bg-surface p-3 text-[13.5px] leading-snug shadow-[0_20px_40px_-20px_rgb(16_24_40/0.5)]" data-pd-tip role="status"></div>
+            <div class="pd-tip pointer-events-none absolute z-10 hidden w-[210px] rounded-[12px] border border-line bg-surface p-3 text-[13.5px] leading-snug shadow-[0_20px_40px_-20px_rgb(0_0_0/0.5)]" data-pd-tip role="status"></div>
           </div>
           <div class="mt-2 grid grid-cols-[repeat(14,minmax(0,1fr))] gap-[3px] pl-7 text-center text-[11px] text-muted tnum sm:gap-[6px] sm:text-[12px]" aria-hidden="true"><span>07</span><span>08</span><span>09</span><span>10</span><span>11</span><span>12</span><span>13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span><span>20</span></div>
         </div>
@@ -468,7 +468,7 @@ export const markup = String.raw`
         <p class="mt-1 text-[14px] text-muted">2-minute call. It tells you it is an AI. Nothing to sign up for.</p>
       </div>
 
-      <div class="mx-auto w-full max-w-[400px] rounded-[38px] border-[10px] border-navy bg-surface p-5 shadow-[0_50px_90px_-50px_rgb(16_24_40/0.6)] dark:border-black" aria-live="polite">
+      <div class="mx-auto w-full max-w-[400px] rounded-[38px] border-[10px] border-navy bg-surface p-5 shadow-[0_50px_90px_-50px_rgb(0_0_0/0.6)] dark:border-black" aria-live="polite">
         <p class="flex items-center justify-between text-[13px] font-semibold text-muted"><span class="tnum">09:41</span><span class="flex items-center gap-1.5"><span class="fd-live" aria-hidden="true"></span>Call answered</span></p>
         <div class="mt-6 text-center">
           <span class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-gold font-display text-[22px] font-semibold text-navy" data-hear-initials>AS</span>
@@ -543,19 +543,19 @@ export const markup = String.raw`
 
 
 <!-- ===== COMPONENT: DentalVideo ===== -->
-<section id="video" data-component="DentalVideo" class="bg-sand">
+<section id="video" data-component="DentalVideo" class="bg-surface">
   <div class="container-omh py-20 lg:py-24">
     <div class="mx-auto text-center">
       <p class="eyebrow justify-center"><span class="eyebrow-mark" aria-hidden="true"><i></i><i></i><i></i></span>Demo video</p>
       <h2>Watch it handle <span class="hl">a patient call</span></h2>
     </div>
     <div class="mx-auto mt-10 rounded-[24px] border border-line bg-surface p-3 sm:p-4">
-      <button type="button" class="group relative block aspect-video w-full overflow-hidden rounded-[18px] bg-[linear-gradient(135deg,#1a2437,#101828_60%,#3a2f1a)] text-left" aria-haspopup="dialog" data-video-modal-open data-video-id="[PLACEHOLDER]" data-video-title="A dental patient call, start to finish" data-video-meta="Albion Square Dental, Manchester (fictional demo practice)" data-track="dental_video_open" aria-label="Play video: a dental patient call, start to finish (opens in a pop-up)">
+      <button type="button" class="group relative block aspect-video w-full overflow-hidden rounded-[18px] bg-[linear-gradient(135deg,#000,#000_60%,#3a2f1a)] text-left" aria-haspopup="dialog" data-video-modal-open data-video-id="[PLACEHOLDER]" data-video-title="A dental patient call, start to finish" data-video-meta="Albion Square Dental, Manchester (fictional demo practice)" data-track="dental_video_open" aria-label="Play video: a dental patient call, start to finish (opens in a pop-up)">
         <span class="absolute -right-10 -top-6 text-white/5" aria-hidden="true"><svg class="icon !h-[300px] !w-[300px]" aria-hidden="true" focusable="false"><use href="#i-tooth"/></svg></span>
         <span class="absolute left-[8%] top-[18%] w-[min(300px,46%)] rounded-[16px] bg-cream p-4 text-navy shadow-[0_30px_50px_-30px_rgb(0_0_0/0.8)]" aria-hidden="true">
-          <span class="flex items-center gap-2 text-[12.5px] font-semibold text-[rgb(16_24_40/0.6)]"><svg class="icon !h-4 !w-4" aria-hidden="true" focusable="false"><use href="#i-phone-incoming"/></svg>Incoming call</span>
+          <span class="flex items-center gap-2 text-[12.5px] font-semibold text-[rgb(0_0_0/0.6)]"><svg class="icon !h-4 !w-4" aria-hidden="true" focusable="false"><use href="#i-phone-incoming"/></svg>Incoming call</span>
           <span class="mt-2 block font-display text-[clamp(14px,1.6vw,19px)] font-semibold leading-tight">Albion Square Dental</span>
-          <span class="mt-1 block text-[clamp(11px,1.2vw,13.5px)] text-[rgb(16_24_40/0.65)]">Answered by Amy, AI receptionist</span>
+          <span class="mt-1 block text-[clamp(11px,1.2vw,13.5px)] text-[rgb(0_0_0/0.65)]">Answered by Amy, AI receptionist</span>
         </span>
         <span class="absolute left-1/2 top-1/2 grid h-[72px] w-[72px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-gold text-navy shadow-[0_14px_30px_-10px_rgb(0_0_0/0.6)] transition-transform group-hover:scale-105" aria-hidden="true"><svg class="icon !h-8 !w-8 translate-x-0.5" aria-hidden="true" focusable="false"><use href="#i-play"/></svg></span>
         <span class="absolute bottom-4 left-5 right-5 flex items-end justify-between gap-4 text-white" aria-hidden="true">
@@ -642,13 +642,13 @@ export const markup = String.raw`
       <p class="mt-5 text-muted">Six jobs your agent can take on. Pick one to see how the call flows and what reception sees afterwards.</p>
     </div>
     <div class="mt-12 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)_minmax(0,1fr)] lg:items-stretch">
-      <ul class="grid gap-4"><li><button type="button" class="wf-card group flex h-full w-full items-start gap-3.5 rounded-[18px] border border-line bg-surface p-4 text-left transition-colors hover:border-[var(--line-strong)] aria-pressed:border-gold aria-pressed:shadow-[0_0_0_1px_#d79a37] sm:p-5" aria-pressed="true" aria-controls="wf-panel" data-wf="new" data-track="dental_workflow" data-track-name="New patient enquiries">
+      <ul class="grid gap-4"><li><button type="button" class="wf-card group flex h-full w-full items-start gap-3.5 rounded-[18px] border border-line bg-surface p-4 text-left transition-colors hover:border-[var(--line-strong)] aria-pressed:border-gold aria-pressed:shadow-[0_0_0_1px_var(--color-teal)] sm:p-5" aria-pressed="true" aria-controls="wf-panel" data-wf="new" data-track="dental_workflow" data-track-name="New patient enquiries">
           <span class="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-gold/20 text-hl group-aria-pressed:bg-gold group-aria-pressed:text-navy" aria-hidden="true"><svg class="icon !h-5 !w-5" aria-hidden="true" focusable="false"><use href="#i-plus-star"/></svg></span>
           <span class="min-w-0"><span class="block font-display text-[17.5px] font-semibold leading-snug">New patient enquiries</span><span class="mt-1 block text-[14.5px] leading-snug text-muted">Details taken, first visit booked</span></span>
-        </button></li><li><button type="button" class="wf-card group flex h-full w-full items-start gap-3.5 rounded-[18px] border border-line bg-surface p-4 text-left transition-colors hover:border-[var(--line-strong)] aria-pressed:border-gold aria-pressed:shadow-[0_0_0_1px_#d79a37] sm:p-5" aria-pressed="false" aria-controls="wf-panel" data-wf="urgent" data-track="dental_workflow" data-track-name="Urgent and emergency calls">
+        </button></li><li><button type="button" class="wf-card group flex h-full w-full items-start gap-3.5 rounded-[18px] border border-line bg-surface p-4 text-left transition-colors hover:border-[var(--line-strong)] aria-pressed:border-gold aria-pressed:shadow-[0_0_0_1px_var(--color-teal)] sm:p-5" aria-pressed="false" aria-controls="wf-panel" data-wf="urgent" data-track="dental_workflow" data-track-name="Urgent and emergency calls">
           <span class="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-gold/20 text-hl group-aria-pressed:bg-gold group-aria-pressed:text-navy" aria-hidden="true"><svg class="icon !h-5 !w-5" aria-hidden="true" focusable="false"><use href="#i-shield"/></svg></span>
           <span class="min-w-0"><span class="block font-display text-[17.5px] font-semibold leading-snug">Urgent and emergency calls</span><span class="mt-1 block text-[14.5px] leading-snug text-muted">Your rules, never clinical advice</span></span>
-        </button></li><li><button type="button" class="wf-card group flex h-full w-full items-start gap-3.5 rounded-[18px] border border-line bg-surface p-4 text-left transition-colors hover:border-[var(--line-strong)] aria-pressed:border-gold aria-pressed:shadow-[0_0_0_1px_#d79a37] sm:p-5" aria-pressed="false" aria-controls="wf-panel" data-wf="recall" data-track="dental_workflow" data-track-name="Recalls and hygiene visits">
+        </button></li><li><button type="button" class="wf-card group flex h-full w-full items-start gap-3.5 rounded-[18px] border border-line bg-surface p-4 text-left transition-colors hover:border-[var(--line-strong)] aria-pressed:border-gold aria-pressed:shadow-[0_0_0_1px_var(--color-teal)] sm:p-5" aria-pressed="false" aria-controls="wf-panel" data-wf="recall" data-track="dental_workflow" data-track-name="Recalls and hygiene visits">
           <span class="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-gold/20 text-hl group-aria-pressed:bg-gold group-aria-pressed:text-navy" aria-hidden="true"><svg class="icon !h-5 !w-5" aria-hidden="true" focusable="false"><use href="#i-calendar"/></svg></span>
           <span class="min-w-0"><span class="block font-display text-[17.5px] font-semibold leading-snug">Recalls and hygiene visits</span><span class="mt-1 block text-[14.5px] leading-snug text-muted">Consented reminders, booked straight in</span></span>
         </button></li></ul>
@@ -659,13 +659,13 @@ export const markup = String.raw`
         <p class="mt-3 text-[16px] text-band-muted">It answers, books and routes, then hands your team a clear note. Reception stays in charge of anything that needs a person.</p>
         <p class="mt-5 flex items-center gap-2 text-[14.5px] font-semibold text-band-ok"><span class="fd-live" aria-hidden="true"></span>Answering 24/7, bank holidays too</p>
       </div>
-      <ul class="grid gap-4"><li><button type="button" class="wf-card group flex h-full w-full items-start gap-3.5 rounded-[18px] border border-line bg-surface p-4 text-left transition-colors hover:border-[var(--line-strong)] aria-pressed:border-gold aria-pressed:shadow-[0_0_0_1px_#d79a37] sm:p-5" aria-pressed="false" aria-controls="wf-panel" data-wf="cancel" data-track="dental_workflow" data-track-name="Cancellations and waitlist">
+      <ul class="grid gap-4"><li><button type="button" class="wf-card group flex h-full w-full items-start gap-3.5 rounded-[18px] border border-line bg-surface p-4 text-left transition-colors hover:border-[var(--line-strong)] aria-pressed:border-gold aria-pressed:shadow-[0_0_0_1px_var(--color-teal)] sm:p-5" aria-pressed="false" aria-controls="wf-panel" data-wf="cancel" data-track="dental_workflow" data-track-name="Cancellations and waitlist">
           <span class="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-gold/20 text-hl group-aria-pressed:bg-gold group-aria-pressed:text-navy" aria-hidden="true"><svg class="icon !h-5 !w-5" aria-hidden="true" focusable="false"><use href="#i-replay"/></svg></span>
           <span class="min-w-0"><span class="block font-display text-[17.5px] font-semibold leading-snug">Cancellations and waitlist</span><span class="mt-1 block text-[14.5px] leading-snug text-muted">Gaps offered before they are lost</span></span>
-        </button></li><li><button type="button" class="wf-card group flex h-full w-full items-start gap-3.5 rounded-[18px] border border-line bg-surface p-4 text-left transition-colors hover:border-[var(--line-strong)] aria-pressed:border-gold aria-pressed:shadow-[0_0_0_1px_#d79a37] sm:p-5" aria-pressed="false" aria-controls="wf-panel" data-wf="treatment" data-track="dental_workflow" data-track-name="Treatment enquiries">
+        </button></li><li><button type="button" class="wf-card group flex h-full w-full items-start gap-3.5 rounded-[18px] border border-line bg-surface p-4 text-left transition-colors hover:border-[var(--line-strong)] aria-pressed:border-gold aria-pressed:shadow-[0_0_0_1px_var(--color-teal)] sm:p-5" aria-pressed="false" aria-controls="wf-panel" data-wf="treatment" data-track="dental_workflow" data-track-name="Treatment enquiries">
           <span class="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-gold/20 text-hl group-aria-pressed:bg-gold group-aria-pressed:text-navy" aria-hidden="true"><svg class="icon !h-5 !w-5" aria-hidden="true" focusable="false"><use href="#i-plus-star"/></svg></span>
           <span class="min-w-0"><span class="block font-display text-[17.5px] font-semibold leading-snug">Treatment enquiries</span><span class="mt-1 block text-[14.5px] leading-snug text-muted">Implants, aligners and whitening</span></span>
-        </button></li><li><button type="button" class="wf-card group flex h-full w-full items-start gap-3.5 rounded-[18px] border border-line bg-surface p-4 text-left transition-colors hover:border-[var(--line-strong)] aria-pressed:border-gold aria-pressed:shadow-[0_0_0_1px_#d79a37] sm:p-5" aria-pressed="false" aria-controls="wf-panel" data-wf="fees" data-track="dental_workflow" data-track-name="Fees, plans and finance">
+        </button></li><li><button type="button" class="wf-card group flex h-full w-full items-start gap-3.5 rounded-[18px] border border-line bg-surface p-4 text-left transition-colors hover:border-[var(--line-strong)] aria-pressed:border-gold aria-pressed:shadow-[0_0_0_1px_var(--color-teal)] sm:p-5" aria-pressed="false" aria-controls="wf-panel" data-wf="fees" data-track="dental_workflow" data-track-name="Fees, plans and finance">
           <span class="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-gold/20 text-hl group-aria-pressed:bg-gold group-aria-pressed:text-navy" aria-hidden="true"><svg class="icon !h-5 !w-5" aria-hidden="true" focusable="false"><use href="#i-message"/></svg></span>
           <span class="min-w-0"><span class="block font-display text-[17.5px] font-semibold leading-snug">Fees, plans and finance</span><span class="mt-1 block text-[14.5px] leading-snug text-muted">Answered from your price list</span></span>
         </button></li></ul>
@@ -1342,7 +1342,7 @@ export const markup = String.raw`
 
 
 <!-- ===== COMPONENT: Boundaries ===== -->
-<section id="boundaries" data-component="Boundaries" class="bg-sand">
+<section id="boundaries" data-component="Boundaries" class="bg-surface">
   <div class="container-omh py-20 lg:py-24">
     <div>
       <div><p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"><i></i><i></i><i></i></span>Clear boundaries</p><h2>What it handles, <span class="hl">and what it doesn't</span></h2></div>
@@ -1411,7 +1411,7 @@ export const markup = String.raw`
         </div>
         <figcaption class="mt-3 flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-[14.5px] text-muted"><span class="flex items-center gap-2"><span class="block h-3 w-3 rounded-full bg-gold"></span>Cities we cover</span><span class="flex items-center gap-2"><span class="block h-2.5 w-2.5 rotate-45 rounded-[2px] bg-ink"></span>Our team in Hullbridge, Essex</span></figcaption>
       </figure>
-      <div class="rounded-[18px] border border-line bg-surface p-5 shadow-[0_30px_60px_-45px_rgb(16_24_40/0.5)] sm:p-7" aria-live="polite">
+      <div class="rounded-[18px] border border-line bg-surface p-5 shadow-[0_30px_60px_-45px_rgb(0_0_0/0.5)] sm:p-7" aria-live="polite">
         <div class="area-panel" id="area-panel-london" data-area-panel="london" role="tabpanel" aria-labelledby="area-tab-london" tabindex="0">
           <div class="flex items-end justify-between gap-4 border-b border-line pb-5">
             <div><p class="text-[14.5px] font-semibold text-muted">Local numbers with</p><p class="font-display text-[clamp(2.6rem,2.2rem+2.4vw,4.5rem)] font-semibold leading-none tracking-tight text-hl tnum">020</p></div>
@@ -1658,8 +1658,8 @@ export const markup = String.raw`
             <span class="block transition-transform group-hover:scale-[1.015]"><span class="relative block aspect-video overflow-hidden rounded-[14px] bg-[var(--tint-1)]">
             <span class="pointer-events-none absolute -right-6 -top-4 text-ink/10" aria-hidden="true"><svg class="icon !h-[140px] !w-[140px]" aria-hidden="true" focusable="false"><use href="#i-tooth"/></svg></span>
             <span class="vn-wave thumb-wave absolute inset-x-[8%] bottom-10 !h-7 opacity-50" aria-hidden="true"><i style="height:30%"></i><i style="height:55%"></i><i style="height:80%"></i><i style="height:45%"></i><i style="height:65%"></i><i style="height:90%"></i><i style="height:50%"></i><i style="height:35%"></i><i style="height:70%"></i><i style="height:85%"></i><i style="height:40%"></i><i style="height:60%"></i><i style="height:75%"></i><i style="height:30%"></i><i style="height:50%"></i><i style="height:65%"></i><i style="height:45%"></i><i style="height:80%"></i><i style="height:55%"></i><i style="height:35%"></i><i style="height:60%"></i><i style="height:40%"></i><i style="height:70%"></i><i style="height:30%"></i></span>
-            <span class="absolute left-1/2 top-[42%] grid h-[60px] w-[60px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-gold text-navy shadow-[0_10px_24px_-8px_rgb(16_24_40/0.55)]" aria-hidden="true"><svg class="icon !h-7 !w-7 translate-x-0.5" aria-hidden="true" focusable="false"><use href="#i-play"/></svg></span>
-            <span class="absolute bottom-3 right-3 rounded-[5px] bg-[#101828]/85 px-1.5 py-0.5 text-[13px] font-semibold text-white tnum">1:12</span>
+            <span class="absolute left-1/2 top-[42%] grid h-[60px] w-[60px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-gold text-navy shadow-[0_10px_24px_-8px_rgb(0_0_0/0.55)]" aria-hidden="true"><svg class="icon !h-7 !w-7 translate-x-0.5" aria-hidden="true" focusable="false"><use href="#i-play"/></svg></span>
+            <span class="absolute bottom-3 right-3 rounded-[5px] bg-[#000]/85 px-1.5 py-0.5 text-[13px] font-semibold text-white tnum">1:12</span>
           </span></span>
           </button>
           <div class="flex flex-1 flex-col px-2 pb-2 pt-4">
@@ -1676,8 +1676,8 @@ export const markup = String.raw`
             <span class="block transition-transform group-hover:scale-[1.015]"><span class="relative block aspect-video overflow-hidden rounded-[14px] bg-[var(--tint-2)]">
             <span class="pointer-events-none absolute -right-6 -top-4 text-ink/10" aria-hidden="true"><svg class="icon !h-[140px] !w-[140px]" aria-hidden="true" focusable="false"><use href="#i-tooth"/></svg></span>
             <span class="vn-wave thumb-wave absolute inset-x-[8%] bottom-10 !h-7 opacity-50" aria-hidden="true"><i style="height:45%"></i><i style="height:70%"></i><i style="height:35%"></i><i style="height:85%"></i><i style="height:60%"></i><i style="height:40%"></i><i style="height:75%"></i><i style="height:55%"></i><i style="height:90%"></i><i style="height:30%"></i><i style="height:65%"></i><i style="height:50%"></i><i style="height:80%"></i><i style="height:45%"></i><i style="height:35%"></i><i style="height:70%"></i><i style="height:60%"></i><i style="height:85%"></i><i style="height:40%"></i><i style="height:55%"></i><i style="height:30%"></i><i style="height:75%"></i><i style="height:50%"></i><i style="height:65%"></i></span>
-            <span class="absolute left-1/2 top-[42%] grid h-[60px] w-[60px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-gold text-navy shadow-[0_10px_24px_-8px_rgb(16_24_40/0.55)]" aria-hidden="true"><svg class="icon !h-7 !w-7 translate-x-0.5" aria-hidden="true" focusable="false"><use href="#i-play"/></svg></span>
-            <span class="absolute bottom-3 right-3 rounded-[5px] bg-[#101828]/85 px-1.5 py-0.5 text-[13px] font-semibold text-white tnum">0:58</span>
+            <span class="absolute left-1/2 top-[42%] grid h-[60px] w-[60px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-gold text-navy shadow-[0_10px_24px_-8px_rgb(0_0_0/0.55)]" aria-hidden="true"><svg class="icon !h-7 !w-7 translate-x-0.5" aria-hidden="true" focusable="false"><use href="#i-play"/></svg></span>
+            <span class="absolute bottom-3 right-3 rounded-[5px] bg-[#000]/85 px-1.5 py-0.5 text-[13px] font-semibold text-white tnum">0:58</span>
           </span></span>
           </button>
           <div class="flex flex-1 flex-col px-2 pb-2 pt-4">
@@ -1694,8 +1694,8 @@ export const markup = String.raw`
             <span class="block transition-transform group-hover:scale-[1.015]"><span class="relative block aspect-video overflow-hidden rounded-[14px] bg-[var(--tint-3)]">
             <span class="pointer-events-none absolute -right-6 -top-4 text-ink/10" aria-hidden="true"><svg class="icon !h-[140px] !w-[140px]" aria-hidden="true" focusable="false"><use href="#i-tooth"/></svg></span>
             <span class="vn-wave thumb-wave absolute inset-x-[8%] bottom-10 !h-7 opacity-50" aria-hidden="true"><i style="height:60%"></i><i style="height:35%"></i><i style="height:75%"></i><i style="height:50%"></i><i style="height:90%"></i><i style="height:40%"></i><i style="height:65%"></i><i style="height:80%"></i><i style="height:30%"></i><i style="height:55%"></i><i style="height:70%"></i><i style="height:45%"></i><i style="height:85%"></i><i style="height:35%"></i><i style="height:60%"></i><i style="height:50%"></i><i style="height:75%"></i><i style="height:40%"></i><i style="height:90%"></i><i style="height:30%"></i><i style="height:65%"></i><i style="height:55%"></i><i style="height:45%"></i><i style="height:70%"></i></span>
-            <span class="absolute left-1/2 top-[42%] grid h-[60px] w-[60px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-gold text-navy shadow-[0_10px_24px_-8px_rgb(16_24_40/0.55)]" aria-hidden="true"><svg class="icon !h-7 !w-7 translate-x-0.5" aria-hidden="true" focusable="false"><use href="#i-play"/></svg></span>
-            <span class="absolute bottom-3 right-3 rounded-[5px] bg-[#101828]/85 px-1.5 py-0.5 text-[13px] font-semibold text-white tnum">1:04</span>
+            <span class="absolute left-1/2 top-[42%] grid h-[60px] w-[60px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-gold text-navy shadow-[0_10px_24px_-8px_rgb(0_0_0/0.55)]" aria-hidden="true"><svg class="icon !h-7 !w-7 translate-x-0.5" aria-hidden="true" focusable="false"><use href="#i-play"/></svg></span>
+            <span class="absolute bottom-3 right-3 rounded-[5px] bg-[#000]/85 px-1.5 py-0.5 text-[13px] font-semibold text-white tnum">1:04</span>
           </span></span>
           </button>
           <div class="flex flex-1 flex-col px-2 pb-2 pt-4">
@@ -1712,8 +1712,8 @@ export const markup = String.raw`
             <span class="block transition-transform group-hover:scale-[1.015]"><span class="relative block aspect-video overflow-hidden rounded-[14px] bg-[var(--tint-4)]">
             <span class="pointer-events-none absolute -right-6 -top-4 text-ink/10" aria-hidden="true"><svg class="icon !h-[140px] !w-[140px]" aria-hidden="true" focusable="false"><use href="#i-tooth"/></svg></span>
             <span class="vn-wave thumb-wave absolute inset-x-[8%] bottom-10 !h-7 opacity-50" aria-hidden="true"><i style="height:35%"></i><i style="height:80%"></i><i style="height:50%"></i><i style="height:65%"></i><i style="height:40%"></i><i style="height:85%"></i><i style="height:30%"></i><i style="height:70%"></i><i style="height:55%"></i><i style="height:90%"></i><i style="height:45%"></i><i style="height:60%"></i><i style="height:35%"></i><i style="height:75%"></i><i style="height:50%"></i><i style="height:80%"></i><i style="height:40%"></i><i style="height:65%"></i><i style="height:30%"></i><i style="height:85%"></i><i style="height:55%"></i><i style="height:70%"></i><i style="height:45%"></i><i style="height:60%"></i></span>
-            <span class="absolute left-1/2 top-[42%] grid h-[60px] w-[60px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-gold text-navy shadow-[0_10px_24px_-8px_rgb(16_24_40/0.55)]" aria-hidden="true"><svg class="icon !h-7 !w-7 translate-x-0.5" aria-hidden="true" focusable="false"><use href="#i-play"/></svg></span>
-            <span class="absolute bottom-3 right-3 rounded-[5px] bg-[#101828]/85 px-1.5 py-0.5 text-[13px] font-semibold text-white tnum">0:47</span>
+            <span class="absolute left-1/2 top-[42%] grid h-[60px] w-[60px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-gold text-navy shadow-[0_10px_24px_-8px_rgb(0_0_0/0.55)]" aria-hidden="true"><svg class="icon !h-7 !w-7 translate-x-0.5" aria-hidden="true" focusable="false"><use href="#i-play"/></svg></span>
+            <span class="absolute bottom-3 right-3 rounded-[5px] bg-[#000]/85 px-1.5 py-0.5 text-[13px] font-semibold text-white tnum">0:47</span>
           </span></span>
           </button>
           <div class="flex flex-1 flex-col px-2 pb-2 pt-4">
@@ -1730,8 +1730,8 @@ export const markup = String.raw`
             <span class="block transition-transform group-hover:scale-[1.015]"><span class="relative block aspect-video overflow-hidden rounded-[14px] bg-[var(--tint-1)]">
             <span class="pointer-events-none absolute -right-6 -top-4 text-ink/10" aria-hidden="true"><svg class="icon !h-[140px] !w-[140px]" aria-hidden="true" focusable="false"><use href="#i-tooth"/></svg></span>
             <span class="vn-wave thumb-wave absolute inset-x-[8%] bottom-10 !h-7 opacity-50" aria-hidden="true"><i style="height:70%"></i><i style="height:45%"></i><i style="height:60%"></i><i style="height:30%"></i><i style="height:80%"></i><i style="height:55%"></i><i style="height:90%"></i><i style="height:35%"></i><i style="height:65%"></i><i style="height:50%"></i><i style="height:75%"></i><i style="height:40%"></i><i style="height:85%"></i><i style="height:60%"></i><i style="height:30%"></i><i style="height:70%"></i><i style="height:45%"></i><i style="height:55%"></i><i style="height:80%"></i><i style="height:35%"></i><i style="height:65%"></i><i style="height:50%"></i><i style="height:90%"></i><i style="height:40%"></i></span>
-            <span class="absolute left-1/2 top-[42%] grid h-[60px] w-[60px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-gold text-navy shadow-[0_10px_24px_-8px_rgb(16_24_40/0.55)]" aria-hidden="true"><svg class="icon !h-7 !w-7 translate-x-0.5" aria-hidden="true" focusable="false"><use href="#i-play"/></svg></span>
-            <span class="absolute bottom-3 right-3 rounded-[5px] bg-[#101828]/85 px-1.5 py-0.5 text-[13px] font-semibold text-white tnum">0:52</span>
+            <span class="absolute left-1/2 top-[42%] grid h-[60px] w-[60px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-gold text-navy shadow-[0_10px_24px_-8px_rgb(0_0_0/0.55)]" aria-hidden="true"><svg class="icon !h-7 !w-7 translate-x-0.5" aria-hidden="true" focusable="false"><use href="#i-play"/></svg></span>
+            <span class="absolute bottom-3 right-3 rounded-[5px] bg-[#000]/85 px-1.5 py-0.5 text-[13px] font-semibold text-white tnum">0:52</span>
           </span></span>
           </button>
           <div class="flex flex-1 flex-col px-2 pb-2 pt-4">
@@ -1748,8 +1748,8 @@ export const markup = String.raw`
             <span class="block transition-transform group-hover:scale-[1.015]"><span class="relative block aspect-video overflow-hidden rounded-[14px] bg-[var(--tint-2)]">
             <span class="pointer-events-none absolute -right-6 -top-4 text-ink/10" aria-hidden="true"><svg class="icon !h-[140px] !w-[140px]" aria-hidden="true" focusable="false"><use href="#i-tooth"/></svg></span>
             <span class="vn-wave thumb-wave absolute inset-x-[8%] bottom-10 !h-7 opacity-50" aria-hidden="true"><i style="height:30%"></i><i style="height:55%"></i><i style="height:80%"></i><i style="height:45%"></i><i style="height:65%"></i><i style="height:90%"></i><i style="height:50%"></i><i style="height:35%"></i><i style="height:70%"></i><i style="height:85%"></i><i style="height:40%"></i><i style="height:60%"></i><i style="height:75%"></i><i style="height:30%"></i><i style="height:50%"></i><i style="height:65%"></i><i style="height:45%"></i><i style="height:80%"></i><i style="height:55%"></i><i style="height:35%"></i><i style="height:60%"></i><i style="height:40%"></i><i style="height:70%"></i><i style="height:30%"></i></span>
-            <span class="absolute left-1/2 top-[42%] grid h-[60px] w-[60px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-gold text-navy shadow-[0_10px_24px_-8px_rgb(16_24_40/0.55)]" aria-hidden="true"><svg class="icon !h-7 !w-7 translate-x-0.5" aria-hidden="true" focusable="false"><use href="#i-play"/></svg></span>
-            <span class="absolute bottom-3 right-3 rounded-[5px] bg-[#101828]/85 px-1.5 py-0.5 text-[13px] font-semibold text-white tnum">0:39</span>
+            <span class="absolute left-1/2 top-[42%] grid h-[60px] w-[60px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-gold text-navy shadow-[0_10px_24px_-8px_rgb(0_0_0/0.55)]" aria-hidden="true"><svg class="icon !h-7 !w-7 translate-x-0.5" aria-hidden="true" focusable="false"><use href="#i-play"/></svg></span>
+            <span class="absolute bottom-3 right-3 rounded-[5px] bg-[#000]/85 px-1.5 py-0.5 text-[13px] font-semibold text-white tnum">0:39</span>
           </span></span>
           </button>
           <div class="flex flex-1 flex-col px-2 pb-2 pt-4">
@@ -1767,7 +1767,7 @@ export const markup = String.raw`
 
 
 <!-- ===== COMPONENT: GettingStarted ===== -->
-<section id="getting-started" data-component="GettingStarted" class="bg-sand">
+<section id="getting-started" data-component="GettingStarted" class="bg-surface">
   <div class="container-omh py-20 lg:py-28">
     <div>
       <div><p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"><i></i><i></i><i></i></span>Getting started</p><h2>From first call <span class="hl">to go-live</span></h2></div>
@@ -1816,12 +1816,12 @@ export const markup = String.raw`
         <a href="#book-demo" class="btn btn-primary mt-6" data-track="dental_checklist_book">Book your discovery call</a>
       </div>
       <ul class="grid gap-2.5 sm:grid-cols-2">
-        <li class="flex"><label class="flex w-full min-h-[56px] items-center gap-3 rounded-[12px] border border-line bg-paper px-4 py-3 text-[16px] leading-snug has-[:checked]:border-gold has-[:checked]:bg-gold/10"><input type="checkbox" class="h-5 w-5 shrink-0 accent-[#b97822]" data-ck-item data-track="dental_checklist_tick" data-track-name="Your price list and fees, NHS and private">Your price list and fees, NHS and private</label></li>
-        <li class="flex"><label class="flex w-full min-h-[56px] items-center gap-3 rounded-[12px] border border-line bg-paper px-4 py-3 text-[16px] leading-snug has-[:checked]:border-gold has-[:checked]:bg-gold/10"><input type="checkbox" class="h-5 w-5 shrink-0 accent-[#b97822]" data-ck-item data-track="dental_checklist_tick" data-track-name="Access to your diary or practice system">Access to your diary or practice system</label></li>
-        <li class="flex"><label class="flex w-full min-h-[56px] items-center gap-3 rounded-[12px] border border-line bg-paper px-4 py-3 text-[16px] leading-snug has-[:checked]:border-gold has-[:checked]:bg-gold/10"><input type="checkbox" class="h-5 w-5 shrink-0 accent-[#b97822]" data-ck-item data-track="dental_checklist_tick" data-track-name="Your emergency and out-of-hours route">Your emergency and out-of-hours route</label></li>
-        <li class="flex"><label class="flex w-full min-h-[56px] items-center gap-3 rounded-[12px] border border-line bg-paper px-4 py-3 text-[16px] leading-snug has-[:checked]:border-gold has-[:checked]:bg-gold/10"><input type="checkbox" class="h-5 w-5 shrink-0 accent-[#b97822]" data-ck-item data-track="dental_checklist_tick" data-track-name="New patient and waiting list rules">New patient and waiting list rules</label></li>
-        <li class="flex"><label class="flex w-full min-h-[56px] items-center gap-3 rounded-[12px] border border-line bg-paper px-4 py-3 text-[16px] leading-snug has-[:checked]:border-gold has-[:checked]:bg-gold/10"><input type="checkbox" class="h-5 w-5 shrink-0 accent-[#b97822]" data-ck-item data-track="dental_checklist_tick" data-track-name="Opening hours and how you would like to be greeted">Opening hours and how you would like to be greeted</label></li>
-        <li class="flex"><label class="flex w-full min-h-[56px] items-center gap-3 rounded-[12px] border border-line bg-paper px-4 py-3 text-[16px] leading-snug has-[:checked]:border-gold has-[:checked]:bg-gold/10"><input type="checkbox" class="h-5 w-5 shrink-0 accent-[#b97822]" data-ck-item data-track="dental_checklist_tick" data-track-name="Who calls should be put through to">Who calls should be put through to</label></li>
+        <li class="flex"><label class="flex w-full min-h-[56px] items-center gap-3 rounded-[12px] border border-line bg-paper px-4 py-3 text-[16px] leading-snug has-[:checked]:border-gold has-[:checked]:bg-gold/10"><input type="checkbox" class="h-5 w-5 shrink-0 accent-[var(--color-teal-dark)]" data-ck-item data-track="dental_checklist_tick" data-track-name="Your price list and fees, NHS and private">Your price list and fees, NHS and private</label></li>
+        <li class="flex"><label class="flex w-full min-h-[56px] items-center gap-3 rounded-[12px] border border-line bg-paper px-4 py-3 text-[16px] leading-snug has-[:checked]:border-gold has-[:checked]:bg-gold/10"><input type="checkbox" class="h-5 w-5 shrink-0 accent-[var(--color-teal-dark)]" data-ck-item data-track="dental_checklist_tick" data-track-name="Access to your diary or practice system">Access to your diary or practice system</label></li>
+        <li class="flex"><label class="flex w-full min-h-[56px] items-center gap-3 rounded-[12px] border border-line bg-paper px-4 py-3 text-[16px] leading-snug has-[:checked]:border-gold has-[:checked]:bg-gold/10"><input type="checkbox" class="h-5 w-5 shrink-0 accent-[var(--color-teal-dark)]" data-ck-item data-track="dental_checklist_tick" data-track-name="Your emergency and out-of-hours route">Your emergency and out-of-hours route</label></li>
+        <li class="flex"><label class="flex w-full min-h-[56px] items-center gap-3 rounded-[12px] border border-line bg-paper px-4 py-3 text-[16px] leading-snug has-[:checked]:border-gold has-[:checked]:bg-gold/10"><input type="checkbox" class="h-5 w-5 shrink-0 accent-[var(--color-teal-dark)]" data-ck-item data-track="dental_checklist_tick" data-track-name="New patient and waiting list rules">New patient and waiting list rules</label></li>
+        <li class="flex"><label class="flex w-full min-h-[56px] items-center gap-3 rounded-[12px] border border-line bg-paper px-4 py-3 text-[16px] leading-snug has-[:checked]:border-gold has-[:checked]:bg-gold/10"><input type="checkbox" class="h-5 w-5 shrink-0 accent-[var(--color-teal-dark)]" data-ck-item data-track="dental_checklist_tick" data-track-name="Opening hours and how you would like to be greeted">Opening hours and how you would like to be greeted</label></li>
+        <li class="flex"><label class="flex w-full min-h-[56px] items-center gap-3 rounded-[12px] border border-line bg-paper px-4 py-3 text-[16px] leading-snug has-[:checked]:border-gold has-[:checked]:bg-gold/10"><input type="checkbox" class="h-5 w-5 shrink-0 accent-[var(--color-teal-dark)]" data-ck-item data-track="dental_checklist_tick" data-track-name="Who calls should be put through to">Who calls should be put through to</label></li>
       </ul>
     </div>
   </div>
@@ -1861,7 +1861,7 @@ ${pricingSection("bg-surface")}
         <button type="button" class="inline-flex min-h-[44px] items-center gap-1.5 font-semibold text-ink hover:text-hl" data-faq-expand data-track="faq_expand_all">Open all</button>
       </div>
       <div class="mt-2 space-y-3">
-      <details class="group rounded-[14px] border border-line bg-surface transition-colors open:border-[var(--line-strong)] open:shadow-[0_18px_40px_-30px_rgb(16_24_40/0.45)]" data-faq-item data-cat="patients" open data-track-name="Will patients know they are talking to an AI?">
+      <details class="group rounded-[14px] border border-line bg-surface transition-colors open:border-[var(--line-strong)] open:shadow-[0_18px_40px_-30px_rgb(0_0_0/0.45)]" data-faq-item data-cat="patients" open data-track-name="Will patients know they are talking to an AI?">
         <summary class="flex min-h-[64px] items-center gap-4 px-5 py-4">
           <span class="num hidden w-7 shrink-0 text-[15px] sm:block" aria-hidden="true">01</span>
           <span class="min-w-0 flex-1"><h3 class="!text-[clamp(18px,17px+.3vw,20.5px)] !leading-[1.3]">Will patients know they are talking to an AI?</h3><span class="mt-1 block text-[13.5px] font-semibold text-muted">Patients and AI</span></span>
@@ -1872,7 +1872,7 @@ ${pricingSection("bg-surface")}
           
         </div>
       </details>
-      <details class="group rounded-[14px] border border-line bg-surface transition-colors open:border-[var(--line-strong)] open:shadow-[0_18px_40px_-30px_rgb(16_24_40/0.45)]" data-faq-item data-cat="clinical" data-track-name="Does it give clinical or medical advice?">
+      <details class="group rounded-[14px] border border-line bg-surface transition-colors open:border-[var(--line-strong)] open:shadow-[0_18px_40px_-30px_rgb(0_0_0/0.45)]" data-faq-item data-cat="clinical" data-track-name="Does it give clinical or medical advice?">
         <summary class="flex min-h-[64px] items-center gap-4 px-5 py-4">
           <span class="num hidden w-7 shrink-0 text-[15px] sm:block" aria-hidden="true">02</span>
           <span class="min-w-0 flex-1"><h3 class="!text-[clamp(18px,17px+.3vw,20.5px)] !leading-[1.3]">Does it give clinical or medical advice?</h3><span class="mt-1 block text-[13.5px] font-semibold text-muted">Clinical safety</span></span>
@@ -1883,7 +1883,7 @@ ${pricingSection("bg-surface")}
           
         </div>
       </details>
-      <details class="group rounded-[14px] border border-line bg-surface transition-colors open:border-[var(--line-strong)] open:shadow-[0_18px_40px_-30px_rgb(16_24_40/0.45)]" data-faq-item data-cat="clinical" data-track-name="What happens with dental emergencies out of hours?">
+      <details class="group rounded-[14px] border border-line bg-surface transition-colors open:border-[var(--line-strong)] open:shadow-[0_18px_40px_-30px_rgb(0_0_0/0.45)]" data-faq-item data-cat="clinical" data-track-name="What happens with dental emergencies out of hours?">
         <summary class="flex min-h-[64px] items-center gap-4 px-5 py-4">
           <span class="num hidden w-7 shrink-0 text-[15px] sm:block" aria-hidden="true">03</span>
           <span class="min-w-0 flex-1"><h3 class="!text-[clamp(18px,17px+.3vw,20.5px)] !leading-[1.3]">What happens with dental emergencies out of hours?</h3><span class="mt-1 block text-[13.5px] font-semibold text-muted">Clinical safety</span></span>
@@ -1894,7 +1894,7 @@ ${pricingSection("bg-surface")}
           
         </div>
       </details>
-      <details class="group rounded-[14px] border border-line bg-surface transition-colors open:border-[var(--line-strong)] open:shadow-[0_18px_40px_-30px_rgb(16_24_40/0.45)]" data-faq-item data-cat="patients" data-track-name="Does it work for NHS and private patients?">
+      <details class="group rounded-[14px] border border-line bg-surface transition-colors open:border-[var(--line-strong)] open:shadow-[0_18px_40px_-30px_rgb(0_0_0/0.45)]" data-faq-item data-cat="patients" data-track-name="Does it work for NHS and private patients?">
         <summary class="flex min-h-[64px] items-center gap-4 px-5 py-4">
           <span class="num hidden w-7 shrink-0 text-[15px] sm:block" aria-hidden="true">04</span>
           <span class="min-w-0 flex-1"><h3 class="!text-[clamp(18px,17px+.3vw,20.5px)] !leading-[1.3]">Does it work for NHS and private patients?</h3><span class="mt-1 block text-[13.5px] font-semibold text-muted">Patients and AI</span></span>
@@ -1905,7 +1905,7 @@ ${pricingSection("bg-surface")}
           
         </div>
       </details>
-      <details class="group rounded-[14px] border border-line bg-surface transition-colors open:border-[var(--line-strong)] open:shadow-[0_18px_40px_-30px_rgb(16_24_40/0.45)]" data-faq-item data-cat="setup" data-track-name="Does it work with our practice management software?">
+      <details class="group rounded-[14px] border border-line bg-surface transition-colors open:border-[var(--line-strong)] open:shadow-[0_18px_40px_-30px_rgb(0_0_0/0.45)]" data-faq-item data-cat="setup" data-track-name="Does it work with our practice management software?">
         <summary class="flex min-h-[64px] items-center gap-4 px-5 py-4">
           <span class="num hidden w-7 shrink-0 text-[15px] sm:block" aria-hidden="true">05</span>
           <span class="min-w-0 flex-1"><h3 class="!text-[clamp(18px,17px+.3vw,20.5px)] !leading-[1.3]">Does it work with our practice management software?</h3><span class="mt-1 block text-[13.5px] font-semibold text-muted">Setup and systems</span></span>
@@ -1916,7 +1916,7 @@ ${pricingSection("bg-surface")}
           <p class="mt-3"><span class="flag flag-wrap">[CONFIRM] supported practice management systems</span></p>
         </div>
       </details>
-      <details class="group rounded-[14px] border border-line bg-surface transition-colors open:border-[var(--line-strong)] open:shadow-[0_18px_40px_-30px_rgb(16_24_40/0.45)]" data-faq-item data-cat="patients" data-track-name="How does it handle elderly or anxious patients?">
+      <details class="group rounded-[14px] border border-line bg-surface transition-colors open:border-[var(--line-strong)] open:shadow-[0_18px_40px_-30px_rgb(0_0_0/0.45)]" data-faq-item data-cat="patients" data-track-name="How does it handle elderly or anxious patients?">
         <summary class="flex min-h-[64px] items-center gap-4 px-5 py-4">
           <span class="num hidden w-7 shrink-0 text-[15px] sm:block" aria-hidden="true">06</span>
           <span class="min-w-0 flex-1"><h3 class="!text-[clamp(18px,17px+.3vw,20.5px)] !leading-[1.3]">How does it handle elderly or anxious patients?</h3><span class="mt-1 block text-[13.5px] font-semibold text-muted">Patients and AI</span></span>
@@ -1927,7 +1927,7 @@ ${pricingSection("bg-surface")}
           
         </div>
       </details>
-      <details class="group rounded-[14px] border border-line bg-surface transition-colors open:border-[var(--line-strong)] open:shadow-[0_18px_40px_-30px_rgb(16_24_40/0.45)]" data-faq-item data-cat="setup" data-track-name="Can it fill last-minute cancellations?">
+      <details class="group rounded-[14px] border border-line bg-surface transition-colors open:border-[var(--line-strong)] open:shadow-[0_18px_40px_-30px_rgb(0_0_0/0.45)]" data-faq-item data-cat="setup" data-track-name="Can it fill last-minute cancellations?">
         <summary class="flex min-h-[64px] items-center gap-4 px-5 py-4">
           <span class="num hidden w-7 shrink-0 text-[15px] sm:block" aria-hidden="true">07</span>
           <span class="min-w-0 flex-1"><h3 class="!text-[clamp(18px,17px+.3vw,20.5px)] !leading-[1.3]">Can it fill last-minute cancellations?</h3><span class="mt-1 block text-[13.5px] font-semibold text-muted">Setup and systems</span></span>
@@ -1938,7 +1938,7 @@ ${pricingSection("bg-surface")}
           
         </div>
       </details>
-      <details class="group rounded-[14px] border border-line bg-surface transition-colors open:border-[var(--line-strong)] open:shadow-[0_18px_40px_-30px_rgb(16_24_40/0.45)]" data-faq-item data-cat="data" data-track-name="Is patient data kept safe?">
+      <details class="group rounded-[14px] border border-line bg-surface transition-colors open:border-[var(--line-strong)] open:shadow-[0_18px_40px_-30px_rgb(0_0_0/0.45)]" data-faq-item data-cat="data" data-track-name="Is patient data kept safe?">
         <summary class="flex min-h-[64px] items-center gap-4 px-5 py-4">
           <span class="num hidden w-7 shrink-0 text-[15px] sm:block" aria-hidden="true">08</span>
           <span class="min-w-0 flex-1"><h3 class="!text-[clamp(18px,17px+.3vw,20.5px)] !leading-[1.3]">Is patient data kept safe?</h3><span class="mt-1 block text-[13.5px] font-semibold text-muted">Data and rules</span></span>
@@ -1949,7 +1949,7 @@ ${pricingSection("bg-surface")}
           <p class="mt-3"><span class="flag flag-wrap">[CONFIRM] storage region and retention options</span></p>
         </div>
       </details>
-      <details data-faq-extra class="group rounded-[14px] border border-line bg-surface transition-colors open:border-[var(--line-strong)] open:shadow-[0_18px_40px_-30px_rgb(16_24_40/0.45)]" data-faq-item data-cat="data" data-track-name="Are calls recorded?">
+      <details data-faq-extra class="group rounded-[14px] border border-line bg-surface transition-colors open:border-[var(--line-strong)] open:shadow-[0_18px_40px_-30px_rgb(0_0_0/0.45)]" data-faq-item data-cat="data" data-track-name="Are calls recorded?">
         <summary class="flex min-h-[64px] items-center gap-4 px-5 py-4">
           <span class="num hidden w-7 shrink-0 text-[15px] sm:block" aria-hidden="true">09</span>
           <span class="min-w-0 flex-1"><h3 class="!text-[clamp(18px,17px+.3vw,20.5px)] !leading-[1.3]">Are calls recorded?</h3><span class="mt-1 block text-[13.5px] font-semibold text-muted">Data and rules</span></span>
@@ -1960,7 +1960,7 @@ ${pricingSection("bg-surface")}
           
         </div>
       </details>
-      <details data-faq-extra class="group rounded-[14px] border border-line bg-surface transition-colors open:border-[var(--line-strong)] open:shadow-[0_18px_40px_-30px_rgb(16_24_40/0.45)]" data-faq-item data-cat="working" data-track-name="Will it replace our receptionists?">
+      <details data-faq-extra class="group rounded-[14px] border border-line bg-surface transition-colors open:border-[var(--line-strong)] open:shadow-[0_18px_40px_-30px_rgb(0_0_0/0.45)]" data-faq-item data-cat="working" data-track-name="Will it replace our receptionists?">
         <summary class="flex min-h-[64px] items-center gap-4 px-5 py-4">
           <span class="num hidden w-7 shrink-0 text-[15px] sm:block" aria-hidden="true">10</span>
           <span class="min-w-0 flex-1"><h3 class="!text-[clamp(18px,17px+.3vw,20.5px)] !leading-[1.3]">Will it replace our receptionists?</h3><span class="mt-1 block text-[13.5px] font-semibold text-muted">Working with us</span></span>
@@ -1971,7 +1971,7 @@ ${pricingSection("bg-surface")}
           
         </div>
       </details>
-      <details data-faq-extra class="group rounded-[14px] border border-line bg-surface transition-colors open:border-[var(--line-strong)] open:shadow-[0_18px_40px_-30px_rgb(16_24_40/0.45)]" data-faq-item data-cat="working" data-track-name="Is there a minimum contract?">
+      <details data-faq-extra class="group rounded-[14px] border border-line bg-surface transition-colors open:border-[var(--line-strong)] open:shadow-[0_18px_40px_-30px_rgb(0_0_0/0.45)]" data-faq-item data-cat="working" data-track-name="Is there a minimum contract?">
         <summary class="flex min-h-[64px] items-center gap-4 px-5 py-4">
           <span class="num hidden w-7 shrink-0 text-[15px] sm:block" aria-hidden="true">11</span>
           <span class="min-w-0 flex-1"><h3 class="!text-[clamp(18px,17px+.3vw,20.5px)] !leading-[1.3]">Is there a minimum contract?</h3><span class="mt-1 block text-[13.5px] font-semibold text-muted">Working with us</span></span>
@@ -2004,7 +2004,7 @@ ${pricingSection("bg-surface")}
     </div>
 
     <div role="tablist" aria-label="How would you like to start?" class="mx-auto mt-10 grid gap-3 md:grid-cols-3">
-      <button type="button" role="tab" id="bk-tab-call" aria-controls="bk-panel-call" aria-selected="true" tabindex="0" class="bk-path group flex items-start gap-4 rounded-[16px] border border-band-line bg-band-surface p-4 text-left transition-colors hover:border-[rgb(247_246_242/.4)] aria-selected:border-gold aria-selected:shadow-[0_0_0_1px_#d79a37] sm:p-5" data-bk-path="call" data-track="booking_path" data-track-name="Book a 30-minute demo">
+      <button type="button" role="tab" id="bk-tab-call" aria-controls="bk-panel-call" aria-selected="true" tabindex="0" class="bk-path group flex items-start gap-4 rounded-[16px] border border-band-line bg-band-surface p-4 text-left transition-colors hover:border-[rgb(247_246_242/.4)] aria-selected:border-gold aria-selected:shadow-[0_0_0_1px_var(--color-teal)] sm:p-5" data-bk-path="call" data-track="booking_path" data-track-name="Book a 30-minute demo">
           <span class="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-gold/20 text-band-hl group-aria-selected:bg-gold group-aria-selected:text-navy" aria-hidden="true"><svg class="icon !h-5 !w-5" aria-hidden="true" focusable="false"><use href="#i-calendar"/></svg></span>
           <span class="min-w-0">
             <span class="mb-1 inline-block rounded-full bg-gold px-2 py-0.5 text-[12px] font-semibold text-navy">Most popular</span>
@@ -2012,7 +2012,7 @@ ${pricingSection("bg-surface")}
             <span class="mt-1 block text-[14.5px] leading-snug text-band-muted">Pick a time. We show you an agent set up for a dental practice.</span>
           </span>
         </button>
-      <button type="button" role="tab" id="bk-tab-ring" aria-controls="bk-panel-ring" aria-selected="false" tabindex="-1" class="bk-path group flex items-start gap-4 rounded-[16px] border border-band-line bg-band-surface p-4 text-left transition-colors hover:border-[rgb(247_246_242/.4)] aria-selected:border-gold aria-selected:shadow-[0_0_0_1px_#d79a37] sm:p-5" data-bk-path="ring" data-track="booking_path" data-track-name="Ring our demo agent now">
+      <button type="button" role="tab" id="bk-tab-ring" aria-controls="bk-panel-ring" aria-selected="false" tabindex="-1" class="bk-path group flex items-start gap-4 rounded-[16px] border border-band-line bg-band-surface p-4 text-left transition-colors hover:border-[rgb(247_246_242/.4)] aria-selected:border-gold aria-selected:shadow-[0_0_0_1px_var(--color-teal)] sm:p-5" data-bk-path="ring" data-track="booking_path" data-track-name="Ring our demo agent now">
           <span class="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-gold/20 text-band-hl group-aria-selected:bg-gold group-aria-selected:text-navy" aria-hidden="true"><svg class="icon !h-5 !w-5" aria-hidden="true" focusable="false"><use href="#i-phone-incoming"/></svg></span>
           <span class="min-w-0">
             
@@ -2020,7 +2020,7 @@ ${pricingSection("bg-surface")}
             <span class="mt-1 block text-[14.5px] leading-snug text-band-muted">Hear one in action straight away, any time of day.</span>
           </span>
         </button>
-      <button type="button" role="tab" id="bk-tab-back" aria-controls="bk-panel-back" aria-selected="false" tabindex="-1" class="bk-path group flex items-start gap-4 rounded-[16px] border border-band-line bg-band-surface p-4 text-left transition-colors hover:border-[rgb(247_246_242/.4)] aria-selected:border-gold aria-selected:shadow-[0_0_0_1px_#d79a37] sm:p-5" data-bk-path="back" data-track="booking_path" data-track-name="Ask for a call back">
+      <button type="button" role="tab" id="bk-tab-back" aria-controls="bk-panel-back" aria-selected="false" tabindex="-1" class="bk-path group flex items-start gap-4 rounded-[16px] border border-band-line bg-band-surface p-4 text-left transition-colors hover:border-[rgb(247_246_242/.4)] aria-selected:border-gold aria-selected:shadow-[0_0_0_1px_var(--color-teal)] sm:p-5" data-bk-path="back" data-track="booking_path" data-track-name="Ask for a call back">
           <span class="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-gold/20 text-band-hl group-aria-selected:bg-gold group-aria-selected:text-navy" aria-hidden="true"><svg class="icon !h-5 !w-5" aria-hidden="true" focusable="false"><use href="#i-phone-forwarded"/></svg></span>
           <span class="min-w-0">
             
@@ -2099,7 +2099,7 @@ ${pricingSection("bg-surface")}
               </div>
             </div>
             <label class="mt-5 flex items-start gap-3 text-[15px] leading-snug text-muted">
-              <input type="checkbox" name="consent" required class="mt-1 h-5 w-5 shrink-0 accent-[#b97822]" aria-describedby="bk-consent-err" data-bk-field>
+              <input type="checkbox" name="consent" required class="mt-1 h-5 w-5 shrink-0 accent-[var(--color-teal-dark)]" aria-describedby="bk-consent-err" data-bk-field>
               <span>I'm happy for OMH to contact me about this demo. See our <a href="/privacy" class="font-semibold text-ink underline decoration-gold decoration-2 underline-offset-2">privacy policy</a>.</span>
             </label>
             <p id="bk-consent-err" class="mt-1 text-[14px] font-semibold text-miss" hidden></p>
@@ -2191,7 +2191,7 @@ ${pricingSection("bg-surface")}
     <ul class="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
       <li><a href="/ai-voice-agents/clinics-healthcare" class="flex h-full min-h-[64px] items-center gap-3 rounded-[14px] border border-line bg-surface px-4 py-3 font-display text-[15.5px] font-semibold leading-snug hover:border-gold" data-track="dental_other_industry" data-track-name="Clinics & Healthcare"><svg class="icon text-hl" aria-hidden="true" focusable="false"><use href="#i-stethoscope"/></svg>Clinics &amp; Healthcare</a></li>
       <li><a href="/ai-voice-agents/law-firms" class="flex h-full min-h-[64px] items-center gap-3 rounded-[14px] border border-line bg-surface px-4 py-3 font-display text-[15.5px] font-semibold leading-snug hover:border-gold" data-track="dental_other_industry" data-track-name="Law Firms"><svg class="icon text-hl" aria-hidden="true" focusable="false"><use href="#i-scale"/></svg>Law Firms</a></li>
-      <li><a href="/ai-voice-agents/estate-letting-agents" class="flex h-full min-h-[64px] items-center gap-3 rounded-[14px] border border-line bg-surface px-4 py-3 font-display text-[15.5px] font-semibold leading-snug hover:border-gold" data-track="dental_other_industry" data-track-name="Estate & Letting Agents"><svg class="icon text-hl" aria-hidden="true" focusable="false"><use href="#i-home"/></svg>Estate &amp; Letting Agents</a></li>
+      <li><a href="/ai-voice-agents/real-estate-letting-agents" class="flex h-full min-h-[64px] items-center gap-3 rounded-[14px] border border-line bg-surface px-4 py-3 font-display text-[15.5px] font-semibold leading-snug hover:border-gold" data-track="dental_other_industry" data-track-name="Real Estate & Letting Agents"><svg class="icon text-hl" aria-hidden="true" focusable="false"><use href="#i-home"/></svg>Real Estate &amp; Letting Agents</a></li>
       <li><a href="/ai-voice-agents/plumbers" class="flex h-full min-h-[64px] items-center gap-3 rounded-[14px] border border-line bg-surface px-4 py-3 font-display text-[15.5px] font-semibold leading-snug hover:border-gold" data-track="dental_other_industry" data-track-name="Plumbers"><svg class="icon text-hl" aria-hidden="true" focusable="false"><use href="#i-wrench"/></svg>Plumbers</a></li>
       <li><a href="/ai-voice-agents/heating-hvac" class="flex h-full min-h-[64px] items-center gap-3 rounded-[14px] border border-line bg-surface px-4 py-3 font-display text-[15.5px] font-semibold leading-snug hover:border-gold" data-track="dental_other_industry" data-track-name="Heating & HVAC"><svg class="icon text-hl" aria-hidden="true" focusable="false"><use href="#i-flame"/></svg>Heating &amp; HVAC</a></li>
       <li><a href="/ai-voice-agents/car-dealerships" class="flex h-full min-h-[64px] items-center gap-3 rounded-[14px] border border-line bg-surface px-4 py-3 font-display text-[15.5px] font-semibold leading-snug hover:border-gold" data-track="dental_other_industry" data-track-name="Car Dealerships"><svg class="icon text-hl" aria-hidden="true" focusable="false"><use href="#i-car"/></svg>Car Dealerships</a></li>
@@ -2201,7 +2201,7 @@ ${pricingSection("bg-surface")}
 
 
 <!-- ===== COMPONENT: VideoModal ===== -->
-<dialog data-component="VideoModal" data-video-modal aria-labelledby="video-modal-title" class="video-modal m-auto w-[min(960px,calc(100vw-32px),calc((100dvh-170px)*16/9))] max-w-none overflow-visible bg-transparent p-0 text-band-ink backdrop:bg-[#0b0f19]/80">
+<dialog data-component="VideoModal" data-video-modal aria-labelledby="video-modal-title" class="video-modal m-auto w-[min(960px,calc(100vw-32px),calc((100dvh-170px)*16/9))] max-w-none overflow-visible bg-transparent p-0 text-band-ink backdrop:bg-[#000]/80">
   <div class="on-band overflow-hidden rounded-[16px] bg-band shadow-[0_40px_80px_-30px_rgb(0_0_0/0.6)]">
     <div class="flex items-start justify-between gap-4 px-5 py-4 sm:px-6">
       <div class="min-w-0">
@@ -2211,7 +2211,7 @@ ${pricingSection("bg-surface")}
       </div>
       <button type="button" class="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-band-line text-band-ink hover:bg-white/10" data-video-modal-close data-track="testimonial_video_close" aria-label="Close video"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-x"/></svg></button>
     </div>
-    <div class="relative aspect-video bg-[#05070c]" data-video-modal-player></div>
+    <div class="relative aspect-video bg-[#000]" data-video-modal-player></div>
   </div>
 </dialog>
 
@@ -2220,7 +2220,7 @@ ${pricingSection("bg-surface")}
 
 
 <!-- ===== COMPONENT: MobileStickyBar ===== -->
-<div data-component="MobileStickyBar" data-sticky-bar class="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-paper px-4 pb-[max(.75rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-12px_30px_-18px_rgb(16_24_40/0.35)] md:hidden" inert>
+<div data-component="MobileStickyBar" data-sticky-bar class="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-paper px-4 pb-[max(.75rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-12px_30px_-18px_rgb(0_0_0/0.35)] md:hidden" inert>
   <div class="flex items-center gap-3">
     <a href="#book-demo" class="btn btn-primary flex-1" data-track="sticky_book_demo">Book a practice demo</a>
     <a href="tel:+442034893934" class="btn btn-secondary !px-0 w-[52px]" aria-label="Call OMH on 020 3489 3934" data-track="sticky_phone_click"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-phone"/></svg></a>

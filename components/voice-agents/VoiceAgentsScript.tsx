@@ -24,9 +24,21 @@ export function VoiceAgentsScript() {
   useEffect(() => {
     const page = document.getElementById("va-page");
     if (!page) return;
-    const stop = init(page, (href) => router.push(href));
-    const unfit = fitRoiFrames(page);
-    return () => { stop(); unfit(); };
+    // Deferred to idle time (client audit, 26 Oct 2026, PageSpeed 71): the twenty-odd inits ran inside
+    // hydration and blocked the main thread. The 800ms timeout keeps interactions responsive on slow devices.
+    let stop = () => {};
+    let unfit = () => {};
+    const run = () => {
+      stop = init(page, (href) => router.push(href));
+      unfit = fitRoiFrames(page);
+    };
+    const idle = window.requestIdleCallback ? window.requestIdleCallback(run, { timeout: 800 }) : window.setTimeout(run, 1);
+    return () => {
+      if (window.cancelIdleCallback) window.cancelIdleCallback(idle);
+      else clearTimeout(idle);
+      stop();
+      unfit();
+    };
   }, [router]);
 
   return null;
@@ -332,7 +344,8 @@ function init(page: HTMLElement, navigate: (href: string) => void) {
 
   /* ------------------------------------------------------- Video facade */
   function initVideoFacade() {
-    $$("[data-video]").forEach((box) => {
+    // Frames with data-youtube-id are the v4 hero player, which LandingV4Script runs.
+    $$("[data-video]:not([data-youtube-id])").forEach((box) => {
       const btn = $("[data-video-play]", box);
       const fallback = $("[data-video-fallback]", box);
       on(btn, "click", () => {
@@ -415,7 +428,9 @@ function init(page: HTMLElement, navigate: (href: string) => void) {
         card.hidden = !match;
         if (match) shown += 1;
       });
-      if (count) count.textContent = "Showing " + shown + (shown === 1 ? " industry" : " industries");
+      // An industry page names its own cards: data-nouns="agency type,agency types" on the filter bar.
+      const [one, many] = (bar.dataset.nouns ?? "industry,industries").split(",");
+      if (count) count.textContent = "Showing " + shown + " " + (shown === 1 ? one : many);
     });
   }
 
@@ -684,6 +699,10 @@ function init(page: HTMLElement, navigate: (href: string) => void) {
     voice: string;
     never: string;
     transfer: string;
+    caller?: string;
+    reply?: string;
+    booked?: string;
+    summary?: string;
   };
   function initBrandBuilder() {
     const root = $("[data-brand]");
@@ -692,23 +711,85 @@ function init(page: HTMLElement, navigate: (href: string) => void) {
     const state: Record<string, string> = { biz: biz[0].id, tone: "warm" };
     let typing = 0,
       clock = 0;
+    // The call that follows the greeting: lines on the phone and the matching step beside it.
+    const lines = $$("[data-brand-line], [data-brand-outcome]", root);
+    const steps = $$("[data-brand-step]", root);
+    let callTimers: number[] = [];
+    // After a call ends, the next business takes the next call, round and round while the phone is on screen.
+    let inView = false,
+      waiting = false;
+    const choosers: Record<string, (btn: HTMLElement, focus: boolean) => void> = {};
+    function loopNext() {
+      if (!inView) {
+        waiting = true;
+        return;
+      }
+      const opts = $$('[data-brand-group="biz"] [data-brand-opt]', root);
+      const i = opts.findIndex((o) => o.getAttribute("aria-checked") === "true");
+      choosers.biz?.(opts[(i + 1) % opts.length], false);
+    }
+    const lineStep: Record<string, number> = { caller: 1, agent: 3, summary: 4 };
+    function light(n: number) {
+      steps.forEach((el) => {
+        const k = Number(el.dataset.brandStep);
+        el.classList.toggle("is-on", k === n);
+        el.classList.toggle("is-done", k < n);
+      });
+    }
+    function resetCall() {
+      callTimers.forEach((id) => clearTimeout(id));
+      callTimers = [];
+      lines.forEach((el) => el.classList.remove("is-shown"));
+      light(0);
+    }
+    function showAll() {
+      lines.forEach((el) => el.classList.add("is-shown"));
+      light(5);
+    }
+    function playCall() {
+      if (!lines.length) return;
+      let at = 700;
+      const queue = (ms: number, fn: () => void) => callTimers.push(later(fn, (at += ms)));
+      lines.forEach((el) => {
+        const key = el.dataset.brandLine || "outcome";
+        if (key === "agent") queue(0, () => light(2)); // thinking
+        queue(key === "agent" ? 1100 : key === "outcome" ? 700 : 400, () => {
+          el.classList.add("is-shown");
+          if (lineStep[key]) light(lineStep[key]);
+          root.classList.toggle("is-speaking", key === "agent");
+        });
+        if (key === "agent") queue(2200, () => root.classList.remove("is-speaking"));
+      });
+      queue(1200, () => {
+        clearInterval(clock);
+        light(5);
+      });
+      queue(3800, loopNext);
+    }
     function greet(b: Biz, t: string) {
       if (t === "brisk") return b.name + ", " + b.agent + " speaking. I'm the " + b.kind + " AI assistant. What can I do for you?";
       if (t === "formal")
         return "Good morning. You have reached " + b.name + ". I am " + b.agent + ", the " + b.kind + " AI assistant. How may I direct your call?";
       return "Good morning, " + b.name + ". I'm " + b.agent + ", the " + b.kind + " AI assistant. How can I help you today?";
     }
-    const set = (sel: string, text: string) => ($(sel, root).textContent = text);
+    // Tolerant: the main page phone no longer shows every field (voice), the AI services one shows no call.
+    const set = (sel: string, text: string) => {
+      const el = $(sel, root);
+      if (el) el.textContent = text;
+    };
     function speak(text: string) {
       const out = $("[data-brand-greeting]", root);
       clearInterval(typing);
       clearInterval(clock);
       set("[data-brand-live]", text);
+      resetCall();
       if (reduceMotion.matches) {
         out.textContent = text;
         root.classList.remove("is-speaking");
+        showAll();
         return;
       }
+      light(1);
       let i = 0,
         secs = 0;
       out.textContent = "";
@@ -723,8 +804,9 @@ function init(page: HTMLElement, navigate: (href: string) => void) {
         out.textContent = text.slice(0, i);
         if (i >= text.length) {
           clearInterval(typing);
-          clearInterval(clock);
           root.classList.remove("is-speaking");
+          if (lines.length) playCall();
+          else clearInterval(clock);
         }
       }, 32);
     }
@@ -738,9 +820,18 @@ function init(page: HTMLElement, navigate: (href: string) => void) {
       set("[data-brand-voice]", b.voice);
       set("[data-brand-never]", b.never);
       set("[data-brand-transfer]", b.transfer);
+      const opt = (sel: string, text?: string) => { const el = $(sel, root); if (el && text) el.textContent = text; };
+      opt("[data-brand-agent2]", b.agent);
+      opt("[data-brand-caller]", b.caller);
+      opt("[data-brand-reply]", b.reply);
+      opt("[data-brand-booked]", b.booked);
+      opt("[data-brand-summary]", b.summary);
       const text = greet(b, state.tone);
       if (animate) speak(text);
-      else set("[data-brand-greeting]", text);
+      else {
+        set("[data-brand-greeting]", text);
+        showAll();
+      }
     }
     $$("[data-brand-group]", root).forEach((group) => {
       const opts = $$("[data-brand-opt]", group);
@@ -754,6 +845,7 @@ function init(page: HTMLElement, navigate: (href: string) => void) {
         if (focus) btn.focus();
         render(true);
       }
+      choosers[group.dataset.brandGroup!] = choose;
       opts.forEach((btn, i) => {
         on(btn, "click", () => choose(btn, false));
         on(btn, "keydown", (e) => {
@@ -767,16 +859,20 @@ function init(page: HTMLElement, navigate: (href: string) => void) {
     on($("[data-brand-replay]", root), "click", () => render(true));
     // Play the greeting once when the phone first scrolls into view.
     if (!reduceMotion.matches) {
-      const io = observe(
+      let first = true;
+      observe(
         (entries) => {
-          if (entries[0].isIntersecting) {
-            io.disconnect();
+          inView = entries[0].isIntersecting;
+          if (inView && first) {
+            first = false;
             render(true);
+          } else if (inView && waiting) {
+            waiting = false;
+            loopNext();
           }
         },
-        { threshold: 0.5 },
-      );
-      io.observe($(".brand-phone", root));
+        { threshold: 0.35 },
+      ).observe($(".brand-phone", root));
     }
   }
 
@@ -791,7 +887,7 @@ function init(page: HTMLElement, navigate: (href: string) => void) {
     const total = 5,
       len = Number(arc.dataset.arc);
     const copy: Record<string, [string, string]> = {
-      empty: ["Answer to see your fit", "Your result appears here as you go. Nothing is sent anywhere."],
+      empty: ["Start with question 1", "Tap Yes or No on each question. Your fit builds here as you answer."],
       strong: ["Strong fit", "A voice agent is likely to earn its keep. Book a demo and hear one set up for your calls."],
       maybe: ["Worth a chat", "Some of your calls could suit an agent. A 30-minute call will tell us which ones."],
       low: ["Probably not yet", "On these answers an agent may not pay for itself. We would rather tell you that now."],
@@ -820,6 +916,17 @@ function init(page: HTMLElement, navigate: (href: string) => void) {
       $("[data-fit-text]", result).textContent = copy[state][1];
       $("[data-fit-count]", result).textContent = answered + " of " + total + " answered";
       $("[data-fit-cta]", result).hidden = !(state === "strong" || state === "maybe") || answered < total;
+      // Guide the visitor: light up the next unanswered question and fill a dot per answer.
+      const rows = Array.from(form.querySelectorAll<HTMLElement>("ol > li"));
+      const dots = $$("[data-fit-dots] i", result);
+      let nextSet = false;
+      for (let i = 0; i < total; i++) {
+        const picked = form.querySelector<HTMLInputElement>('input[data-fit-q="' + i + '"]:checked');
+        if (dots[i]) dots[i].className = picked ? (picked.value === "yes" ? "is-yes" : "is-no") : "";
+        const isNext = !picked && !nextSet && !aiNo;
+        if (isNext) nextSet = true;
+        rows[i]?.classList.toggle("is-next", isNext);
+      }
       const share = yes / total;
       arc.style.strokeDashoffset = String(len * (1 - share));
       needle.style.transform = "rotate(" + (-90 + share * 180) + "deg)";
@@ -1046,6 +1153,247 @@ function init(page: HTMLElement, navigate: (href: string) => void) {
     });
   }
 
+  /* ------------------------------------------------------------ Carousels */
+  // Infinite loop: the track holds three copies of its cards and starts on the middle set. When scrolling settles
+  // in either outer copy, it jumps silently by one set's width, so moving left or right never meets an end. The
+  // status reads the real card ("3 / 6"). Copies are aria-hidden and out of the tab order; they run before the
+  // video pop-up is wired (see the init order), so a copy's play button opens its video like the original's.
+  let carouselCount = 0;
+  function initCarousels() {
+    $$("[data-carousel]").forEach((root) => {
+      const track = $(".va-car-track", root);
+      const prev = $<HTMLButtonElement>("[data-car-prev]", root);
+      const next = $<HTMLButtonElement>("[data-car-next]", root);
+      const status = $("[data-car-status]", root);
+      const wave = $("[data-car-wave]", root);
+      if (!track || !prev || !next) return;
+      const originals = Array.from(track.children) as HTMLElement[];
+      const carousel = String(carouselCount++);
+      originals.forEach((el, i) => (el.dataset.carKey = carousel + "-" + i));
+      const n = originals.length;
+      if (n < 2) return;
+
+      const copy = (el: HTMLElement) => {
+        const c = el.cloneNode(true) as HTMLElement;
+        c.setAttribute("aria-hidden", "true");
+        c.dataset.carClone = "";
+        c.removeAttribute("id");
+        c.querySelectorAll("[id]").forEach((x) => x.removeAttribute("id"));
+        c.querySelectorAll<HTMLElement>("a, button, [tabindex]").forEach((x) => (x.tabIndex = -1));
+        // Copies keep the look but not the heading: the page outline lists each card once (SEO brief v2 §4.4).
+        c.querySelectorAll("h1, h2, h3, h4, h5, h6").forEach((h) => {
+          const d = document.createElement("div");
+          for (const { name, value } of Array.from(h.attributes)) d.setAttribute(name, value);
+          d.classList.add("car-h");
+          d.innerHTML = h.innerHTML;
+          h.replaceWith(d);
+        });
+        return c;
+      };
+      const before = originals.map(copy);
+      const after = originals.map(copy);
+      track.prepend(...before);
+      track.append(...after);
+      cleanups.push(() => [...before, ...after].forEach((c) => c.remove()));
+
+      const all = () => Array.from(track.children) as HTMLElement[];
+      const step = () => {
+        const [a, b] = all();
+        return b.offsetLeft - a.offsetLeft;
+      };
+      const index = () => Math.round(track.scrollLeft / step());
+      const jumpTo = (left: number) => {
+        track.style.scrollBehavior = "auto";
+        track.scrollLeft = left;
+        track.style.scrollBehavior = "";
+      };
+      // Start on the first original.
+      jumpTo(n * step());
+
+      // Waveform: one bar per card.
+      const heights = [40, 70, 55, 90, 45, 75, 60, 85, 50, 65, 80, 35];
+      if (wave) wave.innerHTML = Array.from({ length: n }, (_, k) => '<i style="--h:' + heights[k % heights.length] + '%"></i>').join("");
+      const bars = wave ? $$("i", wave) : [];
+
+      let raf = 0;
+      function sync() {
+        raf = 0;
+        const real = ((index() % n) + n) % n;
+        if (status) status.textContent = real + 1 + " / " + n;
+        bars.forEach((bar, k) => {
+          bar.classList.toggle("is-on", k <= real);
+          bar.classList.toggle("is-now", k === real);
+        });
+      }
+      // Once scrolling settles in an outer copy, move back to the same card in the middle set.
+      let settle = 0;
+      function normalise() {
+        if (dragging) return;
+        const i = index();
+        if (i < n) jumpTo(track.scrollLeft + n * step());
+        else if (i >= 2 * n) jumpTo(track.scrollLeft - n * step());
+        sync();
+      }
+      on(track, "scroll", () => {
+        if (!raf) raf = requestAnimationFrame(sync);
+        clearTimeout(settle);
+        settle = later(normalise, 140);
+      }, { passive: true });
+      on(window, "resize", () => { jumpTo((n + (((index() % n) + n) % n)) * step()); sync(); });
+
+      const go = (dir: number) => {
+        normalise();
+        track.scrollTo({ left: (index() + dir) * step(), behavior: reduceMotion.matches ? "auto" : "smooth" });
+      };
+      on(prev, "click", () => go(-1));
+      on(next, "click", () => go(1));
+
+      // Drag with a mouse or pen (touch already scrolls natively), snapping to the nearest card either way.
+      // A real drag swallows the click that follows.
+      let dragX = 0, dragLeft = 0, dragging = false, moved = false;
+      on(track, "pointerdown", (e: PointerEvent) => {
+        if (e.pointerType === "touch" || e.button !== 0) return;
+        dragging = true; moved = false; dragX = e.clientX; dragLeft = track.scrollLeft;
+      });
+      on(track, "pointermove", (e: PointerEvent) => {
+        if (!dragging) return;
+        const dx = e.clientX - dragX;
+        if (!moved && Math.abs(dx) < 6) return;
+        // Capture only once it is really a drag: capturing on press sends the click to the track, not the button.
+        if (!moved) track.setPointerCapture(e.pointerId);
+        moved = true;
+        track.classList.add("is-dragging");
+        track.scrollLeft = dragLeft - dx;
+      });
+      const endDrag = () => {
+        if (!dragging) return;
+        dragging = false;
+        if (!moved) return;
+        track.classList.remove("is-dragging");
+        track.scrollTo({ left: index() * step(), behavior: reduceMotion.matches ? "auto" : "smooth" });
+      };
+      on(track, "pointerup", endDrag);
+      on(track, "pointercancel", endDrag);
+      on(track, "click", (e) => { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
+
+      // Autoplay: one card every few seconds while in view, paused on hover, focus or after any interaction.
+      if (root.hasAttribute("data-autoplay") && !reduceMotion.matches) {
+        let inView = false, hold = false, idle = 0, tick = 0;
+        const stop = () => { clearInterval(tick); tick = 0; };
+        const play = () => {
+          if (tick || !inView || hold) return;
+          tick = every(() => {
+            // Hold still while dragging or while a recording in this carousel is playing.
+            if (dragging || $$<HTMLAudioElement>("audio", root).some((a) => !a.paused)) return;
+            go(1);
+          }, 4500);
+        };
+        const pause = (ms: number) => { hold = true; stop(); clearTimeout(idle); idle = later(() => { hold = false; play(); }, ms); };
+        on(root, "pointerenter", () => { hold = true; stop(); });
+        on(root, "pointerleave", () => { hold = false; play(); });
+        on(root, "focusin", () => { hold = true; stop(); });
+        on(root, "focusout", () => { hold = false; play(); });
+        on(root, "pointerdown", () => pause(8000));
+        on(root, "touchstart", () => pause(8000), { passive: true });
+        on(prev, "click", () => pause(8000));
+        on(next, "click", () => pause(8000));
+        observe((entries) => { inView = entries[0].isIntersecting; if (inView) play(); else stop(); }, { threshold: 0.4 }).observe(root);
+      }
+      sync();
+    });
+  }
+
+  /* ---------------------------------------------------------- Audio cards */
+  // A recording in a card: play/pause, a waveform that fills as it plays and can be clicked or arrow-keyed to seek,
+  // and the time. Only one recording plays at a time. The file loads when someone presses play (preload="none").
+  function initAudioCards() {
+    // The infinite carousel shows three copies of each card. All copies of one card share the original's
+    // recording: any copy's button and waveform control it, and every copy shows its state, so the card in
+    // view always tells the truth about what is playing.
+    const groups = new Map<string, HTMLElement[]>();
+    let solo = 0;
+    $$("[data-audio-card]").forEach((card) => {
+      if (card.hasAttribute("data-audio-pending")) return;
+      const key = card.dataset.carKey ?? "solo-" + solo++;
+      groups.set(key, [...(groups.get(key) ?? []), card]);
+    });
+    const audios: HTMLAudioElement[] = [];
+    groups.forEach((cards) => {
+      const master = cards.find((c) => !c.hasAttribute("data-car-clone")) ?? cards[0];
+      const audio = $<HTMLAudioElement>("audio[data-audio]", master);
+      if (!audio) return;
+      cards.forEach((c) => c !== master && c.querySelector("audio")?.remove());
+      audios.push(audio);
+      const fmt = (s: number) => Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
+      const fallback = Number($("[data-audio-wave]", master)?.getAttribute("aria-valuemax")) || 0;
+      const dur = () => (Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : fallback);
+      function paint() {
+        const d = dur();
+        const tNow = audio.currentTime;
+        const playing = !audio.paused;
+        cards.forEach((card) => {
+          const btn = $("[data-audio-toggle]", card);
+          const wave = $("[data-audio-wave]", card);
+          const time = $("[data-audio-time]", card);
+          const bars = wave ? $$("i", wave) : [];
+          const k = d ? Math.floor((tNow / d) * bars.length) : 0;
+          bars.forEach((bar, i) => {
+            bar.classList.toggle("is-played", i < k);
+            bar.classList.toggle("is-now", i === k && playing);
+          });
+          card.classList.toggle("is-playing", playing);
+          btn?.setAttribute("aria-label", playing ? "Pause the recording" : "Play the recording");
+          if (time) time.textContent = fmt(tNow) + " / " + fmt(d);
+          wave?.setAttribute("aria-valuenow", String(Math.round(tNow)));
+          wave?.setAttribute("aria-valuetext", fmt(tNow) + " of " + fmt(d));
+        });
+      }
+      cards.forEach((card) => {
+        const btn = $("[data-audio-toggle]", card);
+        const wave = $("[data-audio-wave]", card);
+        if (btn)
+          on(btn, "click", () => {
+            if (audio.paused) {
+              audios.forEach((other) => other !== audio && other.pause());
+              void audio.play();
+            } else audio.pause();
+          });
+        if (!wave) return;
+        on(wave, "click", (e: MouseEvent) => {
+          const r = wave.getBoundingClientRect();
+          audio.currentTime = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * dur();
+          paint();
+        });
+        on(wave, "keydown", (e: KeyboardEvent) => {
+          const step = ({ ArrowRight: 5, ArrowUp: 5, ArrowLeft: -5, ArrowDown: -5 } as Record<string, number>)[e.key];
+          if (e.key === "Home") audio.currentTime = 0;
+          else if (e.key === "End") audio.currentTime = dur();
+          else if (step === undefined) return;
+          else audio.currentTime = Math.min(dur(), Math.max(0, audio.currentTime + step));
+          e.preventDefault();
+          paint();
+        });
+      });
+      on(audio, "play", paint);
+      on(audio, "pause", paint);
+      on(audio, "ended", () => { audio.currentTime = 0; paint(); });
+      on(audio, "timeupdate", paint);
+      on(audio, "loadedmetadata", paint);
+      paint();
+      cleanups.push(() => audio.pause());
+    });
+  }
+
+  /* ----------------------------------------- Plan interest for the form */
+  // A pricing button carries data-plan; the booking form's hidden "Plan interest" field picks it up.
+  function initPlanInterest() {
+    on(page, "click", (e) => {
+      const a = (e.target as Element).closest<HTMLElement>("[data-plan]");
+      const field = a && document.querySelector<HTMLInputElement>("[data-plan-field]");
+      if (field) field.value = a.dataset.plan!;
+    });
+  }
+
   /* --------------------------------------------------------- Sticky bar */
   function initStickyBar() {
     const bar = $("[data-sticky-bar]");
@@ -1104,6 +1452,8 @@ function init(page: HTMLElement, navigate: (href: string) => void) {
   initHeroCall();
   initLedger();
   initVideoFacade();
+  initCarousels();
+  initAudioCards();
   initVideoModal();
   initIndustryFilter();
   initTabs();
@@ -1118,6 +1468,7 @@ function init(page: HTMLElement, navigate: (href: string) => void) {
   initRelated();
   initDemoForm();
   initAreaMap();
+  initPlanInterest();
   initStickyBar();
   initReveal();
 

@@ -16,6 +16,7 @@ import { Eyebrow, Fpo, ReviewProof } from "@/components/ui/Proof";
 import { MediaFrame } from "@/components/ServiceMedia";
 import { ServiceBand as Band } from "@/components/services/ServiceBand";
 import { googleAdsPpc as content } from "@/lib/content/google-ads-ppc";
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 
 type Package = (typeof content.packages)[number];
 
@@ -111,7 +112,7 @@ export function PpcCapabilityGrid() {
               <p className="mt-5 text-lead leading-relaxed text-oninverse/75">{featured.body}</p>
             </div>
             <ul className="col-span-5 col-start-8 grid gap-3 border-t border-oninverse/15 pt-6 max-lg:mt-8">
-              {featured.detail?.map((line) => <li key={line} className="flex gap-3 text-body leading-snug text-oninverse/85"><Check className="mt-0.5 size-4 shrink-0 text-[#f2c675]" />{line}</li>)}
+              {featured.detail?.map((line) => <li key={line} className="flex gap-3 text-body leading-snug text-oninverse/85"><Check className="mt-0.5 size-4 shrink-0 text-[#7d5c33]" />{line}</li>)}
             </ul>
           </div>
         </Pointer>
@@ -204,6 +205,7 @@ export function PpcPricingPackages() {
 }
 
 export function PpcProofSection() {
+  if (!CASE_STUDIES_LIVE) return null;
   return (
     <Band label="Proof" tone="white">
       <Reveal>
@@ -214,7 +216,7 @@ export function PpcProofSection() {
               <h2 className="mb-5 mt-6 font-sans text-h3 font-semibold text-balance">Show spend, measurement and the <span className="text-amber-deep">verified commercial outcome</span></h2>
               <p className="text-body leading-relaxed text-ink/75">Every Google Ads case study we publish includes the date range and what counted as a conversion, so the result can actually be evaluated.</p>
               <ul className="mt-7 border-t border-soft-dark">{["Starting account and business goal", "Campaign and landing-page work", "Spend and measurement period", "Verified lead, sale or efficiency outcome"].map((field) => <li key={field} className="border-b border-soft-dark py-3 text-body text-ink/70">{field}</li>)}</ul>
-              <div className="mt-7"><TextLink href="/case-studies" data-event="ppc_case_study_click">View case studies</TextLink></div>
+              {CASE_STUDIES_LIVE && <div className="mt-7"><TextLink href="/case-studies" data-event="ppc_case_study_click">View case studies</TextLink></div>}
             </div>
             <div className="col-span-12 mt-9">
               <div className="grid grid-cols-2 gap-5 max-sm:grid-cols-1">

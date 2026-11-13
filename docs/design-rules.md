@@ -10,7 +10,8 @@ omh-redesign.vercel.app.
 ## 1. Width and layout
 
 1. **One container.** Every section wraps its content in `container-omh`
-   (max 1440px, 48px gutters at desktop). No page-level `max-w-[…px]` wrappers:
+   (1440px content box, 48px gutters outside it at desktop, so the box is 1536px
+   wide in all; 29 Oct 2026). No page-level `max-w-[…px]` wrappers:
    the AI pages had their own 1240px wrapper and read narrower than the header.
 2. **Content reaches the edges.** Inside a section, the content must run to the
    container's right edge. No half-empty rows (a heading or paragraph alone in
@@ -153,3 +154,22 @@ Accepted exceptions (do not "fix" without asking):
 Flagged for the client, not changed: the `/ai-voice-agents` heading "Proof
 goes here when it's real" (placeholder wording visible to visitors) and the
 Google Ads graphic with "from the original service page" baked in.
+
+**20 Oct 2026, /ai-voice-agents CRO rebuild.** The "Proof goes here when it's real" heading no longer
+ships: the pending-testimonial wall is parked in the `oldv2` backup (`/ai-voice-agents-oldv2`, tag
+`oldv2`) until a verified result exists. Rebuild notes: `docs/ai-voice-agents-cro/`.
+
+**20 Oct 2026, client:** section descriptions on `/ai-voice-agents` stop at 850px, the same measure
+as the homepage's section intros (`max-w-[850px]`), instead of running the full container (rule 9
+said full width). Titles keep the global 30ch cap. Apply the 850px measure to other pages only if the
+client asks.
+
+**29 Oct 2026, client:** the container's side padding no longer eats into the 1440px. `container-omh`
+(and the voice pages' `.v4l .container-omh` and `.wrap`) cap the content box at 1440px with the
+gutters outside it, so from 1536px up the header and sections run the full 1440px. Checked: header
+overflow 0 at 1024, 1280, 1366, 1440 and 1536; header and sections share edges at 1920; no horizontal
+scroll at 1920 or 375.
+
+**20 Oct 2026, client:** the shared booking band (`components/BookDemo.tsx`) no longer has the "Ask
+for a call back" tab, on every page that uses it. It offers "Book a 30-minute demo" and "Ring our demo
+agent now".

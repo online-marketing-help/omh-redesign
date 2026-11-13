@@ -63,14 +63,7 @@ export const wordpressMaintenance = {
       title: "Uptime Monitoring",
       body: "Monitor site availability so outages can be identified and escalated according to the confirmed support terms.",
     },
-    {
-      title: "Monthly Assistance Call",
-      body: "Review completed maintenance, outstanding concerns and sensible next actions with the client each month.",
-    },
-    {
-      title: "Ongoing Support Route",
-      body: "Give the client a clear contact route for WordPress maintenance and support questions, planned requests and technical concerns.",
-    },
+    // The monthly call and support route moved out of this list (client audit, 26 Oct 2026): the process section covers them.
   ],
   process: [
     ["Access and audit", "Confirm ownership, collect access securely and review the current WordPress, hosting and plugin setup."],

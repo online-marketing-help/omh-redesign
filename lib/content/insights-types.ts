@@ -51,3 +51,9 @@ export type InsightPost = InsightIndexEntry & {
 export function insightHref(post: Pick<InsightIndexEntry, "slug">) {
   return `/${post.slug}`;
 }
+
+// A thumbnail box takes its image's own shape (client, 22 Oct 2026): featured images run 5:3 to 1.91:1, and a
+// fixed 16:10 box cropped the text off the wider ones. The aspect-[16/10] class stays as the fallback.
+export function imageRatio({ featuredImage: i }: Pick<InsightIndexEntry, "featuredImage">) {
+  return i?.width && i.height ? { aspectRatio: `${i.width} / ${i.height}` } : undefined;
+}

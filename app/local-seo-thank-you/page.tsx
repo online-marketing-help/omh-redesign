@@ -5,7 +5,7 @@ import { localSeoThankYou } from "@/lib/content/thank-you";
 export const metadata: Metadata = {
   title: localSeoThankYou.seo.title,
   description: localSeoThankYou.seo.description,
-  alternates: { canonical: "https://onlinemarketinghelp.co.uk/local-seo-thank-you/" },
+  alternates: { canonical: "https://onlinemarketinghelp.co.uk/local-seo-thank-you" },
   robots: { index: false, follow: true },
 };
 

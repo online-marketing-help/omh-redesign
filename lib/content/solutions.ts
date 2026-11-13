@@ -1,4 +1,25 @@
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 export type SolutionTheme = "ppc" | "shopify" | "wordpress" | "seo" | "maintenance";
+
+export type DefinitionIcon =
+  | "briefcase" | "pin" | "coins" | "clock" | "building" | "user-check"
+  | "eye" | "shield" | "pointer" | "clipboard" | "phone" | "target" | "chart"
+  | "search" | "megaphone" | "pen" | "share" | "layout";
+
+/** Illustrative UI mock-up under a hero growth-path step (components/solutions/GrowthPath.tsx). */
+export type GrowthMock =
+  | { kind: "search"; query: string; tag?: string; dim?: { query: string; tag: string } }
+  | { kind: "map"; query: string; pin: string }
+  | { kind: "page"; title: string; chips?: string[]; selects?: string[]; cta: string }
+  | { kind: "enquiry"; initials: string; title: string; sub: string; badge: string; checks: string[] }
+  | { kind: "call"; title: string; sub: string }
+  | { kind: "product"; title: string; rating: string; note: string; cta: string }
+  | { kind: "steps"; items: string[]; done: number }
+  | { kind: "bars"; labels: string[]; heights: number[] }
+  | { kind: "tasks"; items: { label: string; status: string; live?: boolean }[] }
+  | { kind: "decision"; title: string; options: [string, string] }
+  | { kind: "form"; fields: string[]; done: string; cta: string }
+  | { kind: "proof"; items: string[] };
 
 export type SolutionPageContent = {
   slug: string;
@@ -12,6 +33,8 @@ export type SolutionPageContent = {
   signal: string;
   /** Line under the hero's growth path; defaults to the shared wording. */
   signalNote?: string;
+  /** One mock-up per `signal` step, in order. */
+  signalMocks?: GrowthMock[];
   heroPoints: string[];
   /** Optional explainer between the hero and the problem section. */
   definition?: {
@@ -19,9 +42,11 @@ export type SolutionPageContent = {
     body: string;
     /** Named factors, shown as cards. */
     factors?: { title: string; body: string }[];
-    /** Or the aspects the definition lists, shown as a chip row under `tagsLabel`. */
+    /** Or the aspects the definition lists, shown as icon cards under `tagsLabel`. */
     tagsLabel?: string;
-    tags?: string[];
+    tags?: { title: string; body: string; icon: DefinitionIcon }[];
+    /** Small print under the cards. */
+    tagsNote?: string;
   };
   problem: {
     eyebrow: string;
@@ -104,13 +129,26 @@ export const solutions: Record<string, SolutionPageContent> = {
     secondaryCta: "See How Better Leads Are Generated",
     theme: "ppc",
     signal: "Search intent → landing page → qualified enquiry",
+    signalMocks: [
+      { kind: "search", query: "office cleaning contract quote", tag: "Buyer: target", dim: { query: "cleaning jobs near me", tag: "Job seeker: skip" } },
+      { kind: "page", title: "Office cleaning across Essex", selects: ["Site size", "Start date"], cta: "Get a quote" },
+      { kind: "enquiry", initials: "JP", title: "New enquiry, 3 office sites", sub: "Chelmsford, starts next month", badge: "Qualified", checks: ["Service", "Area", "Budget", "Timing"] },
+    ],
     heroPoints: ["Built around lead quality", "Campaign and website support", "Clear commercial reporting"],
     definition: {
       title: "What Is a Qualified Lead?",
       body: "A qualified lead is an enquiry that fits the type of customer your business can realistically serve and shows a meaningful reason to buy. The exact criteria vary by business, but they may include service need, location, budget, timing, company type, decision-making role, or another signal that helps your team distinguish a genuine opportunity from a form submission.\n\nThe goal is not to make every visitor qualify. It is to attract and identify more of the people your sales team actually wants to speak to.",
       // The criteria the definition lists, in its order.
       tagsLabel: "Criteria may include",
-      tags: ["Service need", "Location", "Budget", "Timing", "Company type", "Decision-making role"],
+      tags: [
+        { title: "Service need", body: "They need a service you actually offer and deliver well.", icon: "briefcase" },
+        { title: "Location", body: "They are based in, or need work done in, an area you genuinely cover.", icon: "pin" },
+        { title: "Budget", body: "Their expected spend fits your pricing, so the conversation is worth having.", icon: "coins" },
+        { title: "Timing", body: "They plan to act soon enough for the enquiry to turn into paid work.", icon: "clock" },
+        { title: "Company type", body: "Their size, sector or setup matches the clients you serve best.", icon: "building" },
+        { title: "Decision-making role", body: "They can approve the purchase, or will bring in the person who can.", icon: "user-check" },
+      ],
+      tagsNote: "Most businesses only need a few of these. Choose the ones your sales team already uses to decide who is worth a call.",
     },
     problem: {
       eyebrow: "The real lead problem",
@@ -160,7 +198,7 @@ export const solutions: Record<string, SolutionPageContent> = {
     },
     services: {
       title: "Services That Support Qualified Lead Generation",
-      intro: "The right service depends on where lead quality is breaking down. One business may need a stronger acquisition channel; another may need better landing pages, organic visibility, or measurement. We recommend only the work with a clear role in improving the journey.",
+      intro: "The right service depends on where lead quality is breaking down. One business may need a stronger acquisition channel; another may need better landing pages, organic visibility, or measurement. We recommend only the work with a clear role in improving the journey. Call new web leads back within 60 seconds with an [AI voice agent](/ai-voice-agents).",
       items: [
         { title: "Google Ads Management", href: "/google-adwords-ppc", cta: "Explore Google Ads Management", body: "Capture high-intent demand, filter irrelevant searches, and align campaigns with the enquiries your business actually wants." },
         { title: "Paid Social Advertising", href: "/social-media-paid-advertising", cta: "Explore Paid Social Advertising", body: "Reach and retarget defined audiences with creative and offers designed around the right customer profile rather than broad lead volume." },
@@ -217,6 +255,12 @@ export const solutions: Record<string, SolutionPageContent> = {
     theme: "shopify",
     signal: "Acquisition → Product confidence → Checkout → Measurement",
     signalNote: "One connected buying journey, measured against the commercial actions that matter.",
+    signalMocks: [
+      { kind: "search", query: "waterproof walking boots", tag: "Shopping ad" },
+      { kind: "product", title: "Waterproof walking boot", rating: "Reviews", note: "Free UK delivery and returns", cta: "Add to basket" },
+      { kind: "steps", items: ["Basket", "Delivery", "Payment", "Done"], done: 3 },
+      { kind: "bars", labels: ["Sessions", "Orders", "Revenue", "Margin"], heights: [45, 60, 75, 90] },
+    ],
     heroPoints: ["Acquisition & visibility", "Storefront & conversion", "Measurement & prioritisation"],
     problem: {
       eyebrow: "Where growth gets stuck",
@@ -316,17 +360,30 @@ export const solutions: Record<string, SolutionPageContent> = {
     titleAccent: "Turn More Visitors Into Enquiries",
     intro:
       "If your website already attracts relevant traffic but too few visitors enquire, book or buy, the problem may be in the journey itself. We review where people lose clarity, confidence or momentum, then prioritise the changes most likely to improve website conversion.",
-    primaryCta: "Request a Website Conversion Review",
-    secondaryCta: "See How We Find Conversion Friction",
+    primaryCta: "Request a Conversion Review",
+    secondaryCta: "See How Conversion Works",
     theme: "wordpress",
     signal: "Clarity → confidence → action",
+    signalMocks: [
+      { kind: "page", title: "Clear offer, clear next step", chips: ["Who it is for", "What it costs"], cta: "Get a quote" },
+      { kind: "proof", items: ["Google reviews", "Accreditations", CASE_STUDIES_LIVE ? "Case studies" : "Trustpilot reviews"] },
+      { kind: "form", fields: ["Name", "Phone"], done: "Enquiry sent", cta: "Request a quote" },
+    ],
     heroPoints: ["Evidence-led page reviews", "Design and development support", "Tracking before assumptions"],
     definition: {
       title: "What Is Website Conversion Optimisation?",
       body: "Website conversion optimisation is the process of improving the pages and journeys that turn relevant visitors into useful actions such as enquiries, calls, bookings or purchases. It looks at clarity, trust, usability, forms, mobile experience, traffic intent and measurement. The aim is not to change everything – it is to find the biggest source of friction and fix the right problem first.",
       // The seven areas the definition names, in its order.
       tagsLabel: "What it looks at",
-      tags: ["Clarity", "Trust", "Usability", "Forms", "Mobile experience", "Traffic intent", "Measurement"],
+      tags: [
+        { title: "Clarity", body: "Visitors can tell quickly what you offer, who it is for and what to do next.", icon: "eye" },
+        { title: "Trust", body: "Reviews, proof and credentials answer the doubts that stop people enquiring.", icon: "shield" },
+        { title: "Usability", body: "Pages are easy to read, navigate and act on without effort.", icon: "pointer" },
+        { title: "Forms", body: "Enquiry and booking forms ask only for what is needed and work first time.", icon: "clipboard" },
+        { title: "Mobile experience", body: "The journey holds up on a phone, where many visitors arrive.", icon: "phone" },
+        { title: "Traffic intent", body: "The people arriving actually match the service and the page they land on.", icon: "target" },
+        { title: "Measurement", body: "Calls, forms and bookings are tracked, so changes are judged on real actions.", icon: "chart" },
+      ],
     },
     problem: {
       eyebrow: "Conversion friction",
@@ -428,6 +485,11 @@ export const solutions: Record<string, SolutionPageContent> = {
     secondaryCta: "See How Local Visibility Works",
     theme: "seo",
     signal: "Local search → useful page → call or enquiry",
+    signalMocks: [
+      { kind: "map", query: "emergency plumber near me", pin: "Your profile" },
+      { kind: "page", title: "Emergency plumbing in Chelmsford", chips: ["Areas covered", "Reviews"], cta: "Call now" },
+      { kind: "call", title: "New enquiry received", sub: "Boiler repair, CM1, via Google" },
+    ],
     heroPoints: ["Google Business Profile", "Service and location pages", "Local enquiry measurement"],
     definition: {
       title: "What Is Local Search Visibility?",
@@ -535,17 +597,30 @@ export const solutions: Record<string, SolutionPageContent> = {
     titleAccent: "Support for UK Businesses",
     intro:
       "Get strategy, specialist delivery and clear ownership without building every marketing role in-house. OMH works as an outsourced digital marketing team for UK businesses that need joined-up support across acquisition, content, SEO, websites and reporting.",
-    primaryCta: "Discuss Outsourced Marketing Support",
-    secondaryCta: "See How Outsourced Marketing Works",
+    primaryCta: "Discuss Marketing Support",
+    secondaryCta: "See How Outsourcing Works",
     theme: "maintenance",
     signal: "Priorities → delivery → reporting → next decision",
+    signalMocks: [
+      { kind: "tasks", items: [{ label: "Local visibility", status: "Priority 1" }, { label: "Landing pages", status: "Priority 2" }] },
+      { kind: "tasks", items: [{ label: "SEO fixes", status: "Live", live: true }, { label: "Paid search", status: "In progress" }, { label: "Landing page", status: "In review" }] },
+      { kind: "bars", labels: ["Enquiries", "Calls", "Spend", "Cost / lead"], heights: [70, 55, 40, 30] },
+      { kind: "decision", title: "Scale paid search?", options: ["Recommended", "Hold"] },
+    ],
     heroPoints: ["One joined-up delivery team", "Flexible specialist support", "Clear ownership and reporting"],
     definition: {
       title: "What Is Outsourced Digital Marketing?",
       body: "Outsourced digital marketing means using an external team to plan, manage and deliver some or all of your digital marketing without hiring every skill in-house. The relationship can supplement an internal marketing manager, fill specialist gaps or provide a wider team across areas such as SEO, paid media, content, social, website work and reporting. The right model depends on what your business already has and where capability or delivery is breaking down.",
       // The areas the definition names, in its order.
       tagsLabel: "Areas it can cover",
-      tags: ["SEO", "Paid media", "Content", "Social", "Website work", "Reporting"],
+      tags: [
+        { title: "SEO", body: "Technical fixes, content and local visibility to grow organic enquiries.", icon: "search" },
+        { title: "Paid media", body: "Google Ads and paid social managed against the enquiries you want.", icon: "megaphone" },
+        { title: "Content", body: "Pages, articles and landing copy written to support the plan.", icon: "pen" },
+        { title: "Social", body: "Organic social activity kept consistent with the wider marketing.", icon: "share" },
+        { title: "Website work", body: "Landing pages, tracking and site changes delivered alongside campaigns.", icon: "layout" },
+        { title: "Reporting", body: "One clear view of what changed, what it produced and what comes next.", icon: "chart" },
+      ],
     },
     problem: {
       eyebrow: "The coordination gap",

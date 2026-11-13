@@ -12,6 +12,7 @@ import {
 import { Button, TextLink } from "@/components/ui/Button";
 import { Eyebrow, ReviewProof } from "@/components/ui/Proof";
 import { amazonPpc as content } from "@/lib/content/amazon-ppc";
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 
 type Package = (typeof content.packages)[number];
 
@@ -211,6 +212,7 @@ export function AmazonPricing() {
 }
 
 export function AmazonProofGuide() {
+  if (!CASE_STUDIES_LIVE) return null;
   return (
     <SectionShell label="Proof and preparation" dark>
       <Reveal>
@@ -222,7 +224,7 @@ export function AmazonProofGuide() {
             <ul className="mt-7 grid gap-3 border-t border-oninverse/12 pt-5 text-body text-oninverse/72">
               {["Starting account and catalogue context", "Campaign and listing work completed", "Spend and comparison period", "Verified outcome with metric definitions"].map((item) => <li key={item} className="flex gap-3"><Check className="mt-0.5 size-4 shrink-0 text-[#ffb84d]" />{item}</li>)}
             </ul>
-            <div className="mt-7"><TextLink href="/case-studies" className="text-[#ffb84d] hover:text-[#ffc96f]" data-event="amazon_case_study_click">View case studies</TextLink></div>
+            {CASE_STUDIES_LIVE && <div className="mt-7"><TextLink href="/case-studies" className="text-[#ffb84d] hover:text-[#ffc96f]" data-event="amazon_case_study_click">View case studies</TextLink></div>}
           </div>
           <div className="col-span-7">
             <MediaFrame kind="image" theme="amazon" ratio="16/10" title="Verified Amazon PPC case study" note="Replace with approved product imagery and a comparable before-and-after account view." source="/images/Services/Images on the pages/Verified Amazon PPC case study.png" alt="An Amazon PPC case-study summary showing spend, sales, ACoS, orders and ROAS for a single product over a 30-day period." />

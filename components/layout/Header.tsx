@@ -3,12 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { SiteSearch } from "@/components/layout/SiteSearch";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { Button } from "@/components/ui/Button";
 import type { SearchEntry } from "@/lib/content/search-index";
-import { primaryNav, company, type NavItem, type NavLink } from "@/lib/content/nav";
+import { primaryNav, company, columnLinks, type NavItem, type NavLink } from "@/lib/content/nav";
 
 function Chevron({ className = "" }: { className?: string }) {
   return (
@@ -18,8 +18,9 @@ function Chevron({ className = "" }: { className?: string }) {
   );
 }
 
-// The current page's link wears the hover treatment permanently, so an open
-// menu shows where you already are.
+// The current page's link is marked with gold text and a short gold bar; hover alone gets the soft background
+// and an accent border (inset ring, so nothing shifts), so an open menu never shows two items that look selected.
+// In dark mode hover keeps the ink text: the brown accent is too dim on the dark ground (client, 29 Oct 2026).
 function MenuLink({ link, onClick }: { link: NavLink; onClick?: () => void }) {
   const current = usePathname() === link.href;
   return (
@@ -27,18 +28,48 @@ function MenuLink({ link, onClick }: { link: NavLink; onClick?: () => void }) {
       href={link.href}
       onClick={onClick}
       aria-current={current ? "page" : undefined}
-      className={`block rounded-button px-2.5 py-2.5 text-[16px] font-medium transition-colors hover:bg-warm hover:text-amber-deep ${
-        current ? "bg-warm text-amber-deep" : "text-ink"
+      className={`relative block rounded-button px-2.5 py-2.5 text-[16px] font-medium transition-colors hover:bg-warm hover:ring-1 hover:ring-inset hover:ring-amber ${
+        current
+          ? "pl-4 font-semibold text-amber-deep before:absolute before:left-1 before:top-1/2 before:h-4 before:w-[3px] before:-translate-y-1/2 before:rounded-full before:bg-amber before:content-['']"
+          : "text-ink hover:text-amber-deep dark:hover:text-ink"
       }`}
     >
       {link.label}
+      {link.desc && <span className="block text-[14px] font-normal text-muted">{link.desc}</span>}
     </Link>
+  );
+}
+
+// A menu link plus its sub-links, which sit on one small line under it (Trades: Plumbers · Heating · Builders).
+function MenuEntry({ link, onClick }: { link: NavLink; onClick?: () => void }) {
+  const pathname = usePathname();
+  return (
+    <>
+      <MenuLink link={link} onClick={onClick} />
+      {link.sub && (
+        <p className="-mt-1.5 flex flex-wrap items-center gap-x-1.5 pb-2 pl-5 pr-2.5 text-[14px] text-muted">
+          {link.sub.map((sub, i) => (
+            <Fragment key={sub.href}>
+              {i > 0 && <span aria-hidden>·</span>}
+              <Link
+                href={sub.href}
+                onClick={onClick}
+                aria-current={pathname === sub.href ? "page" : undefined}
+                className={`py-1 transition-colors hover:text-amber-deep ${pathname === sub.href ? "font-semibold text-amber-deep" : ""}`}
+              >
+                {sub.label}
+              </Link>
+            </Fragment>
+          ))}
+        </p>
+      )}
+    </>
   );
 }
 
 function isCurrent(pathname: string, item: NavItem) {
   if (item.href) return pathname === item.href || pathname.startsWith(`${item.href}/`);
-  return (item.columns ?? []).some((col) => col.links.some((link) => pathname === link.href.split("#")[0]));
+  return (item.columns ?? []).some((col) => columnLinks(col).some((link) => pathname === link.href.split("#")[0]));
 }
 
 // Future Elementor widget: "OMH Header".
@@ -75,7 +106,7 @@ export function Header({ searchEntries }: { searchEntries: SearchEntry[] }) {
       data-scrolled={scrolled ? "" : undefined}
       className={`sticky top-0 z-40 border-b transition-[background-color,border-color,box-shadow,margin] duration-300 ${
         scrolled
-          ? "mb-4 border-line bg-warm/85 shadow-[0_10px_30px_-24px_rgb(16_24_40/0.5)] backdrop-blur-md"
+          ? "mb-4 border-line bg-warm/85 shadow-[0_10px_30px_-24px_rgb(0_0_0/0.5)] backdrop-blur-md"
           : "border-transparent bg-warm"
       }`}
     >
@@ -124,39 +155,52 @@ export function Header({ searchEntries }: { searchEntries: SearchEntry[] }) {
                   />
                 </button>
                 {menu === item.label && (
-                  <div className={`absolute ${alignRight ? "right-0" : "left-0"} top-full z-50 pt-3`}>
-                    <div
-                      className={`menu-pop rounded-card border border-line bg-surface p-4 shadow-[0_28px_60px_-30px_rgb(16_24_40/0.55)] ${
-                        // Sized by column count — "Get a Quote" has 3 columns and
-                        // used to leave an empty cell in a hardcoded 4-col grid.
-                        // 4-column panel drops to 3 cols at lg (1024–1279) so
-                        // the widest link stops wrapping; the 4th category
-                        // flows to a second row until xl gives it its own column.
-                        item.columns.length > 3
-                          ? "grid w-[720px] grid-cols-3 gap-x-4 gap-y-6 min-[1420px]:w-[920px] min-[1420px]:grid-cols-4 min-[1420px]:gap-y-0"
-                          : item.columns.length === 3
-                            ? "grid w-[620px] grid-cols-3 gap-x-6"
-                            : item.columns.length === 2
-                              ? "grid w-[460px] grid-cols-2 gap-x-6"
+                  // The three-column AI panel (~740px) is centred on its trigger: hung from the left edge it ran
+                  // 60px past the viewport at 1024px.
+                  <div
+                    className={`absolute ${
+                      alignRight ? "right-0" : item.columns.length === 3 ? "left-1/2 -translate-x-1/2" : "left-0"
+                    } top-full z-50 pt-3`}
+                  >
+                    <div className="menu-pop rounded-card border border-line bg-surface p-4 shadow-[0_28px_60px_-30px_rgb(0_0_0/0.55)]">
+                      <div
+                        className={
+                          // Sized by column count. The 4-column panel drops to 3 cols at lg (1024–1279) so
+                          // the widest link stops wrapping; the 4th category flows to a second row until
+                          // xl gives it its own column.
+                          item.columns.length > 3
+                            ? "grid w-[720px] grid-cols-3 gap-x-4 gap-y-6 min-[1420px]:w-[920px] min-[1420px]:grid-cols-4 min-[1420px]:gap-y-0"
+                            : item.columns.length >= 2
+                              ? // Each column as wide as its widest link, so no label wraps.
+                                `grid w-max gap-x-6 ${item.columns.length === 3 ? "grid-flow-col auto-cols-max" : "min-w-[460px] grid-cols-2"}`
                               : "w-[360px]"
-                      }`}
-                    >
-                      {item.columns.map((col) => (
-                        <div key={col.heading ?? item.label}>
-                          {col.heading && (
-                            <p className="mb-2 border-b border-line px-2.5 pb-2 text-[14px] font-semibold uppercase tracking-[0.12em] text-muted">
-                              {col.heading}
-                            </p>
-                          )}
-                          <ul>
-                            {col.links.map((link) => (
-                              <li key={link.href}>
-                                <MenuLink link={link} onClick={() => setMenu(null)} />
-                              </li>
-                            ))}
-                          </ul>
+                        }
+                      >
+                        {item.columns.map((col) => (
+                          <div key={col.heading ?? item.label}>
+                            {col.heading && (
+                              <p className="mb-2 border-b border-line px-2.5 pb-2 text-[14px] font-semibold uppercase tracking-[0.12em] text-muted">
+                                {col.heading}
+                              </p>
+                            )}
+                            <ul>
+                              {col.links.map((link) => (
+                                <li key={link.href}>
+                                  <MenuEntry link={link} onClick={() => setMenu(null)} />
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                      {item.cta && (
+                        <div className="mt-4 flex items-center justify-between gap-6 border-t border-line px-2.5 pt-4">
+                          <p className="text-[16px] text-muted">{item.cta.text}</p>
+                          <Button href={item.cta.href} small arrow onClick={() => setMenu(null)} className="whitespace-nowrap">
+                            {item.cta.label}
+                          </Button>
                         </div>
-                      ))}
+                      )}
                     </div>
                   </div>
                 )}
@@ -229,10 +273,18 @@ export function Header({ searchEntries }: { searchEntries: SearchEntry[] }) {
                           </p>
                         )}
                         {col.links.map((link) => (
-                          <MenuLink key={link.href} link={link} onClick={() => setOpen(false)} />
+                          <MenuEntry key={link.href} link={link} onClick={() => setOpen(false)} />
                         ))}
                       </div>
                     ))}
+                    {item.cta && (
+                      <div className="mt-3 rounded-card border border-line bg-surface p-4">
+                        <p className="text-[16px] text-muted">{item.cta.text}</p>
+                        <Button href={item.cta.href} small arrow onClick={() => setOpen(false)} className="mt-3">
+                          {item.cta.label}
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </details>
               ) : (

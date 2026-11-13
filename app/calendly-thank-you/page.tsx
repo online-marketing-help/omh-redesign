@@ -5,7 +5,7 @@ import { calendlyThankYou } from "@/lib/content/thank-you";
 export const metadata: Metadata = {
   title: calendlyThankYou.seo.title,
   description: calendlyThankYou.seo.description,
-  alternates: { canonical: "https://onlinemarketinghelp.co.uk/calendly-thank-you/" },
+  alternates: { canonical: "https://onlinemarketinghelp.co.uk/calendly-thank-you" },
   robots: { index: false, follow: true },
 };
 

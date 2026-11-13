@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { fitRoiFrames } from "./fitRoiFrames";
+import { wireLeadDemo } from "./wireLeadDemo";
 import { runIndustryScript } from "./industry-script";
 
 export type IndustryCopy = {
@@ -64,6 +65,7 @@ export function IndustryScript({ copy, blocks }: { copy: IndustryCopy; blocks: s
       EventTarget.prototype.addEventListener = add;
     }
     if (page) undo.push(fitRoiFrames(page));
+    if (page) undo.push(wireLeadDemo(page));
 
     return () => {
       // ponytail: undo grows by one entry per timer for the page's lifetime; fine for one page view.

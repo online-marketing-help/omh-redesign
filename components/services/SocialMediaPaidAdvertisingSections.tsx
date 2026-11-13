@@ -12,7 +12,7 @@ function Band({ tone = "white", ...props }: Omit<Parameters<typeof ServiceBand>[
 function PaidCampaignVisual() {
   return (
     <div
-      className="service-media-frame relative w-full min-w-0 max-w-full overflow-hidden rounded-card border border-[#b8cde3] bg-[#10243a] p-5 text-oninverse shadow-xl"
+      className="service-media-frame relative w-full min-w-0 max-w-full overflow-hidden rounded-card border border-line bg-[#000] p-5 text-oninverse shadow-xl"
       role="img"
       aria-label="Illustrated paid social media advertising dashboard tracking campaign performance and return on ad spend"
     >
@@ -68,7 +68,7 @@ export function PaidSocialGoals() {
 }
 
 export function PaidSocialCapabilities() {
-  return <Band label="How we can help" tone="mist"><Reveal><div><h2 className="font-sans text-h2 font-semibold">Six connected levers for better paid social advertising.</h2><p className="mt-5 text-body leading-relaxed text-ink/68">As a paid social marketing agency, we treat audience, creative, measurement, budget, testing and ongoing optimisation as one campaign system rather than six separate tasks.</p></div><div className="mt-11 grid grid-cols-2 gap-5 max-md:grid-cols-1">{content.capabilities.map((item,index)=><article key={item.title} className={`${index===0 || index===5 ? "bg-[#10243a] text-oninverse" : "bg-surface text-ink"} surface-card rounded-card border border-[#bfd1e3] p-7`}><div className="flex items-start justify-between gap-4"><span className={`text-body font-semibold ${index===0 || index===5 ? "text-[#ffac99]" : "text-amber-deep"}`}>0{index+1}</span><span className={`h-px w-12 ${index===0 || index===5 ? "bg-oninverse/15" : "bg-[#bfd1e3]"}`} /></div><h3 className="mt-5 font-sans text-h4 font-semibold">{item.title}</h3><p className={`mt-3 text-body leading-relaxed ${index===0 || index===5 ? "text-oninverse/68" : "text-ink/70"}`}>{item.body}</p></article>)}</div></Reveal></Band>;
+  return <Band label="How we can help" tone="mist"><Reveal><div><h2 className="font-sans text-h2 font-semibold">Six connected levers for better paid social advertising.</h2><p className="mt-5 text-body leading-relaxed text-ink/68">As a paid social marketing agency, we treat audience, creative, measurement, budget, testing and ongoing optimisation as one campaign system rather than six separate tasks.</p></div><div className="mt-11 grid grid-cols-2 gap-5 max-md:grid-cols-1">{content.capabilities.map((item,index)=><article key={item.title} className={`${index===0 || index===5 ? "bg-[#000] text-oninverse" : "bg-surface text-ink"} surface-card rounded-card border border-[#bfd1e3] p-7`}><div className="flex items-start justify-between gap-4"><span className={`text-body font-semibold ${index===0 || index===5 ? "text-[#ffac99]" : "text-amber-deep"}`}>0{index+1}</span><span className={`h-px w-12 ${index===0 || index===5 ? "bg-oninverse/15" : "bg-[#bfd1e3]"}`} /></div><h3 className="mt-5 font-sans text-h4 font-semibold">{item.title}</h3><p className={`mt-3 text-body leading-relaxed ${index===0 || index===5 ? "text-oninverse/68" : "text-ink/70"}`}>{item.body}</p></article>)}</div></Reveal></Band>;
 }
 
 export function PaidSocialPricing() {

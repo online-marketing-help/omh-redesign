@@ -2,8 +2,13 @@
    with hard fallbacks so this file stands alone in any page it is pasted into. */
 
 :root{
-  --ink:#101828; --muted:#667085; --line:#d9ddd8; --warm:#f7f6f2; --surface:#fff;
-  --amber:#d79a37; --amber-deep:#8f5a0e; --good:#067647; --bad:#b42318;
+  --ink:#000; --muted:#667085; --line:#d9ddd8; --warm:#f7f6f2; --surface:#fff;
+  --amber:#7d5c33; --amber-deep:#7d5c33; --bad:#b42318;
+  /* A positive result is shown in ink, not green. The site's palette is cream,
+     ink and amber, and a green figure read as a different brand sitting inside
+     an OMH page. Red stays for a negative, where it is a warning rather than
+     decoration. */
+  --good:#000;
   --radius:14px;
   color-scheme:light;
 }
@@ -41,7 +46,9 @@ input[type=range]{width:100%;accent-color:var(--amber);height:22px}
 .help.src{background:var(--warm);border-radius:8px;padding:9px 11px}
 .grade{display:inline-block;font-size:11px;letter-spacing:.05em;text-transform:uppercase;
   font-weight:600;padding:2px 7px;border-radius:999px;vertical-align:1px}
-.src.study .grade{background:#e7f4ed;color:var(--good)}
+/* Three grades, told apart by weight rather than by hue: a study is the
+   strongest, a supplier figure is amber, our own assumption is quiet. */
+.src.study .grade{background:var(--ink);color:#fff}
 .src.vendor .grade{background:#fdf2e3;color:var(--amber-deep)}
 .src.ours .grade{background:#eef0ee;color:var(--muted)}
 
@@ -111,14 +118,14 @@ footer strong{color:var(--ink)}
 
 /* ----------------------------------------------------------- the hero */
 .hero{text-align:center;margin:0 auto 34px;max-width:720px}
-.badge{display:inline-flex;align-items:center;gap:7px;background:#e7f4ed;color:var(--good);
+.badge{display:inline-flex;align-items:center;gap:7px;background:#f7f0e3;color:var(--amber-deep);
   border-radius:999px;padding:6px 14px;font-size:13px;font-weight:600;margin-bottom:18px}
 .hero h1{max-width:none;margin:0 auto 10px;font-size:clamp(32px,5.4vw,52px);line-height:1.05}
 .hero .lede{margin:0 auto;max-width:52ch;font-size:17px}
 
 /* ---------------------------------------------------------- the panel */
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:22px;
-  padding:6px;box-shadow:0 24px 60px -34px rgba(16,24,40,.3)}
+  padding:6px;box-shadow:0 24px 60px -34px rgba(0,0,0,.3)}
 .panel-in{display:grid;grid-template-columns:1fr 1fr;gap:10px;
   background:linear-gradient(180deg,#fdfcfa,var(--surface));border-radius:18px;padding:26px}
 @media (max-width:900px){.panel-in{grid-template-columns:1fr;padding:18px}}
@@ -137,6 +144,50 @@ footer strong{color:var(--ink)}
 .ask .hint{font-size:13px;margin-top:9px}
 .ask .hint.src{background:var(--warm);border-radius:9px;padding:9px 11px;margin-top:10px}
 input[type=range]{height:26px}
+
+/* ---------------------------------------------------------- tooltips
+   The explanation under each dial, and the line saying where its starting
+   figure came from, used to sit in the column. Three of them together made
+   the panel about a third taller than the answer it was carrying, which is
+   the wrong shape for something embedded in a page. They are the same words,
+   moved behind the mark beside the question: hover on a mouse, tap on a
+   phone. Nothing here is load bearing for the sum, so nothing is lost by it
+   being one gesture away. */
+.tip{position:relative;display:inline-flex;vertical-align:baseline;margin-left:6px}
+.tip-b{width:17px;height:17px;padding:0;border-radius:50%;cursor:pointer;
+  border:1px solid var(--line);background:var(--warm);color:var(--muted);
+  font:600 11px/1 inherit;display:inline-flex;align-items:center;justify-content:center}
+.tip-b:hover,.tip.open .tip-b{background:var(--ink);border-color:var(--ink);color:#fff}
+.tip-b:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.tip-pop{position:absolute;bottom:calc(100% + 9px);left:50%;transform:translateX(-50%);
+  width:min(300px,74vw);background:var(--ink);color:#fff;border-radius:12px;
+  padding:12px 14px;font:400 13px/1.5 inherit;text-align:left;letter-spacing:0;
+  text-transform:none;z-index:30;opacity:0;visibility:hidden;transition:opacity .12s;
+  /* The mark sits inside a nowrap span so it cannot wrap away from the last
+     word of the question. The bubble must opt back out, or its text runs off
+     in one line. */
+  white-space:normal;
+  box-shadow:0 18px 40px -16px rgba(0,0,0,.6)}
+/* Pinned to one edge when the mark sits near the side of the frame, so the
+   bubble never hangs off it. */
+.tip.at-left .tip-pop{left:-8px;transform:none}
+.tip.at-right .tip-pop{left:auto;right:-8px;transform:none}
+.tip-pop::after{content:"";position:absolute;top:100%;left:var(--tail,50%);margin-left:-5px;
+  border:5px solid transparent;border-top-color:var(--ink)}
+.tip:hover .tip-pop,.tip.open .tip-pop,.tip-b:focus-visible+.tip-pop{opacity:1;visibility:visible}
+/* Hovering the question itself opens it, which is where the pointer already
+   is. The mark is the signal that there is something behind it. */
+.has-tip{cursor:help}
+.has-tip:hover .tip-pop{opacity:1;visibility:visible}
+.has-tip:hover .tip-b{background:var(--ink);border-color:var(--ink);color:#fff}
+.nowrap{white-space:nowrap}
+.tip-pop a{color:#7d5c33}
+.tip-pop .tip-hint{display:block}
+.tip-pop .src{display:block;margin:9px 0 0;padding-top:9px;
+  border-top:1px solid rgba(255,255,255,.16);
+  font-size:12.5px;color:rgba(255,255,255,.8)}
+@media (hover:none){.tip:hover .tip-pop,.has-tip:hover .tip-pop{opacity:0;visibility:hidden}
+  .tip.open .tip-pop{opacity:1;visibility:visible}}
 
 /* ---------------------------------------------------------- segments */
 .planpick{margin-top:4px}
@@ -198,7 +249,9 @@ input[type=range]{height:26px}
 button.cta{border:none;cursor:pointer;font:inherit;font-weight:600;font-size:16px}
 .formnote{font-size:14.5px;margin:14px 0 0;line-height:1.5}
 .formnote.bad{color:var(--bad)}
-.formnote.good{color:var(--good)}
+/* A sent confirmation, in amber rather than body ink, so it is clearly a
+   response to the button and not another paragraph. */
+.formnote.good{color:var(--amber-deep);font-weight:600}
 .or{font-size:14px;color:var(--muted);margin:16px 0 0}
 
 /* The highlight line varies in length ("1.3x back" against "1.1 new patients a
@@ -208,3 +261,17 @@ button.cta{border:none;cursor:pointer;font:inherit;font-weight:600;font-size:16p
 .highlight b{font-size:clamp(21px,2.3vw,28px);line-height:1.18}
 .highlight .right{flex:0 0 auto;white-space:nowrap}
 .highlight .right b{font-size:24px}
+
+
+/* ------------------------------------------------- embedded in our own page
+   Inside an iframe on onlinemarketinghelp.co.uk the host page already carries
+   the navigation, the call to action and the footer, so the calculator's own
+   copies of all three are noise. The disclaimer stays: it is the only line
+   here that is not repeated upstairs, and it is the one that says this is an
+   estimate rather than a quotation. */
+html.embedded .back,
+html.embedded #capture,
+html.embedded .middle,
+html.embedded footer .addr { display: none; }
+html.embedded .wrap { padding-top: 26px; padding-bottom: 34px; }
+html.embedded footer { margin-top: 22px; padding-bottom: 0; }

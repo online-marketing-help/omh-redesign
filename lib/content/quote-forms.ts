@@ -540,7 +540,7 @@ export const quoteFormPages: QuoteFormPage[] = [
   ppcRequestQuote,
   seoRequestQuote,
   wordpressDevelopmentRequestQuote,
-  wordpressMaintenanceRequestQuote,
+  wordpressMaintenanceRequestQuote,
   socialPaidRequestQuote,
   facebookAdsQuestionnaire,
   newWebsiteQuestionnaire,
@@ -587,4 +587,4 @@ export const freeConsultation = {
 
 /* Every Phase 5 URL, for app/sitemap.ts. Kept out of `readyPages` on purpose:
    funnel pages belong in the sitemap but not in the header nav or site search. */
-export const funnelPaths = [...quoteFormPages.map((p) => `/${p.slug}`), `/${freeConsultation.slug}`];
+export const funnelPaths = [...quoteFormPages.map((p) => `/${p.slug}`), `/${freeConsultation.slug}`, "/get-more-leads"];

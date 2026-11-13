@@ -1,4 +1,7 @@
 @import "tailwindcss";
+/* These three stay here, inside the Tailwind build: voice-agents.css and industry.css carry @theme tokens
+   (band, ink, gold...) that Tailwind turns into utilities used across the site, BookDemo included. Moving them
+   to per-route imports (21 Oct 2026) silently dropped those utilities and broke several sections. */
 @import "./ai-voice-agents/voice-agents.css";
 @import "./ai-voice-agents/industry.css";
 @import "./ai-voice-agents/landing-v4.css";
@@ -20,56 +23,72 @@
   `inverse` / `oninverse` are the deliberately dark ground and the type that
   sits on it — those stay dark and light in both themes.
 */
+:root {
+  /* Site accent (client, 29 Oct 2026): one brown, #7d5c33, replaces the tan (25 Oct) and the gold.
+     TO REVERT, swap these five values back to the TAN or OLD gold ones noted beside each. */
+  --accent: #7d5c33;        /* TAN #d2b48c, OLD #d79a37 */
+  --accent-dark: #5e4526;   /* TAN #b39977, OLD #b97822 (hover) */
+  --accent-deep: #7d5c33;   /* OLD #8f5a0e (link + eyebrow text, 5.6:1 on warm) */
+  --accent-light: #7d5c33;  /* TAN #e0c6a0, OLD #f5d394 (text on dark sections, dark-mode links) */
+  --accent-rgb: 125 92 51;  /* TAN 210 180 140, OLD 215 154 55 (glows, shadows, grid) */
+}
+
 @theme {
-  --color-ink: #101828;
+  --color-ink: #000;
   --color-muted: #667085;
   --color-line: #d9ddd8;
 
-  --color-warm: #f7f6f2;
+  /* Sections are black and white only (client, 29 Oct 2026): warm and the tints below are white.
+     OLD warm #f7f6f2; OLD tints blue #edf4fb, green #eef4f0, amber #f7f0e3, rose #fbf2ee. */
+  --color-warm: #ffffff;
   --color-surface: #ffffff;
   --color-soft: #f8eddc;
   --color-soft-dark: #efd9b5;
 
-  --color-inverse: #101828;
+  --color-inverse: #000;
   --color-oninverse: #ffffff;
 
-  --color-teal: #d79a37;
-  --color-teal-dark: #b97822;
-  --color-amber: #d79a37;
+  --color-teal: var(--accent);
+  --color-teal-dark: var(--accent-dark);
+  --color-amber: var(--accent);
   /* Deepened from #a36712: that landed at 4.3:1 on warm and soft, just under
      the 4.5 needed for the link and eyebrow colour. */
-  --color-amber-deep: #8f5a0e;
+  --color-amber-deep: var(--accent-deep);
 
   /* Section tints that used to be one-off hexes per service page. */
-  --color-tint-blue: #edf4fb;
-  --color-tint-green: #eef4f0;
-  --color-tint-amber: #f7f0e3;
-  --color-tint-rose: #fbf2ee;
+  --color-tint-blue: #ffffff;
+  --color-tint-green: #ffffff;
+  --color-tint-amber: #ffffff;
+  --color-tint-rose: #ffffff;
 
   --color-error: #b42318;
   --color-success: #067647;
 }
 
+/* Dark mode is neutral black and grey, no blue tint (client, 29 Oct 2026). Greys keep the old
+   luminance; OLD ink #e9ebf0, muted #99a3b2, line #2c333e, warm #0f1319, surface #161b23,
+   soft #1c222c, soft-dark #2b333f, inverse #080b10, oninverse #f4f6f8. */
 :root[data-theme="dark"] {
-  --color-ink: #e9ebf0;
-  --color-muted: #99a3b2;
-  --color-line: #2c333e;
+  --color-ink: #ebebeb;
+  --color-muted: #a2a2a2;
+  --color-line: #333333;
 
-  --color-warm: #0f1319;
-  --color-surface: #161b23;
-  --color-soft: #1c222c;
-  --color-soft-dark: #2b333f;
+  --color-warm: #000;
+  --color-surface: #1b1b1b;
+  --color-soft: #222222;
+  --color-soft-dark: #323232;
 
-  --color-inverse: #080b10;
-  --color-oninverse: #f4f6f8;
+  --color-inverse: #000;
+  --color-oninverse: #f6f6f6;
 
   /* Amber has to lighten to stay readable on a dark ground. */
-  --color-amber-deep: #e5ac52;
+  --color-amber-deep: var(--accent-light);
 
-  --color-tint-blue: #131b26;
-  --color-tint-green: #101d18;
-  --color-tint-amber: #1d1810;
-  --color-tint-rose: #1e1517;
+  /* Same ground as warm, so no section reads as coloured. OLD #131b26 / #101d18 / #1d1810 / #1e1517. */
+  --color-tint-blue: #000;
+  --color-tint-green: #000;
+  --color-tint-amber: #000;
+  --color-tint-rose: #000;
 
   color-scheme: dark;
 }
@@ -111,9 +130,12 @@
 }
 
 /* Layout primitives (brief §17): 1280px content, 48/32/20 gutters, 144/104/72 rhythm */
+/* The 1440px cap is the content box (client, 29 Oct 2026): the gutters sit outside it, so on wide screens
+   the content runs the full 1440px instead of losing 96px to padding. Below 1536px the gutters still keep
+   text off the screen edge. OLD max-width: 1440px (content 1344px). */
 @utility container-omh {
   width: 100%;
-  max-width: 1440px;
+  max-width: calc(1440px + 2 * 48px);
   margin-inline: auto;
   padding-inline: clamp(20px, 8.4px + 3.09vw, 48px);
 }
@@ -129,7 +151,7 @@
 /* Hatched "for position only" ground for unverified imagery (brief §1) */
 @utility fpo-hatch {
   background:
-    repeating-linear-gradient(45deg, rgb(16 24 40 / 0.028) 0 1.5px, transparent 1.5px 12px),
+    repeating-linear-gradient(45deg, rgb(0 0 0 / 0.028) 0 1.5px, transparent 1.5px 12px),
     linear-gradient(180deg, #efede6, #e9e7df);
 }
 
@@ -216,10 +238,23 @@ body {
 .hero-grid {
   position: relative;
   isolation: isolate;
+}
+
+/* The grid itself (client, 25 Oct 2026): neutral ink hairlines on their own layer, masked so they are
+   clearest behind the headline and fade out before the edges, the way product sites frame a hero.
+   Ink flips in dark mode, so no separate dark rule is needed. Tune strength with the 7% below. */
+.hero-grid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background-image:
-    linear-gradient(rgb(16 24 40 / 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(16 24 40 / 0.035) 1px, transparent 1px);
-  background-size: 48px 48px;
+    linear-gradient(color-mix(in srgb, var(--color-ink) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--color-ink) 7%, transparent) 1px, transparent 1px);
+  background-size: 56px 56px;
+  background-position: center top;
+  mask-image: radial-gradient(ellipse 75% 85% at 35% 25%, #000 25%, transparent 78%);
 }
 
 .hero-grid::after {
@@ -228,7 +263,7 @@ body {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background: radial-gradient(circle at 80% 42%, rgb(215 154 55 / 0.12), transparent 30%);
+  background: radial-gradient(circle at 80% 42%, rgb(var(--accent-rgb) / 0.12), transparent 30%);
 }
 
 .image-hover-frame > img {
@@ -249,7 +284,7 @@ body {
   position: relative;
   background-image:
     linear-gradient(135deg, transparent 0 49.7%, rgb(255 255 255 / 0.025) 49.8% 50.2%, transparent 50.3%),
-    radial-gradient(circle at 18% 40%, rgb(215 154 55 / 0.13), transparent 30%);
+    radial-gradient(circle at 18% 40%, rgb(var(--accent-rgb) / 0.13), transparent 30%);
   background-size: 92px 92px, 100% 100%;
 }
 
@@ -291,7 +326,7 @@ body {
   inset: 0;
   pointer-events: none;
   opacity: 0;
-  background: radial-gradient(circle at 50% 0%, rgb(215 154 55 / 0.24), transparent 52%);
+  background: radial-gradient(circle at 50% 0%, rgb(var(--accent-rgb) / 0.24), transparent 52%);
   transition: opacity 520ms ease;
 }
 
@@ -302,9 +337,9 @@ body {
 
 .program-card:hover {
   transform: translateY(-10px);
-  border-color: rgb(242 198 117 / 0.55);
-  background-color: rgb(215 154 55 / 0.08);
-  box-shadow: 0 34px 74px -38px rgb(0 0 0 / 0.92), 0 0 42px rgb(215 154 55 / 0.11);
+  border-color: rgb(125 92 51 / 0.55);
+  background-color: rgb(var(--accent-rgb) / 0.08);
+  box-shadow: 0 34px 74px -38px rgb(0 0 0 / 0.92), 0 0 42px rgb(var(--accent-rgb) / 0.11);
 }
 
 .program-card:hover::before {
@@ -321,10 +356,10 @@ body {
   height: 72px;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgb(242 198 117 / 0.14);
+  border: 1px solid rgb(125 92 51 / 0.14);
   border-radius: 8px;
-  background: rgb(215 154 55 / 0.17);
-  color: #f2c675;
+  background: rgb(var(--accent-rgb) / 0.17);
+  color: #7d5c33;
   transition:
     transform 520ms cubic-bezier(0.2, 0.8, 0.2, 1),
     color 520ms ease,
@@ -334,14 +369,14 @@ body {
 .program-card:hover .program-icon {
   transform: translateY(-4px) rotate(-3deg);
   background: var(--color-teal);
-  color: var(--color-ink);
+  color: #fff;
 }
 
 .program-link {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  color: #f2c675;
+  color: #7d5c33;
   font-size: 18px;
   font-weight: 700;
   text-transform: uppercase;
@@ -363,8 +398,8 @@ body {
 }
 
 .media-card:hover {
-  border-color: rgb(215 154 55 / 0.48);
-  box-shadow: 0 30px 70px -40px rgb(16 24 40 / 0.62);
+  border-color: rgb(var(--accent-rgb) / 0.48);
+  box-shadow: 0 30px 70px -40px rgb(0 0 0 / 0.62);
 }
 
 /* Service-page identity: every service keeps the shared brand system, but its
@@ -378,8 +413,8 @@ body {
    for each commercial journey. The layout remains CSS-only and Elementor-ready. */
 .solution-hero {
   background-image:
-    linear-gradient(rgb(16 24 40 / 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(16 24 40 / 0.03) 1px, transparent 1px);
+    linear-gradient(rgb(0 0 0 / 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(0 0 0 / 0.03) 1px, transparent 1px);
   background-size: 52px 52px;
 }
 
@@ -389,11 +424,11 @@ body {
   aspect-ratio: 1;
   right: -18%;
   top: -28%;
-  border: 1px solid rgb(215 154 55 / 0.12);
+  border: 1px solid rgb(var(--accent-rgb) / 0.12);
   border-radius: 50%;
   box-shadow:
-    0 0 0 90px rgb(215 154 55 / 0.025),
-    0 0 0 180px rgb(215 154 55 / 0.018);
+    0 0 0 90px rgb(var(--accent-rgb) / 0.025),
+    0 0 0 180px rgb(var(--accent-rgb) / 0.018);
 }
 
 .solution-signal::after {
@@ -402,15 +437,15 @@ body {
   inset: auto -20% -24% 30%;
   aspect-ratio: 1;
   border-radius: 50%;
-  background: rgb(215 154 55 / 0.28);
+  background: rgb(var(--accent-rgb) / 0.28);
   filter: blur(70px);
   pointer-events: none;
 }
 
 .solution-signal-shopify::after { background: rgb(36 116 79 / 0.38); }
-.solution-signal-wordpress::after { background: rgb(215 154 55 / 0.3); }
+.solution-signal-wordpress::after { background: rgb(var(--accent-rgb) / 0.3); }
 .solution-signal-seo::after { background: rgb(118 169 232 / 0.34); }
-.solution-signal-maintenance::after { background: rgb(242 198 117 / 0.3); }
+.solution-signal-maintenance::after { background: rgb(125 92 51 / 0.3); }
 
 @media (max-width: 1024px) {
   .solution-orbit {
@@ -425,7 +460,7 @@ body {
 
 .service-media-frame {
   isolation: isolate;
-  box-shadow: 0 24px 70px -48px rgb(16 24 40 / 0.7);
+  box-shadow: 0 24px 70px -48px rgb(0 0 0 / 0.7);
   transition:
     transform 520ms cubic-bezier(0.2, 0.8, 0.2, 1),
     border-color 420ms ease,
@@ -446,7 +481,7 @@ body {
 
 .service-media-frame:hover {
   transform: translateY(-6px);
-  box-shadow: 0 34px 80px -42px rgb(16 24 40 / 0.72);
+  box-shadow: 0 34px 80px -42px rgb(0 0 0 / 0.72);
 }
 
 .service-media-frame:hover::after,
@@ -466,13 +501,14 @@ body {
   transition:
     transform 480ms cubic-bezier(0.2, 0.8, 0.2, 1),
     border-color 480ms ease,
+    background-color 480ms ease,
     box-shadow 480ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .surface-card:hover {
   transform: translateY(-7px);
-  border-color: rgb(215 154 55 / 0.48);
-  box-shadow: 0 30px 70px -40px rgb(16 24 40 / 0.62);
+  border-color: rgb(var(--accent-rgb) / 0.48);
+  box-shadow: 0 30px 70px -40px rgb(0 0 0 / 0.62);
 }
 
 .case-row,
@@ -568,7 +604,7 @@ body {
 
 .button-motion:hover {
   transform: translateY(-2px) scale(1);
-  box-shadow: 0 16px 30px -22px rgb(16 24 40 / 0.62);
+  box-shadow: 0 16px 30px -22px rgb(0 0 0 / 0.62);
 }
 
 .button-motion:active {
@@ -577,7 +613,7 @@ body {
 }
 
 .quote-feature {
-  box-shadow: 0 24px 64px -46px rgb(215 154 55 / 0.9);
+  box-shadow: 0 24px 64px -46px rgb(var(--accent-rgb) / 0.9);
   transition:
     transform 500ms cubic-bezier(0.2, 0.8, 0.2, 1),
     box-shadow 500ms cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -585,7 +621,7 @@ body {
 
 .quote-feature:hover {
   transform: translateY(-7px);
-  box-shadow: 0 36px 76px -42px rgb(215 154 55 / 0.82);
+  box-shadow: 0 36px 76px -42px rgb(var(--accent-rgb) / 0.82);
 }
 
 /* WordPress article HTML is sanitised during import, then styled inside this
@@ -692,9 +728,9 @@ body {
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(90deg, transparent, rgb(242 198 117 / 0.85), transparent) 30% 0 / 34% 1px no-repeat,
+    linear-gradient(90deg, transparent, rgb(125 92 51 / 0.85), transparent) 30% 0 / 34% 1px no-repeat,
     linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-oninverse) 60%, transparent), transparent) 70% 100% / 26% 1px no-repeat;
-  filter: drop-shadow(0 0 3px rgb(242 198 117 / 0.55));
+  filter: drop-shadow(0 0 3px rgb(125 92 51 / 0.55));
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -744,7 +780,7 @@ body {
 }
 
 .site-search::backdrop {
-  background: rgb(16 24 40 / 0.42);
+  background: rgb(0 0 0 / 0.42);
   backdrop-filter: blur(3px);
 }
 
@@ -778,10 +814,12 @@ body {
   to { scale: 1 1; }
 }
 
+/* Client, 2 Nov 2026: tighter lines and a slightly larger reading size than the site's 18px body (an exception to
+   design rule 9, for article text only). */
 .insight-prose {
   color: color-mix(in oklab, var(--color-ink) 88%, transparent);
-  font-size: var(--text-body);
-  line-height: 1.78;
+  font-size: 19px;
+  line-height: 1.6;
   overflow-wrap: anywhere;
 }
 
@@ -796,7 +834,7 @@ body {
 .insight-prose figure,
 .insight-prose table,
 .insight-prose pre {
-  margin-top: 1.55em;
+  margin-top: 1.1em;
 }
 
 .insight-prose h2,
@@ -809,24 +847,43 @@ body {
   text-wrap: balance;
 }
 
+/* Article headings (client, 22 Oct 2026): less space above, tied to the text they introduce, and marked in amber
+   like the site's eyebrows — a short bar over each h2, a rule beside each h3. */
 .insight-prose h2 {
-  margin-top: 2.1em;
+  margin-top: 1em; /* was 2.1em; the gap above a heading read as a blank block */
   font-size: var(--text-h2);
   line-height: var(--text-h2--line-height);
   scroll-margin-top: 110px;
 }
 
+.insight-prose h2::before {
+  content: "";
+  display: block;
+  width: 44px;
+  height: 4px;
+  margin-bottom: 0.4em;
+  border-radius: 2px;
+  background: var(--color-amber);
+}
+
 .insight-prose h3 {
-  margin-top: 1.9em;
+  margin-top: 1.3em; /* was 1.9em */
+  padding-left: 0.7em;
+  border-left: 3px solid var(--color-amber);
   font-size: var(--text-h3);
   line-height: var(--text-h3--line-height);
 }
 
 .insight-prose h4,
 .insight-prose h5 {
-  margin-top: 1.75em;
+  margin-top: 1.3em; /* was 1.75em */
+  color: var(--color-amber-deep);
   font-size: var(--text-h4);
   line-height: var(--text-h4--line-height);
+}
+
+.insight-prose :is(h2, h3, h4, h5) + * {
+  margin-top: 0.8em;
 }
 
 .insight-prose a {
@@ -839,6 +896,73 @@ body {
 
 .insight-prose a:hover {
   color: var(--color-amber-deep);
+}
+
+/* Download buttons (Sanity file assets). Same gold pill as the site's primary CTA so the
+   article never shows a foreign-looking control. The block form is its own paragraph; the
+   inline form is a compact chip that sits in the sentence without breaking the line. */
+.insight-prose .insight-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  min-height: 48px;
+  padding: 0.75em 1.4em;
+  border-radius: var(--radius-button);
+  background: var(--color-teal);
+  color: #fff;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  transform: translateY(0);
+  transition:
+    transform 480ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 480ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    background-color 480ms ease;
+}
+
+.insight-prose .insight-download:hover {
+  color: #fff;
+  background: var(--color-teal-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 30px -22px rgb(0 0 0 / 0.62);
+}
+
+.insight-prose .insight-download:active {
+  transform: translateY(0) scale(0.99);
+  transition-duration: 140ms;
+}
+
+.insight-prose .insight-download svg {
+  flex: none;
+}
+
+.insight-prose .insight-download small {
+  font-size: 0.78em;
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+.insight-prose .insight-download small::before {
+  content: "·";
+  margin-right: 0.5em;
+}
+
+.insight-prose .insight-download--inline {
+  min-height: 0;
+  padding: 0.18em 0.7em 0.18em 0.55em;
+  gap: 0.35em;
+  font-size: 0.92em;
+  vertical-align: baseline;
+  border-radius: calc(var(--radius-button) - 3px);
+}
+
+.insight-prose .insight-download--inline svg {
+  width: 14px;
+  height: 14px;
+}
+
+.insight-prose .insight-download-row {
+  margin-top: 1.1em;
 }
 
 .insight-prose ul,
@@ -859,7 +983,7 @@ body {
 }
 
 .insight-prose li + li {
-  margin-top: 0.55em;
+  margin-top: 0.3em;
 }
 
 .insight-prose li > ul,
@@ -874,6 +998,32 @@ body {
   color: color-mix(in oklab, var(--color-ink) 80%, transparent);
   font-size: 1.18em;
   line-height: 1.55;
+}
+
+/* Callout ("The short version"): the Sanity callout block and the legacy pasted
+   <aside class="omh-callout"> HTML. !important beats that HTML's inline light
+   colours, which left light-on-light text in dark mode. */
+.insight-prose .omh-callout {
+  margin: 1.5em 0 !important;
+  padding: 14px 18px !important;
+  border-left: 4px solid var(--color-amber) !important;
+  background: color-mix(in oklab, var(--color-ink) 5%, var(--color-surface)) !important;
+  color: var(--color-ink) !important;
+}
+
+.insight-prose .omh-callout-title {
+  margin: 0 0 0.4em !important;
+  font-size: 1.05em;
+  line-height: 1.35;
+}
+
+.insight-prose .omh-callout :is(ul, ol) {
+  margin: 0 !important;
+  padding-left: 1.3em !important;
+}
+
+.insight-prose .omh-callout > :last-child {
+  margin-bottom: 0 !important;
 }
 
 .insight-prose img {
@@ -943,15 +1093,15 @@ body {
 
 @media (max-width: 640px) {
   .insight-prose {
-    font-size: 17px;
-    line-height: 1.72;
+    font-size: 18px;
+    line-height: 1.6;
   }
 }
 
 .recognition-field {
   background-image:
-    linear-gradient(rgb(16 24 40 / 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(16 24 40 / 0.025) 1px, transparent 1px);
+    linear-gradient(rgb(0 0 0 / 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(0 0 0 / 0.025) 1px, transparent 1px);
   background-size: 54px 54px;
 }
 
@@ -979,7 +1129,7 @@ body {
   text-align: center;
   font-size: 18px;
   font-weight: 700;
-  box-shadow: 0 18px 42px -38px rgb(16 24 40 / 0.65);
+  box-shadow: 0 18px 42px -38px rgb(0 0 0 / 0.65);
   transition:
     transform 480ms cubic-bezier(0.2, 0.8, 0.2, 1),
     color 480ms ease,
@@ -1007,19 +1157,19 @@ body {
   border-color: var(--color-teal);
   background: var(--color-ink);
   color: white;
-  box-shadow: 0 30px 58px -34px rgb(16 24 40 / 0.72);
+  box-shadow: 0 30px 58px -34px rgb(0 0 0 / 0.72);
 }
 
 .recognition-tile:hover svg:first-child {
   transform: scale(1.12) rotate(-4deg);
-  color: #f2c675;
+  color: #7d5c33;
 }
 
 .recognition-arrow {
   position: absolute;
   right: 12px;
   bottom: 12px;
-  color: #f2c675;
+  color: #7d5c33;
   opacity: 0;
   transform: translateX(-8px);
   transition:
@@ -1087,22 +1237,13 @@ body {
   }
 }
 
-@media (max-width: 640px) {
-  .stats-grid .stat-item:nth-child(odd) {
-    border-right: 0;
-  }
-
-  .stats-grid .stat-item:nth-last-child(2) {
-    border-bottom: 1px solid var(--color-line);
-  }
-}
+/* Phones keep the two-column stats grid (client, 2 Nov 2026), so the lg rules above apply all the way down. */
 
 /* Neutral instead of amber: the orange ring read as an error state, especially
    around search inputs. Kept visible — keyboard users need to see focus. */
 :focus-visible {
   outline: 2px solid var(--color-ink);
   outline-offset: 2px;
-  border-radius: 2px;
 }
 
 /* Fields already have a border, so a ring on top reads as a bar around the
@@ -1129,7 +1270,6 @@ select:focus-visible {
   a light-on-light gradient was baked into a decorative background.
 */
 :root[data-theme="dark"] {
-  .hero-grid,
   .solution-hero,
   .recognition-field {
     background-image:
@@ -1179,6 +1319,65 @@ select:focus-visible {
     opacity: 1;
     translate: 0 0;
   }
+  /* Above-the-fold entrance: plays on first paint with no JS, so the hero counts as painted at once. */
+  .hero-in {
+    animation: hero-in 0.6s cubic-bezier(0.2, 0.6, 0.2, 1) both;
+  }
+  .hero-in-2 {
+    animation-delay: 0.1s;
+  }
+}
+/* Case studies hero result cards: each rises in after the last, its chart draws, then the three drift gently
+   (transform, so the drift never fights the entrance's translate). Motion only when the visitor allows it. */
+@media (prefers-reduced-motion: no-preference) {
+  .cs-card {
+    animation:
+      hero-in 0.7s cubic-bezier(0.2, 0.6, 0.2, 1) var(--d, 0s) both,
+      cs-drift 7s ease-in-out calc(var(--d, 0s) + 0.8s) infinite;
+  }
+  .cs-line {
+    stroke-dasharray: 320;
+    animation: cs-draw 1.4s cubic-bezier(0.4, 0, 0.2, 1) 0.6s both;
+  }
+  .cs-area {
+    animation: cs-fade 0.8s ease-out 1.2s both;
+  }
+  .cs-bar {
+    transform-origin: bottom;
+    animation: cs-grow 0.6s cubic-bezier(0.2, 0.6, 0.2, 1) calc(0.7s + var(--i) * 80ms) both;
+  }
+}
+@keyframes cs-drift {
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@keyframes cs-draw {
+  from {
+    stroke-dashoffset: 320;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes cs-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes cs-grow {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+/* Starts at 1%, not 0: Chrome skips fully transparent elements when it picks the largest paint, so a 0 start
+   made the header logo the LCP instead of the headline. 1% looks the same. */
+@keyframes hero-in {
+  from {
+    opacity: 0.01;
+    translate: 0 14px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1207,25 +1406,7 @@ select:focus-visible {
   }
 }
 
-/* Section anchors in articles: a "#" that appears on hover beside each h2. */
-.insight-prose h2 {
-  position: relative;
-}
-
-.insight-prose h2 .heading-anchor {
-  margin-left: 0.4em;
-  color: var(--color-amber-deep);
-  font-weight: 500;
-  text-decoration: none;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.insight-prose h2:hover .heading-anchor,
-.insight-prose h2 .heading-anchor:focus-visible {
-  opacity: 1;
-}
-
+/* A section opened from the contents rail flashes once. (The hover "#" beside each h2 was removed, client 22 Oct 2026.) */
 .insight-prose h2:target {
   animation: heading-flash 1.6s ease-out;
 }

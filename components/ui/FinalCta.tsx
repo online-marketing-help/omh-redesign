@@ -31,6 +31,8 @@ export function FinalCta({
   contactEvents,
   id,
   aside,
+  tag,
+  note,
 }: {
   title: string;
   titleAccent?: string;
@@ -43,13 +45,20 @@ export function FinalCta({
   id?: string;
   /** Replaces the steps panel, for pages whose closer carries an offer instead. */
   aside?: ReactNode;
+  /** A small pill above the heading, e.g. "Free, no obligation". */
+  tag?: string;
+  /** A line under the steps, e.g. a pointer to the contact page. */
+  note?: ReactNode;
 }) {
   return (
     <section id={id} className="scroll-mt-20 bg-inverse text-oninverse">
       <div className="container-omh section-md grid grid-cols-12 items-start gap-x-10 gap-y-10 max-lg:block">
         <Reveal className="col-span-7">
+          {tag && (
+            <span className="mb-5 inline-flex rounded-full bg-teal px-3 py-1 text-[14px] font-semibold text-white">{tag}</span>
+          )}
           <h2 className="mb-5 font-sans text-h2 font-semibold text-balance">
-            <HighlightedText text={title} highlight={titleAccent} highlightClassName="text-[#f2c675]" />
+            <HighlightedText text={title} highlight={titleAccent} highlightClassName="text-[#7d5c33]" />
           </h2>
           <p className="mb-9 text-body leading-relaxed text-oninverse/75">{body}</p>
           <div className="flex flex-wrap items-center gap-3.5 max-sm:flex-col max-sm:items-stretch">
@@ -100,7 +109,7 @@ export function FinalCta({
                 <li key={step} className="grid grid-cols-[auto_1fr] items-start gap-4">
                   <span
                     aria-hidden
-                    className="flex size-8 shrink-0 items-center justify-center rounded-full border border-oninverse/25 font-sans text-[18px] font-semibold tabular-nums text-[#f2c675]"
+                    className="flex size-8 shrink-0 items-center justify-center rounded-full border border-oninverse/25 font-sans text-[18px] font-semibold tabular-nums text-[#7d5c33]"
                   >
                     {String(index + 1).padStart(2, "0")}
                   </span>
@@ -108,6 +117,7 @@ export function FinalCta({
                 </li>
               ))}
             </ol>
+            {note && <p className="mt-6 border-t border-oninverse/15 pt-5 text-body text-oninverse/70">{note}</p>}
           </div>
           )}
         </Reveal>

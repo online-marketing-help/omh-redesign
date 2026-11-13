@@ -12,15 +12,16 @@ export function industryMetadata(path: string): Metadata {
   const { meta } = page;
   return {
     title: { absolute: meta.title },
+    ...("noindex" in meta && { robots: { index: false, follow: false } }),
     description: meta.description,
-    alternates: { canonical: `${SITE}${meta.canonical}/` },
+    alternates: { canonical: `${SITE}${meta.canonical}` },
     openGraph: {
       type: "website",
       locale: "en_GB",
       siteName: "Online Marketing Help",
       title: meta.ogTitle,
       description: meta.ogDescription,
-      url: `${SITE}${meta.canonical}/`,
+      url: `${SITE}${meta.canonical}`,
     },
   };
 }
@@ -30,7 +31,7 @@ export function IndustryPage({ path }: { path: string }) {
   if (!page) notFound();
   return (
     <>
-      <JsonLd data={page.schema} />
+      {page.schema.length > 0 && <JsonLd data={page.schema} />}
       <div id="va-page" className={`va-page vi-page ${page.classes}`} dangerouslySetInnerHTML={{ __html: page.markup }} />
       <IndustryScript copy={page.copy} blocks={page.blocks} />
     </>

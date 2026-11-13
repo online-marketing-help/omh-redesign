@@ -48,6 +48,6 @@ export function CaseEvidenceFpo() {
       ratio="16/10"
       tag="Evidence · 16:10"
       title="Verified campaign data"
-      note="Real dashboard screenshot for this case, with client permission." source="/images/home/campaign-review.png" alt="Illustrative campaign review" />
+      note="Real dashboard screenshot for this case, with client permission." source="/images/home/campaign-review.webp" alt="Illustrative campaign review" />
   );
 }

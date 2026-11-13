@@ -59,7 +59,7 @@ export function ServiceProcessTimeline({
               <li key={stepTitle} className="group/step relative pb-10 last:pb-0">
                 <span
                   aria-hidden
-                  className="absolute -left-[51px] top-0.5 flex size-[30px] items-center justify-center rounded-full border border-line bg-surface font-sans text-[18px] font-semibold tabular-nums text-amber-deep transition-colors group-hover/step:border-teal group-hover/step:bg-teal group-hover/step:text-ink max-sm:-left-[43px]"
+                  className="absolute -left-[51px] top-0.5 flex size-[30px] items-center justify-center rounded-full border border-line bg-surface font-sans text-[18px] font-semibold tabular-nums text-amber-deep transition-colors group-hover/step:border-teal group-hover/step:bg-teal group-hover/step:text-white max-sm:-left-[43px]"
                 >
                   {index + 1}
                 </span>

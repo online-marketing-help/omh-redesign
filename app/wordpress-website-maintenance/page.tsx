@@ -14,13 +14,12 @@ import {
   MaintenanceWhyChooseSection,
 } from "@/components/services/WordPressMaintenanceSections";
 import { RelatedServices } from "@/components/RelatedServices";
-import { ServiceCaseStudies } from "@/components/CaseStudies";
 import { MaintenanceControlRoom } from "@/components/ServiceMedia";
 import { SiteTestimonials } from "@/components/Testimonials";
 
 export const metadata: Metadata = {
   title: { absolute: "WordPress Website Maintenance Packages for UK Businesses | OMH" },
-  alternates: { canonical: "https://onlinemarketinghelp.co.uk/wordpress-website-maintenance/" },
+  alternates: { canonical: "https://onlinemarketinghelp.co.uk/wordpress-website-maintenance" },
   description:
     "WordPress website maintenance packages for UK businesses. Updates, backups, monitoring and technical support from £300. Three clear plans with published allowances.",
 };
@@ -38,13 +37,8 @@ export default function WordPressWebsiteMaintenancePage() {
       <MaintenanceProofSection />
       <MaintenanceFitSection />
       <MaintenanceWhyChooseSection />
-      <ServiceCaseStudies
-        serviceId="maintenance"
-        title="WordPress maintenance packages inside a connected marketing programme"
-        body="How routine maintenance sat alongside SEO, paid media and conversion work for a client website."
-        limit={1}
-      />
-      <SiteTestimonials eventPrefix="maintenance" accent="bg-[#f2c675]" />
+      {/* Related case studies removed (client audit, 26 Oct 2026): this is a service page. */}
+      <SiteTestimonials eventPrefix="maintenance" accent="bg-[#7d5c33]" />
       <RelatedServices
         eventPrefix="maintenance"
         title="Move from routine WordPress maintenance to the right wider service"

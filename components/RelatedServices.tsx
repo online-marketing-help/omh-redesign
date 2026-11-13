@@ -37,25 +37,24 @@ export function RelatedServices({
               </h2>
               {body && <p className="mt-5 text-body leading-relaxed text-ink/70">{body}</p>}
             </div>
-            <div className="col-span-8 grid grid-cols-3 gap-5 max-md:grid-cols-1">
+            <div className={`col-span-8 grid gap-5 max-md:grid-cols-1 ${links.length === 4 ? "grid-cols-2" : "grid-cols-3"}`}>
               {links.map((link, index) => (
-                <article key={link.href} className="surface-card flex min-h-full flex-col rounded-card border border-line bg-warm/55 p-6">
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  data-event={`${eventPrefix}_related_service_click`}
+                  data-service={link.title}
+                  className="surface-card group flex min-h-full flex-col rounded-card border border-line bg-warm/55 p-6 text-ink"
+                >
                   <span className="text-[18px] font-semibold tabular-nums tracking-[0.12em] text-amber">
                     {String(index + 1).padStart(2, "0")}
                   </span>
-                  <h3 className="mt-5 font-sans text-h4 font-semibold">
-                    <Link
-                      href={link.href}
-                      data-event={`${eventPrefix}_related_service_click`}
-                      data-service={link.title}
-                      className="group inline-flex items-start gap-2 text-ink transition-colors hover:text-amber-deep"
-                    >
-                      <span>{link.title}</span>
-                      <ArrowRight className="mt-1 size-4 shrink-0 transition-transform duration-500 group-hover:translate-x-1" />
-                    </Link>
+                  <h3 className="mt-5 flex items-start gap-2 font-sans text-h4 font-semibold transition-colors group-hover:text-amber-deep">
+                    <span>{link.title}</span>
+                    <ArrowRight className="mt-1 size-4 shrink-0 transition-transform duration-500 group-hover:translate-x-1" />
                   </h3>
                   {link.body && <p className="mt-3 text-body leading-relaxed text-ink/70">{link.body}</p>}
-                </article>
+                </Link>
               ))}
             </div>
           </div>

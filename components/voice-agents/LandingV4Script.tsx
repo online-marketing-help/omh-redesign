@@ -82,10 +82,12 @@ export function LandingV4Script() {
       const status = $("[data-lf-status]");
       const parts: Record<string, HTMLElement> = {};
       $$("[data-lf]", flow).forEach((el) => (parts[el.dataset.lf!] = el));
+      // An industry page can word the three routes for its sector: data-lf-routes='["…","…","…"]' on the flow.
+      const own = flow.dataset.lfRoutes ? (JSON.parse(flow.dataset.lfRoutes) as string[]) : [];
       const LABELS: Record<number, string> = {
-        1: "Route 1 of 3: the lead books an appointment",
-        2: "Route 2 of 3: the lead asks for you and gets a warm transfer",
-        3: "Route 3 of 3: not ready yet, so the lead goes into follow-up",
+        1: own[0] ?? "Route 1 of 3: the lead books an appointment",
+        2: own[1] ?? "Route 2 of 3: the lead asks for you and gets a warm transfer",
+        3: own[2] ?? "Route 3 of 3: not ready yet, so the lead goes into follow-up",
       };
       const intro = status?.textContent ?? "";
       const steps = (k: number) => [["n1"], ["a1", "n2"], ["a2", "n3"], ["a3", "n4"], [`s${k}`, "sm", `b${k}`], [`m${k}`, "mm", "n5"]];

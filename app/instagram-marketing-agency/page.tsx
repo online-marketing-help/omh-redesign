@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description:
     "OMH is an Instagram marketing agency in Essex helping UK businesses grow with Reels, paid Instagram ads, carousels and account management. Free consultation.",
   openGraph: { title: "Instagram Marketing Agency UK | Ads, Reels & Growth", images: defaultOgImages },
-  alternates: { canonical: "https://onlinemarketinghelp.co.uk/instagram-marketing-agency/" },
+  alternates: { canonical: "https://onlinemarketinghelp.co.uk/instagram-marketing-agency" },
 };
 
 export default function InstagramMarketingPage() {

@@ -7,6 +7,7 @@ import {
   type CaseStudy,
   type CaseStudyServiceId,
 } from "@/lib/content/case-studies";
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 
 /*
   The related-work block reused across service pages. The archive and the single
@@ -54,7 +55,7 @@ export function ServiceCaseStudies({
   const matchingStudies = getCaseStudiesForService(serviceId);
   const studies = matchingStudies.slice(0, limit);
   const remainingStudies = matchingStudies.slice(limit);
-  if (studies.length === 0) return null;
+  if (!CASE_STUDIES_LIVE || studies.length === 0) return null;
 
   return (
     <section className="border-y border-line bg-warm" aria-labelledby={`${serviceId}-case-studies-title`}>

@@ -26,13 +26,7 @@
 
   const state = Object.assign({}, ind.defaults, { mode: "overflow", plan: "auto" });
 
-  /* Where the form goes. The page is static and public, so it cannot hold the
-     Convex secret: this webhook is the only way in, and it writes the lead
-     against the figures the visitor actually entered. */
-  const LEAD_URL =
-    "https://n8n.srv1836598.hstgr.cloud/webhook/ohm-roi-lead";
-
-  let last = null;   /* the most recent result, sent with the form */
+  let last = null;   /* the most recent result */
 
   /* ------------------------------------------------------------ the model */
 
@@ -141,21 +135,22 @@
       scale.appendChild(sp);
     });
 
-    const hint = document.createElement("p");
-    hint.className = "hint";
-    hint.textContent = o.hint;
-
-    const head = document.createElement("div");
-    head.className = "ask-head";
-    head.append(q, out);
-
-    row.append(head, input, scale, hint);
+    /* The explanation and the source both go behind the mark next to the
+       question rather than under the slider. See the tooltip note in
+       style.css for why. */
+    const inside = [];
+    if (o.hint) {
+      const hint = document.createElement("span");
+      hint.className = "tip-hint";
+      hint.textContent = o.hint;
+      inside.push(hint);
+    }
 
     const srcKey = o.sourced === true ? ind.missedSource : o.sourced;
     if (srcKey && SOURCES[srcKey]) {
       const s = SOURCES[srcKey];
-      const p = document.createElement("p");
-      p.className = "hint src " + s.grade;
+      const p = document.createElement("span");
+      p.className = "src " + s.grade;
       if (s.url) {
         p.append("We have started you at the figure reported by ");
         const a = document.createElement("a");
@@ -166,14 +161,122 @@
       } else {
         p.append("Starting figure: " + s.label + ". Move it to what you know.");
       }
-      row.appendChild(p);
+      inside.push(p);
     }
+
+    appendTipInline(q, makeTip(inside));
+
+    const head = document.createElement("div");
+    head.className = "ask-head";
+    head.append(q, out);
+
+    row.append(head, input, scale);
 
     row.dataset.key = o.key;
     ASK_FORMAT[o.key] = o.show;
     return row;
   }
   const ASK_FORMAT = {};
+
+  /* ------------------------------------------------------------ tooltips */
+
+  /* A mark beside the question holding the explanation and the source.
+     Hover opens it on a mouse, which is CSS; this adds the tap, because a
+     phone has no hover and the text would otherwise be unreachable. */
+  function closeTips(except) {
+    document.querySelectorAll(".tip.open").forEach(function (t) {
+      if (t === except) return;
+      t.classList.remove("open");
+      const b = t.querySelector(".tip-b");
+      if (b) b.setAttribute("aria-expanded", "false");
+    });
+  }
+
+  /* Keep the bubble inside the frame. It is centred on the mark by default,
+     and pinned to whichever edge it would otherwise hang off. */
+  function placeTip(wrap) {
+    wrap.classList.remove("at-left", "at-right");
+    const pop = wrap.querySelector(".tip-pop");
+    if (!pop) return;
+    const r = pop.getBoundingClientRect();
+    const pad = 10;
+    if (r.left < pad) wrap.classList.add("at-left");
+    else if (r.right > window.innerWidth - pad) wrap.classList.add("at-right");
+    /* The tail follows the mark when the bubble is pinned. */
+    const b = wrap.querySelector(".tip-b").getBoundingClientRect();
+    const now = pop.getBoundingClientRect();
+    pop.style.setProperty("--tail", (b.left + b.width / 2 - now.left) + "px");
+  }
+
+  /* Put the mark on the same line as the last word of the question. Appended
+     plainly it wraps on its own onto the next line whenever the question
+     fills the column, which reads as a stray dot under the text. */
+  function appendTipInline(el, tip) {
+    if (!tip) return;
+    /* The whole question is the target, not just the 17px mark: people aim at
+       the words they are reading. The mark stays as the thing that says there
+       is something to read. */
+    el.classList.add("has-tip");
+    el.addEventListener("mouseenter", function () { placeTip(tip); });
+    const last = el.lastChild;
+    if (last && last.nodeType === 3 && /\S\s*$/.test(last.nodeValue)) {
+      const text = last.nodeValue.replace(/\s+$/, "");
+      const cut = text.lastIndexOf(" ");
+      const keep = cut === -1 ? "" : text.slice(0, cut + 1);
+      const word = cut === -1 ? text : text.slice(cut + 1);
+      const tail = document.createElement("span");
+      tail.className = "nowrap";
+      tail.textContent = word;
+      tail.appendChild(tip);
+      last.nodeValue = keep;
+      el.appendChild(tail);
+      return;
+    }
+    el.appendChild(tip);
+  }
+
+  let tipsWired = false;
+  function makeTip(nodes) {
+    if (!nodes.length) return null;
+
+    const wrap = document.createElement("span");
+    wrap.className = "tip";
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "tip-b";
+    btn.setAttribute("aria-label", "Why we ask this, and where the figure comes from");
+    btn.setAttribute("aria-expanded", "false");
+    btn.textContent = "i";
+
+    const pop = document.createElement("span");
+    pop.className = "tip-pop";
+    pop.setAttribute("role", "tooltip");
+    nodes.forEach(function (n) { pop.appendChild(n); });
+
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const open = !wrap.classList.contains("open");
+      closeTips(wrap);
+      wrap.classList.toggle("open", open);
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+      if (open) placeTip(wrap);
+    });
+    wrap.addEventListener("mouseenter", function () { placeTip(wrap); });
+    btn.addEventListener("focus", function () { placeTip(wrap); });
+
+    wrap.append(btn, pop);
+
+    if (!tipsWired) {
+      tipsWired = true;
+      document.addEventListener("click", function () { closeTips(null); });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") closeTips(null);
+      });
+    }
+    return wrap;
+  }
 
   /* ------------------------------------------------------- the workings */
 
@@ -205,6 +308,10 @@
       const l = document.createElement("label");
       l.setAttribute("for", "d-" + f.k);
       l.textContent = f.label;
+      const help = document.createElement("span");
+      help.className = "tip-hint";
+      help.textContent = f.help;
+      appendTipInline(l, makeTip([help]));
       const o = document.createElement("output");
       head.append(l, o);
 
@@ -213,11 +320,7 @@
       i.min = f.min; i.max = f.max; i.step = f.step; i.value = state[f.k];
       i.addEventListener("input", () => { state[f.k] = parseFloat(i.value); render(); });
 
-      const h = document.createElement("p");
-      h.className = "hint";
-      h.textContent = f.help;
-
-      row.append(head, i, h);
+      row.append(head, i);
       wrap.appendChild(row);
     });
   }
@@ -239,13 +342,21 @@
         (k === "minutes" ? state[k].toFixed(1) : Math.round(state[k])) + row.dataset.suffix;
     });
 
-    /* The headline figure, with the sum beside it so it is never a black box. */
-    const wonN = Math.round(r.won);
+    /* The headline figure, with a sentence under it saying where it came from.
+       It used to read "3 customers x £900 - £449 cost", which asked the reader
+       to do the sum and then failed it: the model works on 3.19 customers and
+       the line rounded that to 3, so the arithmetic on screen did not reach
+       the number above it. This says the same thing in words, keeps "about"
+       in front of the rounded count, and quotes the two money figures that do
+       reconcile. */
+    const wonN = r.won >= 2 ? Math.round(r.won) : Math.round(r.won * 10) / 10;
+    const unit = wonN === 1 ? one(ind.unit) : ind.unit;
     $("#verdict-num").textContent = (r.net < 0 ? "-" : "+") + money(Math.abs(r.net));
     $("#verdict-num").className = r.net > 0 ? "good" : "bad";
     $("#verdict-sum").textContent =
-      wonN.toLocaleString("en-GB") + " " + (wonN === 1 ? one(ind.unit) : ind.unit) +
-      " x " + money(state.value) + " - " + money(r.monthlyCost) + " cost";
+      "Win back about " + wonN.toLocaleString("en-GB") + " " + unit +
+      " a month from calls nobody answers, worth " + money(r.revenue) +
+      ", less the " + money(r.monthlyCost) + " the agent costs.";
     document.querySelector(".hero-fig .cap").textContent =
       r.net < 0 ? "What it would cost you, every month" : "Better off, every month";
 
@@ -371,8 +482,6 @@
       buildMain(); buildDetail(); render();
     });
 
-    wireForm();
-
     const notes = $("#notes");
     ind.notes.forEach((n) => {
       const li = document.createElement("li");
@@ -383,69 +492,6 @@
     buildMain();
     buildDetail();
     render();
-  }
-
-  /* ----------------------------------------------------------- lead form */
-  /* The headline answer is never gated. This asks only once the visitor has
-     seen what they came for, and it offers something real in return: the
-     figures written up, and a same-day reply. */
-
-  function wireForm() {
-    const form = $("#lead-form");
-    if (!form) return;
-    const note = $("#lead-note");
-    const btn = $("#lead-submit");
-
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      const d = Object.fromEntries(new FormData(form).entries());
-
-      if (!String(d.name || "").trim()) return bad("Please tell us your name.");
-      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(d.email || "").trim()))
-        return bad("That email address does not look right.");
-
-      btn.disabled = true;
-      note.className = "formnote";
-      note.textContent = "Sending\u2026";
-
-      fetch(LEAD_URL, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          name: d.name, email: d.email, phone: d.phone, company: d.company,
-          industry: ind.name,
-          unit: one(ind.unit),
-          calls: state.calls,
-          missed: Math.round(state.calls * state.missedPct / 100),
-          value: state.value,
-          recovered: last ? Math.round(last.revenue) : 0,
-          cost: last ? Math.round(last.monthlyCost) : 0,
-          net: last ? Math.round(last.net) : 0,
-          plan: last ? last.plan.name : "",
-          page_url: location.href,
-        }),
-      })
-        .then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
-        .then(function () {
-          form.innerHTML = "";
-          note.className = "formnote good";
-          note.textContent =
-            "Thank you. Your breakdown is on its way and somebody will come back " +
-            "to you today. If it is urgent, ring 020 3489 3934.";
-          form.appendChild(note);
-        })
-        .catch(function () {
-          btn.disabled = false;
-          bad("Sorry, that did not go through. Please ring 020 3489 3934 or " +
-              "email support@onlinemarketinghelp.co.uk and we will sort it.");
-        });
-
-      function bad(msg) {
-        note.className = "formnote bad";
-        note.textContent = msg;
-        btn.disabled = false;
-      }
-    });
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);

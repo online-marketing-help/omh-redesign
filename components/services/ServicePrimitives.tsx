@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { isHiddenHref } from "@/lib/flags";
 
 export function HighlightedText({
   text,
@@ -154,21 +155,29 @@ export function FeatureValue({
 // internal link resolves to the header, footer or mega-menu. Content files hold
 // plain strings, so link targets are written inline as [anchor](/path) and
 // rendered here. Keeps the §7 linking plan in the content data, not the markup.
+// Bare email addresses and UK phone numbers in the text also become links (client audit, 26 Oct 2026).
+const linkPattern = /(\[[^\]]+\]\(\/[^)]*\)|[\w.+-]+@[\w-]+(?:\.[\w-]+)+|(?:\+44\s?|0)\d{2,4}[\s-]?\d{3,4}[\s-]?\d{3,4})/g;
+const linkClass = "font-semibold text-amber-deep underline decoration-amber-deep/35 underline-offset-4 hover:decoration-amber-deep";
+
 export function withLinks(text: string) {
-  const parts = text.split(/(\[[^\]]+\]\(\/[^)]*\))/g);
+  const parts = text.split(linkPattern);
   return (
     <>
       {parts.map((part, i) => {
+        if (part.includes("@") && !part.startsWith("[")) {
+          return <a key={i} href={`mailto:${part}`} className={linkClass}>{part}</a>;
+        }
+        if (/^(?:\+44|0)[\d\s-]+$/.test(part)) {
+          const digits = part.replace(/[\s-]/g, "").replace(/^0/, "+44");
+          return <a key={i} href={`tel:${digits}`} className={linkClass}>{part}</a>;
+        }
         const match = /^\[([^\]]+)\]\((\/[^)]*)\)$/.exec(part);
         if (!match) return part;
+        if (isHiddenHref(match[2])) return match[1];
         // ponytail: a plain inline anchor, not TextLink — TextLink appends an
         // arrow and is inline-flex, which breaks mid-sentence.
         return (
-          <Link
-            key={i}
-            href={match[2]}
-            className="font-semibold text-amber-deep underline decoration-amber-deep/35 underline-offset-4 hover:decoration-amber-deep"
-          >
+          <Link key={i} href={match[2]} className={linkClass}>
             {match[1]}
           </Link>
         );

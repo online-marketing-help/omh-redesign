@@ -13,7 +13,7 @@ function RecoverableImage({ src, alt, onError, unoptimized, ...props }: ImagePro
   return (
     <Image
       {...props}
-      src={failures < 2 ? src : "/images/home/agency-collaboration.png"}
+      src={failures < 2 ? src : "/images/home/agency-collaboration.webp"}
       alt={failures < 2 ? alt : "Agency team collaborating on a marketing project"}
       unoptimized={unoptimized || failures > 0}
       onError={(event) => {

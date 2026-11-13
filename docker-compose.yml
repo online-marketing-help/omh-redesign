@@ -1,11 +1,15 @@
-# ponytail: no proxy, no network, no volumes of its own — it joins the Traefik
+# ponytail: no proxy, no network of its own (one volume, for old builds' static files) — it joins the Traefik
 # that n8n already runs on. Nothing in the existing stack is touched.
 services:
   omh:
-    build: .
+    build:
+      context: .
+      secrets: [env]
     env_file: .env
     restart: always
     networks: [web]
+    # Keeps old builds' CSS and JS so pages saved before a deploy still load (see Dockerfile).
+    volumes: [omh-static:/app/.next/static]
     labels:
       - traefik.enable=true
       - traefik.docker.network=${TRAEFIK_NETWORK}
@@ -19,6 +23,14 @@ services:
       - traefik.http.middlewares.omh-www.redirectregex.regex=^https://www\.(.*)
       - traefik.http.middlewares.omh-www.redirectregex.replacement=https://$${1}
       - traefik.http.middlewares.omh-www.redirectregex.permanent=true
+
+volumes:
+  omh-static:
+
+# .env handed to the build as a secret (see Dockerfile), so it never ends up in the image.
+secrets:
+  env:
+    file: .env
 
 networks:
   web:

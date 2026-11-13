@@ -1,3 +1,4 @@
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 // Verbatim copy from the live /faq/ page (docs/legacy-pages-plan.md Phase 2).
 // Wording must not be edited — only re-typeset into this site's components.
 
@@ -139,15 +140,17 @@ export const faqPage = {
         {
           q: "Can I check the designs made by your team?",
           a: [
-            "Yes you can, after you have had an initial consultation with one of our customer care team we will send you upon request any relevant case studies or previous works to you.",
+            `Yes you can, after you have had an initial consultation with one of our customer care team we will send you upon request any relevant ${CASE_STUDIES_LIVE ? "case studies or " : ""}previous works to you.`,
           ],
         },
+        ...(CASE_STUDIES_LIVE ? [
         {
           q: "I just want to have a look at the designs. Can I do that?",
           a: [
             "Yes we have an entire case study page which will give you an idea of the kind of work we have done in the past but we always start with a fresh and open mind for design projects so that you get the look, design and feel that you want for your business not that someone else already has.",
           ],
         },
+        ] : []),
         {
           q: "Will my website be custom designed and unique?",
           a: [

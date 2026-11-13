@@ -22,7 +22,7 @@ import { SiteTestimonials } from "@/components/Testimonials";
 export const metadata: Metadata = {
   // absolute: this title already ends in "| OMH", so skip the layout's "| Online Marketing Help".
   title: { absolute: "Expert WordPress Development Services UK | OMH" },
-  alternates: { canonical: "https://onlinemarketinghelp.co.uk/wordpress-development/" },
+  alternates: { canonical: "https://onlinemarketinghelp.co.uk/wordpress-development" },
   description:
     "Custom WordPress development services from a UK agency. New builds, redesigns, plugins & integrations from £200. Book a free consultation.",
 };

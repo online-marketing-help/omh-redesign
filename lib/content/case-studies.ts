@@ -503,3 +503,17 @@ export function getCaseStudy(slug: string) {
 export function getCaseStudiesForService(serviceId: CaseStudyServiceId) {
   return caseStudies.filter((study) => study.serviceIds.includes(serviceId));
 }
+
+// Recovered from the site's WordPress media archive. Sector photos are not client evidence.
+export const caseStudyMedia: Record<string, { src: string; alt: string; caption: string; logo?: boolean }> = {
+  bakery: { src: "/images/case-studies/bakery.webp", alt: "A decorated cake on a bakery table", caption: "Bakery sector photography" },
+  "car-showroom": { src: "/images/case-studies/automotive.webp", alt: "Vehicles displayed in a bright car showroom", caption: "Automotive sector photography" },
+  "clothing-business": { src: "/images/case-studies/clothing.webp", alt: "A colourful range of retail accessories", caption: "Ecommerce sector photography" },
+  "craft-business": { src: "/images/case-studies/craft.webp", alt: "Handcrafted wooden letter forms", caption: "Craft sector photography" },
+  bar: { src: "/images/clients/bar.webp", alt: "The home page of the Keens Steak House website", caption: "Client website" },
+  "fine-dining": { src: "/images/case-studies/restaurant.webp", alt: "A restaurant table set for dinner", caption: "Restaurant sector photography" },
+  "fleming-verandas": { src: "/images/clients/fleming-verandas.webp", alt: "The home page of the Fleming Verandas website", caption: "Client website" },
+  "california-accounting": { src: "/images/clients/california-accounting.webp", alt: "The home page of the California Accounting website", caption: "Client website" },
+  "allied-hands": { src: "/images/case-studies/allied.webp", alt: "A care worker accompanying an older person outdoors", caption: "Care sector photography" },
+  "out-out-entry": { src: "/images/case-studies/out-out.webp", alt: "A group enjoying a pool party", caption: "Activity photography" },
+};

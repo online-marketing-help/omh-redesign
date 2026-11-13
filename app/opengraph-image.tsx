@@ -12,8 +12,8 @@ export const alt = "Online Marketing Help: full-service digital marketing agency
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const INK = "#101828";
-const AMBER = "#f2c675";
+const INK = "#000";
+const AMBER = "#7d5c33";
 
 export default async function Image() {
   const logo = await readFile(join(process.cwd(), "public/images/logo-white.png"));

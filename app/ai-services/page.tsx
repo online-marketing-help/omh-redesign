@@ -9,14 +9,14 @@ export const metadata: Metadata = {
   title: { absolute: "AI Services for UK Businesses | Chatbots, Voice Agents & Automation | OMH" },
   description:
     "AI chatbots, voice agents, integrations, AI agents, AI software, consulting and AI UGC video for UK businesses. Planned, built and managed by OMH's UK team.",
-  alternates: { canonical: `${SITE}${path}/` },
+  alternates: { canonical: `${SITE}${path}` },
   openGraph: {
     type: "website",
     locale: "en_GB",
     siteName: "Online Marketing Help",
     title: "AI Services for UK Businesses | OMH",
     description: "Practical AI for the jobs that slow your team down. Planned, built and managed by a UK team.",
-    url: `${SITE}${path}/`,
+    url: `${SITE}${path}`,
   },
 };
 
@@ -30,7 +30,7 @@ const service = {
     "AI chatbots, voice agents, integrations, AI agents, AI-powered websites and software, AI technology consulting and AI UGC video for UK businesses.",
   provider: { "@id": `${SITE}/#organisation` },
   areaServed: { "@type": "Country", name: "United Kingdom" },
-  url: `${SITE}${path}/`,
+  url: `${SITE}${path}`,
   hasOfferCatalog: {
     "@type": "OfferCatalog",
     name: "AI services",
@@ -40,7 +40,7 @@ const service = {
         "@type": "Service",
         name: s.name,
         description: s.summary,
-        url: s.page ? `${SITE}${s.page.href}/` : `${SITE}${path}/#${s.id}`,
+        url: s.page ? `${SITE}${s.page.href}` : `${SITE}${path}#${s.id}`,
       },
     })),
   },

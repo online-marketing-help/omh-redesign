@@ -13,6 +13,7 @@ const needs = [
   "Website redesign",
   "WordPress support or fixes",
   "SEO",
+  "Ecommerce SEO",
   "Google Ads",
   "Something else",
 ];

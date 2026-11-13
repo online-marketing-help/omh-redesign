@@ -12,6 +12,7 @@ import { socialMediaMarketing } from "@/lib/content/social-media-marketing";
 import { socialMediaPaidAdvertising } from "@/lib/content/social-media-paid-advertising";
 import { facebookLanding, instagramLanding } from "@/lib/content/social-landing";
 import { bestSeoServices } from "@/lib/content/seo-landing";
+import { ecommerceSeo } from "@/lib/content/ecommerce-seo";
 
 export const SITE = "https://onlinemarketinghelp.co.uk";
 
@@ -132,6 +133,11 @@ const services: Record<string, { name: string; description: string; faqs: Faqs; 
     description: "Shopify store development for UK ecommerce brands, covering build, theme customisation, product journeys, integrations and conversion tracking.",
     faqs: shopifyDevelopment.faqs,
   },
+  "/ecommerce-seo-services": {
+    name: "Ecommerce SEO Services",
+    description: "Ecommerce SEO services for UK online stores on Shopify, WooCommerce and Magento: audits, technical SEO, category and product page optimisation, content and link building, reported against organic revenue.",
+    faqs: ecommerceSeo.faq.items,
+  },
   "/seo-services": {
     name: "Professional SEO Services",
     description: "Professional SEO services for UK businesses: technical SEO audits, on-page optimisation, local SEO, link building and monthly reporting.",
@@ -198,7 +204,7 @@ const services: Record<string, { name: string; description: string; faqs: Faqs; 
 /** Service + FAQPage markup for a service route. FAQs are the ones the page renders. */
 export function ServiceJsonLd({ path }: { path: keyof typeof services }) {
   const s = services[path];
-  return <JsonLd data={[serviceSchema(s.name, s.description, `${path}/`, s.offers), faqSchema(s.faqs)]} />;
+  return <JsonLd data={[serviceSchema(s.name, s.description, path, s.offers), faqSchema(s.faqs)]} />;
 }
 
 export function JsonLd({ data }: { data: object | object[] }) {

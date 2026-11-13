@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   title: "Social Media Marketing Services UK",
   description:
     "Social media marketing services for UK businesses. Strategy, content, graphics, community management and reporting from £450/mo. Book a free consultation.",
-  alternates: { canonical: "https://onlinemarketinghelp.co.uk/social-media-marketing-services/" },
+  alternates: { canonical: "https://onlinemarketinghelp.co.uk/social-media-marketing-services" },
 };
 
 export default function SocialMediaMarketingPage() {

@@ -128,7 +128,7 @@ export function Footer() {
                       rel="noopener noreferrer"
                       aria-label={`${company.name} on ${social.label}`}
                       data-event={`footer_social_${social.label.toLowerCase()}_click`}
-                      className="grid size-11 place-items-center rounded-full border border-oninverse/20 text-oninverse/75 transition-colors hover:border-amber hover:bg-amber hover:text-inverse focus-visible:border-amber focus-visible:text-oninverse"
+                      className="grid size-11 place-items-center rounded-full border border-oninverse/20 text-oninverse/75 transition-colors hover:border-amber hover:bg-amber hover:text-white focus-visible:border-amber focus-visible:text-oninverse"
                     >
                       <SocialIcon name={social.label} />
                     </a>
@@ -137,7 +137,7 @@ export function Footer() {
               </ul>
             </div>
             <div>
-              <h2 className={headingClass}>Our location</h2>
+              <p className={headingClass}>Our location</p>
               <address className="not-italic text-body leading-relaxed text-oninverse/62">
                 {company.address}
               </address>
@@ -147,7 +147,7 @@ export function Footer() {
           <div className="mt-12 grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-x-8 gap-y-10 xl:flex xl:justify-between">
             {footerCols.map((col) => (
               <nav key={col.heading} aria-label={col.heading}>
-                <h2 className={headingClass}>{col.heading}</h2>
+                <p className={headingClass}>{col.heading}</p>
                 {col.links.map((link) => (
                   <Link key={link.href} href={link.href} className={linkClass}>
                     {link.label}
@@ -172,8 +172,8 @@ export function Footer() {
               {/* Colour runs left to right: faint white, then light amber. */}
               <linearGradient id="fw-fill" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1600" y2="0">
                 <stop offset="0.45" stopColor="currentColor" stopOpacity="0.22" />
-                <stop offset="0.6" stopColor="#f2c675" stopOpacity="0.36" />
-                <stop offset="0.8" stopColor="#f2c675" stopOpacity="0.44" />
+                <stop offset="0.6" stopColor="#7d5c33" stopOpacity="0.36" />
+                <stop offset="0.8" stopColor="#7d5c33" stopOpacity="0.44" />
               </linearGradient>
               {/* The top-to-bottom fade is a mask, so it combines with that colour. */}
               <linearGradient id="fw-fade" x1="0" y1="0" x2="0" y2="1">
@@ -190,7 +190,7 @@ export function Footer() {
             <defs>
               <linearGradient id="fw-lit" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1600" y2="0">
                 <stop offset="0.45" stopColor="#f8eddc" stopOpacity="0.6" />
-                <stop offset="0.6" stopColor="#f2c675" stopOpacity="0.9" />
+                <stop offset="0.6" stopColor="#7d5c33" stopOpacity="0.9" />
               </linearGradient>
             </defs>
             <WordmarkText fill="url(#fw-lit)" />
@@ -207,7 +207,7 @@ export function Footer() {
               data-event="footer_company_deck_download"
               className="group inline-flex items-center gap-4"
             >
-              <span className="grid size-12 shrink-0 place-items-center rounded-full bg-amber text-inverse transition-transform duration-300 group-hover:scale-110">
+              <span className="grid size-12 shrink-0 place-items-center rounded-full bg-amber text-white transition-transform duration-300 group-hover:scale-110">
                 <Download aria-hidden className="size-5" strokeWidth={2.25} />
               </span>
               <span>

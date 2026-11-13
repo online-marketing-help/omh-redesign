@@ -5,7 +5,7 @@ import { quotationQuestionnaireThankYou } from "@/lib/content/thank-you";
 export const metadata: Metadata = {
   title: quotationQuestionnaireThankYou.seo.title,
   description: quotationQuestionnaireThankYou.seo.description,
-  alternates: { canonical: "https://onlinemarketinghelp.co.uk/quotation-questionnaire-thank-you/" },
+  alternates: { canonical: "https://onlinemarketinghelp.co.uk/quotation-questionnaire-thank-you" },
   robots: { index: false, follow: true },
 };
 

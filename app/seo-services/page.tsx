@@ -22,7 +22,7 @@ const meta = bestSeoServices.meta!;
 export const metadata: Metadata = {
   title: meta.title,
   description: meta.description,
-  alternates: { canonical: `https://onlinemarketinghelp.co.uk${meta.path}/` },
+  alternates: { canonical: `https://onlinemarketinghelp.co.uk${meta.path}` },
 };
 
 export default function SeoServicesPage() {
@@ -47,6 +47,7 @@ export default function SeoServicesPage() {
         title="Connect SEO with the website and campaigns it supports"
         body="Organic search works alongside the local presence, pages and paid campaigns visitors reach after a click."
         links={[
+          { title: "Ecommerce SEO", href: "/ecommerce-seo-services", body: "Category, product and technical SEO for Shopify, WooCommerce and Magento stores, reported against organic revenue." },
           { title: "Local SEO", href: "/local-seo", body: "Google Business Profile, local pages, citations and reviews for businesses serving defined areas." },
           { title: "WordPress Development", href: "/wordpress-development", body: "Build or improve the pages and conversion journeys organic visitors land on." },
           { title: "Google Ads Management", href: "/google-adwords-ppc", body: "Cover high-intent searches with paid campaigns while organic visibility builds." },

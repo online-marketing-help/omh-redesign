@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   title: "Paid Social Media Advertising Agency UK",
   description:
     "A UK paid social media advertising agency running managed Meta, TikTok and LinkedIn campaigns. Strategy, audience, creative, tracking and budget handled for you. Request a paid social review.",
-  alternates: { canonical: "https://onlinemarketinghelp.co.uk/social-media-paid-advertising/" },
+  alternates: { canonical: "https://onlinemarketinghelp.co.uk/social-media-paid-advertising" },
 };
 
 export default function SocialMediaPaidAdvertisingPage() {

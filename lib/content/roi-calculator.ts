@@ -5,6 +5,6 @@
 
 /** `page` is the calculator file name without .html, e.g. "dental", "real-estate", "any-business". */
 export const roiCalculator = (page: string, cls = "bg-paper") => `<section id="roi-calculator" data-component="RoiCalculator" class="${cls}">
-  <iframe src="/roi-calculator/${page}.html" title="ROI calculator" data-roi-frame
+  <iframe src="/roi-calculator/${page}.html" title="ROI calculator" loading="lazy" data-roi-frame
         style="width:100%;height:1400px;border:0"></iframe>
 </section>`;

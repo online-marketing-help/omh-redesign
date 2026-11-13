@@ -25,8 +25,9 @@ const toneClass: Record<ServiceBandTone, string> = {
   warm: "",
   white: "border-b border-line bg-surface",
   mist: "bg-tint-blue text-ink",
-  navy: "bg-[#0e2035] text-oninverse",
-  dark: "bg-[#211a12] text-oninverse",
+  // Black and white sections only (client, 29 Oct 2026). OLD navy #0e2035, dark #211a12.
+  navy: "bg-inverse text-oninverse",
+  dark: "bg-inverse text-oninverse",
 };
 
 const darkTones: ServiceBandTone[] = ["navy", "dark"];

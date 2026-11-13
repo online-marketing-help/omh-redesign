@@ -239,7 +239,7 @@ const statusChip = {
 };
 
 const planCard = `
-    <div class="card relative overflow-hidden shadow-[0_24px_60px_-28px_rgb(16_24_40/0.35)]" role="group" aria-label="Example AI plan for a lettings agency">
+    <div class="card relative overflow-hidden shadow-[0_24px_60px_-28px_rgb(0_0_0/0.35)]" role="group" aria-label="Example AI plan for a lettings agency">
       <div class="flex items-center justify-between gap-3 border-b border-line bg-sand px-5 py-3.5 text-[15px]">
         <span class="flex items-center gap-2 font-semibold">${icon("i-plus-star", "text-hl")}AI plan</span>
         <span class="chip !py-0.5">First six months</span>
@@ -394,7 +394,7 @@ const steps = [
     title: "Discovery",
     text: "We talk through how your business runs, where the time goes and what frustrates your team. You get an honest view of where AI can help.",
     chip: "You give: about an hour",
-    mock: `<div class="how-mock w-full max-w-[250px] rounded-[10px] bg-surface p-4 text-left shadow-[0_10px_30px_-18px_rgb(16_24_40/0.5)]">
+    mock: `<div class="how-mock w-full max-w-[250px] rounded-[10px] bg-surface p-4 text-left shadow-[0_10px_30px_-18px_rgb(0_0_0/0.5)]">
           <p class="text-[13.5px] font-semibold">Where the hours go, per week</p>
           <ul class="mt-2.5 space-y-2 text-[13px] leading-tight">
             <li class="flex items-center justify-between gap-2"><span>Answering calls</span><span class="rounded-full bg-gold/25 px-2 py-0.5 font-semibold text-hl tnum">9 hrs</span></li>
@@ -409,7 +409,7 @@ const steps = [
     title: "Plan and prototype",
     text: "We recommend where to start, agree what success looks like and show you a working prototype before the full build.",
     chip: "You give: examples and access",
-    mock: `<div class="how-mock w-full max-w-[250px] rounded-[10px] bg-surface p-4 text-left shadow-[0_10px_30px_-18px_rgb(16_24_40/0.5)]">
+    mock: `<div class="how-mock w-full max-w-[250px] rounded-[10px] bg-surface p-4 text-left shadow-[0_10px_30px_-18px_rgb(0_0_0/0.5)]">
           <p class="text-[13.5px] font-semibold">Recommended order</p>
           <ol class="mt-2.5 space-y-2 text-[13px] leading-tight">
             <li class="flex items-center justify-between gap-2"><span>1. AI Chatbot</span><span class="rounded-full bg-gold/25 px-2 py-0.5 font-semibold text-hl">Start here</span></li>
@@ -423,7 +423,7 @@ const steps = [
     title: "Build and test",
     text: "We build the tool, connect it to your systems and test it with your team. We fix what you find, and nothing goes live until you say so.",
     chip: "You give: honest feedback",
-    mock: `<div class="how-mock w-full max-w-[250px] rounded-[10px] bg-surface p-4 text-left shadow-[0_10px_30px_-18px_rgb(16_24_40/0.5)]">
+    mock: `<div class="how-mock w-full max-w-[250px] rounded-[10px] bg-surface p-4 text-left shadow-[0_10px_30px_-18px_rgb(0_0_0/0.5)]">
           <p class="text-[13.5px] font-semibold">Test questions</p>
           <ul class="mt-2.5 space-y-2 text-[13px] leading-tight">
             <li class="flex items-center justify-between gap-2"><span>Opening hours</span><span class="flex items-center gap-1 font-semibold text-ok">${icon("i-check", "!h-3.5 !w-3.5")}Passed</span></li>
@@ -438,7 +438,7 @@ const steps = [
     title: "Launch and improve",
     text: "We switch it on, watch the results and review them with you every month. Once the first tool is working well, we look at the next job.",
     chip: "You get: a monthly report",
-    mock: `<div class="how-mock w-full max-w-[250px] rounded-[10px] bg-surface p-4 text-left shadow-[0_10px_30px_-18px_rgb(16_24_40/0.5)]">
+    mock: `<div class="how-mock w-full max-w-[250px] rounded-[10px] bg-surface p-4 text-left shadow-[0_10px_30px_-18px_rgb(0_0_0/0.5)]">
           <p class="flex items-center justify-between text-[13.5px] font-semibold"><span>Your AI tools</span><span class="flex items-center gap-1.5 rounded-full bg-ok/10 px-2 py-0.5 text-[12.5px] text-ok"><span class="block h-2 w-2 rounded-full bg-ok"></span>Live</span></p>
           <div class="mt-3 grid h-[68px] grid-cols-3 items-end gap-2">
             <span class="block h-[45%] rounded-t-[4px] bg-ink/20"></span>
@@ -487,7 +487,7 @@ const fitItem = (good: boolean) => ([ic, title, text]: readonly [string, string,
 
 const faqItems = aiServicesFaqs
   .map(
-    (f, i) => `<details class="group rounded-[14px] border border-line bg-paper transition-colors open:border-[var(--va-line-strong)] open:bg-surface open:shadow-[0_18px_40px_-30px_rgb(16_24_40/0.45)]" data-faq-item data-cat="${f.cat}"${i === 0 ? " open" : ""} data-track-name="${esc(f.q)}">
+    (f, i) => `<details class="group rounded-[14px] border border-line bg-paper transition-colors open:border-[var(--va-line-strong)] open:bg-surface open:shadow-[0_18px_40px_-30px_rgb(0_0_0/0.45)]" data-faq-item data-cat="${f.cat}"${i === 0 ? " open" : ""} data-track-name="${esc(f.q)}">
         <summary class="flex min-h-[64px] items-center gap-4 px-5 py-4">
           <span class="num hidden w-7 shrink-0 text-[15px] sm:block" aria-hidden="true">${pad(i + 1)}</span>
           <span class="min-w-0 flex-1">
@@ -579,6 +579,28 @@ ${planCard}
   </div>
 </section>
 
+<!-- ===== COMPONENT: DemoVideo ===== -->
+<section id="video" data-component="DemoVideo" class="bg-surface">
+  <div class="container-omh py-20 lg:py-24">
+    <div class="mx-auto text-center">
+      <p class="eyebrow justify-center">${mark}Demo video</p>
+      <h2>See an AI voice agent <span class="hl">answer and route calls</span></h2>
+    </div>
+    <div class="mx-auto mt-10 rounded-[24px] border border-line bg-surface p-3 sm:p-4">
+      <div class="v4l"><div class="video-frame" data-video data-video-id="NB9WWD0TBR8" data-video-title="Stop missing calls with the OMH AI Receptionist">
+        <button type="button" class="video-poster on-band has-thumb" data-video-play data-track="ai_services_video_open" aria-label="Play video: Stop missing calls with the OMH AI Receptionist (1:09)">
+          <img class="vp-thumb" src="/images/voice-agents/ai-receptionist-video-poster.jpg" alt="Video: the OMH AI Receptionist answering calls 24/7" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="vp-play" aria-hidden="true"><span class="vp-play-core"><svg class="vp-play-ico" viewBox="0 0 24 24" focusable="false"><path d="M8 5.6v12.8l10.4-6.4z"/></svg></span><span class="vp-play-label">Watch the demo</span></span>
+          <span class="vp-bottom" aria-hidden="true">
+            <span class="vp-cap"><span class="vp-kicker"><span class="voice-mark"><i></i><i></i><i></i></span>Online Marketing Help</span><span class="vp-title">Stop missing calls with the OMH AI Receptionist</span></span>
+            <span class="vp-time tnum">1:09</span>
+          </span>
+        </button>
+      </div></div>
+      <p class="px-2 pb-1 pt-4 text-[16px] text-muted">Plays from YouTube's privacy-enhanced player, only when you press play.</p>
+    </div>
+  </div>
+</section>
 <section id="overview" data-component="Overview" class="on-band bg-band text-band-ink">
   <div class="container-omh grid gap-12 py-20 lg:grid-cols-[minmax(0,.9fr)_minmax(0,1.1fr)] lg:gap-16 lg:py-28">
     <div>
@@ -594,7 +616,7 @@ ${timePanel}
   </div>
 </section>
 
-<section id="services" data-component="Services" class="bg-sand">
+<section id="services" data-component="Services" class="bg-surface">
   <div class="container-omh py-20 lg:py-28">
     <div>
       <div>
@@ -638,7 +660,7 @@ ${whyTable}
   </div>
 </section>
 
-<section id="right-fit" data-component="RightFit" class="bg-sand">
+<section id="right-fit" data-component="RightFit" class="bg-surface">
   <div class="container-omh py-20 lg:py-28">
     <div>
       <div>
@@ -775,7 +797,7 @@ ${whyTable}
             ${field("demo-email", "email", "Email", "email", "email")}
           </div>
           <label class="mt-5 flex items-start gap-3 text-[15px] leading-snug text-muted">
-            <input type="checkbox" name="consent" required class="mt-1 h-5 w-5 shrink-0 accent-[#b97822]" aria-describedby="demo-consent-err" data-demo-field data-demo-message="Tick the box so we can contact you about your enquiry.">
+            <input type="checkbox" name="consent" required class="mt-1 h-5 w-5 shrink-0 accent-[var(--color-teal-dark)]" aria-describedby="demo-consent-err" data-demo-field data-demo-message="Tick the box so we can contact you about your enquiry.">
             <span>I'm happy for OMH to contact me about this enquiry. See our <a href="/privacy" class="font-semibold text-ink underline decoration-gold decoration-2 underline-offset-2">privacy policy</a>.</span>
           </label>
           <p id="demo-consent-err" class="mt-1 text-[14px] font-semibold text-miss" data-demo-error hidden></p>
@@ -795,7 +817,7 @@ ${whyTable}
   </div>
 </section>
 
-<div data-component="MobileStickyBar" data-sticky-bar class="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-paper px-4 pb-[max(.75rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-12px_30px_-18px_rgb(16_24_40/0.35)] md:hidden" inert>
+<div data-component="MobileStickyBar" data-sticky-bar class="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-paper px-4 pb-[max(.75rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-12px_30px_-18px_rgb(0_0_0/0.35)] md:hidden" inert>
   <div class="flex items-center gap-3">
     <a href="#book-demo" class="btn btn-primary flex-1" data-track="sticky_book_consultation">Book a Consultation</a>
     <a href="tel:+442034893934" class="btn btn-secondary !px-0 w-[52px]" aria-label="Call OMH on 020 3489 3934" data-track="sticky_phone_click">${icon("i-phone")}</a>

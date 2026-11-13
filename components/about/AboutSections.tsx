@@ -3,6 +3,7 @@ import { Leaf, HandHeart, Users, Trees } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { AboutTabs } from "@/components/about/AboutTabs";
 import { Button } from "@/components/ui/Button";
+import { BookDemo } from "@/components/BookDemo";
 import { FinalCta } from "@/components/ui/FinalCta";
 import { Eyebrow } from "@/components/ui/Proof";
 import { about } from "@/lib/content/about";
@@ -53,7 +54,7 @@ export function AboutHero() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="relative col-span-2 aspect-[16/10] overflow-hidden rounded-media border border-line bg-soft">
                   <Image
-                    src="/images/home/agency-collaboration.png"
+                    src="/images/home/agency-collaboration.webp"
                     alt="The Online Marketing Help team working together on a client campaign"
                     fill
                     priority
@@ -75,7 +76,7 @@ export function AboutHero() {
                     />
                     {/* Deep gradient stop: these labels sit over photography, so
                         the ground has to carry them on light images too. */}
-                    <span className="absolute inset-x-0 bottom-0 bg-[linear-gradient(180deg,transparent,rgb(16_24_40/0.92))] px-5 pb-5 pt-12">
+                    <span className="absolute inset-x-0 bottom-0 bg-[linear-gradient(180deg,transparent,rgb(0_0_0/0.92))] px-5 pb-5 pt-12">
                       <span className="block font-sans text-body font-semibold text-white">
                         {member.name}
                       </span>
@@ -162,7 +163,7 @@ export function AboutAwards() {
             <div className="col-span-6">
               <Eyebrow light>{about.awards.label}</Eyebrow>
               <h2 className="mt-6 font-sans text-h2 font-semibold text-balance">
-                <span className="text-[#f2c675]">{about.awards.titleLead}</span>{" "}
+                <span className="text-[#7d5c33]">{about.awards.titleLead}</span>{" "}
                 {about.awards.titleRest}
               </h2>
               <div className="mt-7 grid gap-5">
@@ -240,7 +241,7 @@ export function AboutCharity() {
   const [lead, ...rest] = about.charity.body;
 
   return (
-    <section className="border-b border-line bg-soft/45">
+    <section className="border-b border-line bg-surface">
       <div className="container-omh section-md">
         <Reveal>
           <div className="grid grid-cols-12 items-start gap-x-12 gap-y-10 max-lg:block">
@@ -333,7 +334,7 @@ export function AboutTeam() {
                       className="object-cover transition-transform duration-700 ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-[1.04]"
                     />
                   </div>
-                  <figcaption className="absolute inset-x-0 bottom-0 bg-[linear-gradient(180deg,transparent,rgb(16_24_40/0.94))] px-5 pb-5 pt-14">
+                  <figcaption className="absolute inset-x-0 bottom-0 bg-[linear-gradient(180deg,transparent,rgb(0_0_0/0.94))] px-5 pb-5 pt-14">
                     <p className="font-sans text-h4 font-semibold text-white">{member.name}</p>
                     <p className="mt-1 text-body leading-snug text-white/85">{member.role}</p>
                   </figcaption>
@@ -349,12 +350,15 @@ export function AboutTeam() {
 
 export function AboutFinalCTA() {
   return (
-    <FinalCta
-      title="Bring the right specialists into your next stage of growth."
-      titleAccent="next stage of growth."
-      body="Tell us what you are trying to achieve. We’ll recommend the services, people and next steps that fit."
-      primary={{ label: "Meet the Team", event: "about_final_cta_click" }}
-      contactEvents={{ phone: "about_phone_click", email: "about_email_click" }}
-    />
+    <>
+      <FinalCta
+        title="Bring the right specialists into your next stage of growth."
+        titleAccent="next stage of growth."
+        body="Tell us what you are trying to achieve. We’ll recommend the services, people and next steps that fit."
+        primary={{ label: "Meet the Team", event: "about_final_cta_click" }}
+        contactEvents={{ phone: "about_phone_click", email: "about_email_click" }}
+      />
+      <BookDemo />
+    </>
   );
 }

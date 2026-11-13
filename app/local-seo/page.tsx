@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   // ponytail: brief says "from £450/month"; "/month" dropped until billing frequency is confirmed (see pricing notes).
   description: "Local SEO services for UK businesses. Google Business Profile, local pages, directories, reviews and maps. Packages from £450 with published deliverables.",
   openGraph: { title: "Local SEO Services for UK Small Businesses", images: defaultOgImages },
-  alternates: { canonical: "https://onlinemarketinghelp.co.uk/local-seo/" },
+  alternates: { canonical: "https://onlinemarketinghelp.co.uk/local-seo" },
 };
 
 export default function LocalSeoPage() {

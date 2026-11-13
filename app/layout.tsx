@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { Instrument_Sans, Source_Sans_3 } from "next/font/google";
+import { draftMode, headers } from "next/headers";
+import { VisualEditing } from "next-sanity/visual-editing";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ScrollTop } from "@/components/layout/ScrollTop";
+import { SiteBreadcrumbs } from "@/components/layout/SiteBreadcrumbs";
 import { SiteAssistant } from "@/components/layout/SiteAssistant";
 import { getSearchIndex } from "@/lib/content/search-index";
 import { JsonLd, SITE, organisation, website } from "@/lib/schema";
@@ -36,6 +39,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  /* The dashboard is an internal tool: no site analytics on it. Set by
+     proxy.ts, which already knows which requests those are. */
+  const isDashboard = (await headers()).get("x-omh-dashboard") === "1";
+
   const searchEntries = await getSearchIndex();
 
   return (
@@ -45,18 +52,37 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        {/* Google Tag Manager, first in <head> as Google asks. The
-            @next/third-parties component would load it only after hydration. */}
-        {/* eslint-disable-next-line @next/next/next-script-for-ga */}
+        {/* Google Tag Manager, loaded on the visitor's first interaction or 3.5s after the page loads,
+            whichever comes first (PageSpeed, 21 Oct 2026: GTM and the tags it pulls in were ~900ms of
+            main-thread blocking and ~500 KiB on mobile). dataLayer exists from the start, so events pushed
+            before GTM arrives are queued, not lost. Trade-off: a visitor who leaves within ~3s without
+            touching the page is not recorded. */}
+        {/* Public pages only, for the same reason as Plerdy below and one
+            more that matters more.
+
+            Gating Plerdy stopped the hydration error. This one was still
+            loading on every dashboard page and reporting a page_view to
+            Google Tag Manager, which means the client's own tag account was
+            being told the URL of each screen somebody opened. Those URLs
+            carry a session id and a campaign id, so a conversation with a
+            named member of the public was leaving the building in the query
+            string of a marketing pixel. Nothing about an internal tool
+            belongs in the site's advertising measurement either way: it is
+            not a visitor, and counting it inflates every figure the client
+            pays attention to. */}
+        {!isDashboard && (
+        /* eslint-disable-next-line @next/next/next-script-for-ga */
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-WWSXTPH');`,
+            __html: `(function(w,d,i){w.dataLayer=w.dataLayer||[];var done=0,ev=["pointerdown","keydown","touchstart","scroll","wheel"];
+function load(){if(done)return;done=1;ev.forEach(function(e){w.removeEventListener(e,load,true)});
+w.dataLayer.push({'gtm.start':new Date().getTime(),event:'gtm.js'});var j=d.createElement('script');j.async=true;
+j.src='https://www.googletagmanager.com/gtm.js?id='+i;d.head.appendChild(j)}
+ev.forEach(function(e){w.addEventListener(e,load,{capture:true,passive:true,once:true})});
+function later(){setTimeout(load,3500)}if(d.readyState==='complete')later();else w.addEventListener('load',later)})(window,document,'GTM-WWSXTPH');`,
           }}
         />
+        )}
         {/* Runs before first paint: sets the theme so the page never flashes the
             wrong one, and marks that JS is alive so scroll reveals may hide
             content. Without it, a failed script would leave .rv invisible. */}
@@ -77,12 +103,36 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           Skip to content
         </a>
         <Header searchEntries={searchEntries} />
-        <main id="main" className="flex-1">
+        <main id="main" className="relative flex-1">
+          <SiteBreadcrumbs />
           {children}
         </main>
         <Footer />
         <ScrollTop />
-        <SiteAssistant />
+        {/* The public chat and voice assistant. Not on the dashboard: it is
+            the thing the dashboard REPORTS ON, and mounting it there means
+            the launcher sits over the bottom-left of every screen covering
+            whatever is under it. Its webhooks only accept the public domain
+            in any case, so pressing it from an internal tool fails. */}
+        {!isDashboard && <SiteAssistant />}
+        {/* Draft preview only: connects the page to the Studio's Presentation tool so edits show as you type. */}
+        {(await draftMode()).isEnabled && <VisualEditing />}
+        {/* Plerdy heatmaps and session tracking (site ID 82582), as supplied
+            by Plerdy. Public pages only: its script writes attributes into
+            the DOM before React hydrates, which broke every dashboard page,
+            and heatmapping an internal tool was never the point of it. */}
+        {!isDashboard && (
+        <script
+          data-plerdy_code="1"
+          dangerouslySetInnerHTML={{
+            __html: `(function(w,d){if(w.__plerdyCode)return;w.__plerdyCode=1;
+w._protocol=w.location.protocol=="https:"?"https://":"http://";
+w._site_hash_code="0eb2c6d30f5cb5b16b2df3bebdd85de7";w._suid=82582;
+var s=d.createElement("script");s.async=true;s.referrerPolicy="strict-origin-when-cross-origin";
+s.src="https://d.plerdy.com/public/js/click/main.js?v="+Math.random();d.head.appendChild(s)})(window,document);`,
+          }}
+        />
+        )}
       </body>
     </html>
   );

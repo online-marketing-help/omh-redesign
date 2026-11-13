@@ -1,4 +1,10 @@
 import { Fragment } from "react";
+import Link from "next/link";
+import { Megaphone, Puzzle, RefreshCw, ShieldCheck, Zap } from "lucide-react";
+import { CaseStudyVisual } from "@/components/case-studies/CaseStudyVisual";
+import { CapabilityShowcase } from "@/components/services/CapabilityShowcase";
+import { ServiceHeroArt } from "@/components/services/ServiceHeroArt";
+import { caseStudies } from "@/lib/content/case-studies";
 import { Pointer } from "@/components/Pointer";
 import { Reveal } from "@/components/Reveal";
 import { ServiceFaqSection } from "@/components/services/ServiceFaqSection";
@@ -12,11 +18,11 @@ import {
   HighlightedText,
   ServiceSectionIntro as SectionIntro,
 } from "@/components/services/ServicePrimitives";
-import { Button, TextLink } from "@/components/ui/Button";
+import { ArrowRight, Button, TextLink } from "@/components/ui/Button";
 import { Eyebrow, Fpo, ReviewProof } from "@/components/ui/Proof";
-import { MediaFrame } from "@/components/ServiceMedia";
 import { ServiceBand as Band } from "@/components/services/ServiceBand";
 import { wordpressDevelopment as content } from "@/lib/content/wordpress-development";
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
 
 type Package = (typeof content.packages)[number];
 
@@ -36,7 +42,8 @@ export function ServiceHero() {
       <div className="container-omh pb-[clamp(56px,38px+2.9vw,88px)] pt-[clamp(48px,34px+2.3vw,80px)]">
         <div className="grid grid-cols-12 items-center gap-x-12 gap-y-12 max-lg:block">
           <div className="col-span-7 max-lg:mb-12">
-            <Reveal>
+            {/* CSS-only entrance, not <Reveal>: the JS-gated reveal held the headline at opacity 0 until hydration and delayed LCP. */}
+            <div className="hero-in">
               <Eyebrow>{content.hero.eyebrow}</Eyebrow>
               {/* text-h1, not text-display: 72px in a 7-col measure wrapped to six
                   lines and pushed the hero past the fold. */}
@@ -50,11 +57,7 @@ export function ServiceHero() {
                 <Button href={content.hero.primary.href} arrow data-event="wpdev_hero_cta_click">
                   {content.hero.primary.label}
                 </Button>
-                <Button
-                  href={content.hero.secondary.href}
-                  variant="secondary"
-                  data-event="wpdev_view_packages_click"
-                >
+                <Button href={content.hero.secondary.href} variant="secondary" arrow data-event="wpdev_view_packages_click">
                   {content.hero.secondary.label}
                 </Button>
               </div>
@@ -72,27 +75,17 @@ export function ServiceHero() {
                   </div>
                 ))}
               </dl>
-            </Reveal>
+            </div>
           </div>
 
-          <Reveal className="col-span-5 col-start-8">
-            {/* Signature interaction: the hero visual drifts a few px with the
-                pointer. Wrapper stays fixed so the tracked rect never moves. */}
+          <div className="hero-in hero-in-2 col-span-5 col-start-8">
             <Pointer>
               <div className="pointer-parallax">
-                <MediaFrame
-                  kind="screen"
-                  theme="wordpress"
-                  ratio="16/11"
-                  title="WordPress project preview"
-                  note="Replace with a real project, before-and-after view or planning board."
-                  source="/images/website-designs/Brand-New-Website-Development.png"
-                  alt="WordPress development services: a custom WordPress theme build shown on desktop and laptop, with homepage, service blocks and recent projects grid visible."
-                />
+                <ServiceHeroArt variant="wordpress" />
               </div>
             </Pointer>
             <ReviewProof serviceId="wordpress" heading="Proven WordPress experience" className="mt-6" />
-          </Reveal>
+          </div>
         </div>
       </div>
     </section>
@@ -171,52 +164,43 @@ export function FitSection() {
 // Future Elementor widget: "OMH Capability Bento"
 export function ServiceCapabilityGrid() {
   const [featured, ...rest] = content.capabilities;
-
+  const icons = [RefreshCw, Puzzle, Megaphone, Zap, ShieldCheck];
+  const recent = caseStudies.find((study) => study.slug === "bar")!;
   return (
-    <Band label="Build">
-      <Reveal>
-        <SectionIntro
-          title="Custom WordPress development services, built around you"
-          accent="built around you"
-          body="The scope can cover a new build, a careful redesign, technical improvements or the functionality needed to support your sales process."
-        />
-        <div className="mt-12 grid grid-cols-6 gap-5 max-lg:grid-cols-2 max-sm:grid-cols-1">
-          <Pointer className="pointer-spotlight relative col-span-3 row-span-2 flex flex-col justify-between overflow-hidden rounded-card bg-inverse p-9 text-oninverse max-lg:col-span-2 max-sm:col-span-1 max-sm:p-6">
-            <div className="relative z-10">
-              <p className="text-[14px] font-semibold uppercase tracking-[0.16em] text-oninverse/55">
-                Most projects start here
-              </p>
-              <h3 className="mt-5 font-sans text-h2 font-semibold">{featured.title}</h3>
-              <p className="mt-5 text-lead leading-relaxed text-oninverse/75">
-                {featured.body}
-              </p>
+    <CapabilityShowcase
+      label="Build"
+      intro={{
+        title: "Custom WordPress development services, built around you",
+        accent: "built around you",
+        body: "The scope can cover a new build, a careful redesign, technical improvements or the functionality needed to support your sales process.",
+      }}
+      featured={{
+        eyebrow: "Most projects start here",
+        tag: "From £200 · from 4 weeks",
+        title: featured.title,
+        body: featured.body,
+        detail: ["Structure planned before design", "Built to be edited without a developer", "Set up for tracking from day one", "Speed, security and schema basics in the build"],
+        primary: { label: "Start a project", href: "/wordpress-development-request-quote", event: "wpdev_build_start_click" },
+        secondary: { label: "See the packages", href: "#packages", event: "wpdev_build_packages_click" },
+        aside: CASE_STUDIES_LIVE && (
+          <Link href={`/case-studies/${recent.slug}`} data-event="wpdev_build_case_study_click" className="group block rounded-[10px] border border-oninverse/12 bg-oninverse/[0.06] p-4 transition-colors hover:bg-oninverse/[0.1]">
+            <p className="text-[14px] font-semibold uppercase tracking-[0.14em] text-[var(--accent-light)]">Recent build</p>
+            <div className="mt-3 grid grid-cols-[96px_1fr] items-center gap-4 max-sm:grid-cols-1">
+              <CaseStudyVisual study={recent} ratio="1/1" frameClassName="rounded-[8px]" />
+              <div>
+                <h4 className="font-sans text-[18px] font-semibold leading-snug">{recent.title}</h4>
+                <p className="mt-1.5 text-[14px] text-oninverse/65">{recent.sector}</p>
+                <span className="mt-3 inline-flex items-center gap-2 text-[14px] font-semibold text-[var(--accent-light)]">
+                  Read the case study
+                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                </span>
+              </div>
             </div>
-            <ul className="relative z-10 mt-10 grid gap-2.5 border-t border-oninverse/15 pt-7">
-              {["Structure planned before design", "Built to be edited without a developer", "Set up for tracking from day one"].map(
-                (line) => (
-                  <li key={line} className="flex gap-3 text-body leading-snug text-oninverse/85">
-                    <Check className="mt-0.5 size-4 shrink-0 text-soft" />
-                    {line}
-                  </li>
-                ),
-              )}
-            </ul>
-          </Pointer>
-
-          {rest.map((item) => (
-            <article
-              key={item.title}
-              className={`group rounded-card border border-line bg-surface p-7 transition duration-200 hover:-translate-y-1 hover:border-teal/40 hover:shadow-[0_16px_34px_-24px_rgb(16_24_40/0.45)] max-lg:col-span-1 max-sm:col-span-1 max-sm:p-6 ${
-                item.size === "medium" ? "col-span-3" : "col-span-2"
-              }`}
-            >
-              <h3 className="font-sans text-h4 font-semibold">{item.title}</h3>
-              <p className="mt-3 text-body leading-relaxed text-ink/75">{item.body}</p>
-            </article>
-          ))}
-        </div>
-      </Reveal>
-    </Band>
+          </Link>
+        ),
+      }}
+      items={rest.map((item, i) => ({ ...item, icon: icons[i] ?? Zap }))}
+    />
   );
 }
 
@@ -451,6 +435,7 @@ export function IncludedFeatures() {
 // ── Section 8: Proof ────────────────────────────────────────────────────────
 // Future Elementor widget: "OMH Case Study Feature"
 export function CaseStudyFeature() {
+  if (!CASE_STUDIES_LIVE) return null;
   return (
     <Band label="Proof" tone="white">
       <Reveal>

@@ -1,6 +1,7 @@
 import type { CaseMeta } from "@/components/ui/Case";
 import { caseStudies } from "@/lib/content/case-studies";
-import { about } from "@/lib/content/about";
+import { CASE_STUDIES_LIVE } from "@/lib/flags";
+import { siteTestimonials } from "@/lib/content/testimonials";
 
 // Homepage SEO brief (Oct 2026): focus "full service digital marketing agency",
 // co-primary "digital marketing agency uk".
@@ -56,7 +57,8 @@ export const programs = [
 // [CONFIRM COMPANY INFORMATION] — restore a spend or client-count figure only
 // with a real number the client will put their name to.
 export const stats = [
-  { value: `${about.team.members.length}`, label: "Specialists in the team" },
+  // Client's figure (1 Nov 2026), not a count of the profiles on the About page. Also in components/ui/Proof.tsx.
+  { value: "36", label: "Specialists in the team" },
   { value: "13", label: "Services under one roof" },
   { value: "Est. 2019", label: "Companies House no. 12328533" },
   { value: "100%", label: "UK business focus" },
@@ -121,29 +123,41 @@ export const difference = [
 ];
 
 // Tile labels are the anchor text into each service page, so each one carries
-// that page's own focus keyword (brief §7). Rows run shortest to tallest by rendered
-// height at 1440px, ties broken by title width (measured Oct 2026); Google Ads
-// sits last because its description wraps to two lines. Re-measure if copy changes.
+// that page's own focus keyword (brief §7). Rows run from the narrowest title to the
+// widest, by rendered width at 1440px (client, 21 Oct 2026; measured then). Re-measure
+// if a label changes.
 export const services = [
+  { label: "AI Services", href: "/ai-services", body: "Chatbots, voice agents, integrations and automation, built and managed for you." },
   { label: "SEO Services", href: "/seo-services", body: "Technical, on-page and content SEO for long-term organic growth." },
+  { label: "AI Voice Agents", href: "/ai-voice-agents", body: "Answers every call and books appointments, day and night." },
   { label: "Website Design", href: "/website-designs", body: "Fast, clear websites designed to turn visits into enquiries." },
   { label: "Local SEO Services", href: "/local-seo", body: "Google Business Profile and map pack visibility." },
+  { label: "Google Ads Agency", href: "/google-adwords-ppc", body: "Search, Shopping and Performance Max campaigns built around profit." },
   { label: "Amazon PPC Agency", href: "/amazon-ppc-advertising-agency-uk", body: "Sponsored ads that grow sales without wasting spend." },
   { label: "Paid Social Advertising", href: "/social-media-paid-advertising", body: "Meta, Instagram and TikTok ads that turn attention into leads." },
   { label: "Conversion Improvement", href: "/solutions/improve-website-conversion", body: "Testing and page changes that lift enquiries and sales." },
   { label: "Social Media Marketing Services", href: "/social-media-marketing-services", body: "Organic content and community management for your brand." },
   { label: "WordPress Development Services", href: "/wordpress-development", body: "Custom WordPress and WooCommerce builds." },
   { label: "WordPress Maintenance Packages", href: "/wordpress-website-maintenance", body: "Updates, security, backups and support." },
-  { label: "Google Ads Agency", href: "/google-adwords-ppc", body: "Search, Shopping and Performance Max campaigns built around profit." },
 ];
 
-export const testimonials = caseStudies
-  .filter((s) => s.testimonial)
-  .slice(0, 3)
-  .map((s) => ({ quote: s.testimonial!.quote, name: s.testimonial!.attribution }));
+// While case studies are unpublished (lib/flags.ts) the quotes come from published Trustpilot/Google reviews instead.
+export const testimonials = CASE_STUDIES_LIVE
+  ? caseStudies
+      .filter((s) => s.testimonial)
+      .slice(0, 3)
+      .map((s) => ({ quote: s.testimonial!.quote, name: s.testimonial!.attribution }))
+  : ["Kiera Taylor-Elton", "Sanjay", "Tania Smyths"].map((n) => {
+      const t = siteTestimonials.find((x) => x.name === n)!;
+      return { quote: t.quote, name: t.name };
+    });
 
+// 14 tiles. The home page draws positions 1, 5, 10 and 12 double-height (the two AI
+// tiles among them); with dense packing that is the spread that fills the three-column
+// masonry in exactly six rows with no hole. Re-check if a tile is added or removed.
 export const recognition = [
   "Google Ads",
+  "AI Voice Agents",
   "Meta Ads",
   "GA4",
   "Tag Manager",
@@ -154,6 +168,7 @@ export const recognition = [
   "Reporting",
   "Conversion Rate",
   "Technical SEO",
+  "AI Chatbots",
   "Account Support",
 ];
 
