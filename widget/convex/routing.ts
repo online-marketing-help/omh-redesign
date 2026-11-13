@@ -1127,7 +1127,12 @@ export const channelFacts = query({
         .take(200);
 
       const out = touches.filter((t) => t.direction === "out");
-      const inb = touches.filter((t) => t.direction === "in");
+      /* `countsAsReply`, not `direction === "in"`. An out-of-office is
+         recorded as an inbound touch so the team can see one came back,
+         and counting it here would put the lead in "They replied" on the
+         Channels report and start the clock on time-to-first-reply from a
+         machine. The same rule the sequence worker uses. */
+      const inb = touches.filter((t) => countsAsReply(t));
       const firstOut = out.length ? Math.min(...out.map((t) => t.at)) : null;
       const firstIn = inb.length ? Math.min(...inb.map((t) => t.at)) : null;
 
@@ -1167,6 +1172,10 @@ export const channelFacts = query({
         smsOut: out.filter((t) => t.channel === "sms").length,
         smsIn: inb.filter((t) => t.channel === "sms").length,
         emailOut: out.filter((t) => t.channel === "email").length,
+        /* Counted at last. The report has shown emails sent against texts
+           replied to since it was built, so "replied" meant "replied by
+           text" and email looked worse than it was on every channel. */
+        emailIn: inb.filter((t) => t.channel === "email").length,
         callsOut: out.filter((t) => t.channel === "call").length,
         callsAnswered: out.filter(
           (t) => t.channel === "call" && t.status === "answered",

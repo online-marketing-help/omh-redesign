@@ -91,19 +91,36 @@ Crude on purpose. The Google Ads and Meta Marketing APIs are the accurate
 version and a project of their own.
 
 ### Email reply rate
-The Channels report counts emails sent and texts replied to. It cannot count
-emails replied to, so "replied" currently means "replied by text".
+**Done, except for the mailbox credential.** The report shows an email reply
+rate beside the text one. The two are not averaged together: a text is read
+in minutes and an email when somebody sits down, so one figure made from
+both would mean nothing.
 
-**Missing:** anything that receives email. Outbound email is a `touch`; a
-reply lands in a mailbox nothing reads.
+An email reply is counted only when it is a person. An out-of-office, a
+bounce, a newsletter and a no-reply sender are all refused by
+`widget/gates/email-reply.js`, which carries 41 assertions mostly made of
+those refusals. Counting them would have been worse than the gap: they
+would each have stopped a follow-up and inflated the rate on the report the
+client reads.
 
-**To finish:** a unique reply-to per outbound email,
-`reply+{touchId}@inbound.<domain>`, and an inbound webhook that posts the
-parsed message back as an inbound `touch`. The reply address is the only
-identifier a mail client cannot strip, which is why it beats subject matching
-or threading headers. Add a scheduled reconciliation pass so a webhook outage
-undercounts loudly rather than silently. Needs a provider decision first:
-Postmark inbound parse or Resend's `email.received`.
+A reply is matched to what it answers in two ways, because their weaknesses
+do not overlap: the `Message-ID` we sent, carried on the touch and found
+through the index that already holds a Twilio SID, and a plus-addressed
+`Reply-To`. Threading works on any mailbox with no setup but loses a client
+that starts a fresh message; the plus address survives that but needs the
+host to route it.
+
+**Missing: the mailbox credential.** `12-email-inbound` is built and cannot
+be activated, because there is no IMAP credential on srv1836598 and the
+mailbox password lives on the production server. Until then the column
+reads "nothing reads the mailbox yet" rather than nought.
+
+No new provider was needed. Postmark and Resend were the assumed answer and
+turned out to be the wrong question: OMH already sends through a mailbox on
+their own domain, so the replies are already arriving somewhere IMAP can
+read.
+
+
 
 ---
 

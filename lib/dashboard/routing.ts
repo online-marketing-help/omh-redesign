@@ -86,6 +86,8 @@ export type ChannelFact = {
   msToFirstReply: number | null;
   smsOut: number;
   smsIn: number;
+  /** Replies that came by email. Excludes auto-replies. */
+  emailIn: number;
   emailOut: number;
   callsOut: number;
   callsAnswered: number;

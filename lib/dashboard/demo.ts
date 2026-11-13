@@ -306,6 +306,11 @@ export function demoChannelFacts(): {
       smsOut: s.smsOut,
       smsIn: s.repliedAfterMs === null ? 0 : 1,
       emailOut: s.emailOut,
+      /* Some people answer the email rather than the text. Roughly one in
+         four of those who reply, so the example shows an email reply rate
+         that is lower than the text one and not zero, which is what the
+         real figure looks like once the mailbox is read. */
+      emailIn: s.repliedAfterMs !== null && s.emailOut > 0 && i % 3 === 0 ? 1 : 0,
       callsOut: s.callsOut,
       callsAnswered: s.callsAnswered,
       sequences: [{ route: s.route, status: s.seqStatus, stopReason: s.stopReason }],

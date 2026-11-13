@@ -2,7 +2,7 @@ import { Shell } from "@/components/dashboard/Shell";
 import { Card, Empty, ShowExample } from "@/components/dashboard/ui";
 import { Kpi } from "@/components/dashboard/Stats";
 import { BarCompare } from "@/components/dashboard/BarCompare";
-import { IconClock, IconChat, IconCalendar, IconCheck } from "@/components/dashboard/icons";
+import { IconClock, IconChat, IconCalendar, IconCheck, IconSend } from "@/components/dashboard/icons";
 import {
   getChannelFacts, sourceLabel, sourceFamily, duration, median, money,
   type ChannelFact, canonicalSource } from "@/lib/dashboard/routing";
@@ -29,6 +29,7 @@ type Group = {
   worstFirstTouch: number | null;
   smsOut: number;
   smsIn: number;
+  emailIn: number;
   replied: number;
   booked: number;
   optedOut: number;
@@ -56,6 +57,7 @@ function group(rows: ChannelFact[]): Group[] {
         worstFirstTouch: touches.length ? Math.max(...touches) : null,
         smsOut: rs.reduce((n, r) => n + r.smsOut, 0),
         smsIn: rs.reduce((n, r) => n + r.smsIn, 0),
+        emailIn: rs.reduce((n, r) => n + r.emailIn, 0),
         replied: rs.filter((r) => r.msToFirstReply !== null).length,
         booked: rs.reduce((n, r) => n + r.bookings, 0),
         optedOut: rs.filter((r) =>
@@ -90,6 +92,8 @@ export default async function ChannelsPage({
   const overallMedian = median(touches);
   const smsOut = rows.reduce((n, r) => n + r.smsOut, 0);
   const smsIn = rows.reduce((n, r) => n + r.smsIn, 0);
+  const emailOut = rows.reduce((n, r) => n + r.emailOut, 0);
+  const emailIn = rows.reduce((n, r) => n + r.emailIn, 0);
   const booked = rows.reduce((n, r) => n + r.bookings, 0);
   const wonTotal = rows.filter((r) => r.outcome === "won").length;
   const valueTotal = rows.reduce((n, r) => n + (r.valueGbp ?? 0), 0);
@@ -207,6 +211,40 @@ export default async function ChannelsPage({
               value={smsOut ? `${Math.round((smsIn / smsOut) * 100)}%` : "no texts yet"}
               sub="target 15 to 30 per cent"
               icon={IconChat}
+              rise={2}
+            />
+            {/* Shown beside the text rate rather than folded into it.
+
+                Until the mailbox was read, this column could only ever be
+                "no replies", because nothing counted one: emails sent were
+                measured against texts replied to, so email looked worse
+                than it was on every channel. The two rates are not
+                comparable - a text is read in minutes and an email when
+                somebody sits down - so they are two figures, not an
+                average.
+
+                "Not counted yet" rather than 0%: nothing has read the
+                mailbox on this deployment, and a nought here would be a
+                measurement rather than an absence. */}
+            <Kpi
+              label="Email reply rate"
+              /* An em dash, not a phrase. This slot holds a figure, and
+                 "not counted yet" set in the number's type wrapped to
+                 three lines and broke the row. The explanation belongs
+                 underneath, where the other tiles put theirs. */
+              value={
+                !emailOut
+                  ? "none sent"
+                  : emailIn === 0
+                    ? "\u2014"
+                    : `${Math.round((emailIn / emailOut) * 100)}%`
+              }
+              sub={
+                emailIn === 0 && emailOut > 0
+                  ? "nothing reads the mailbox yet"
+                  : "replies that were a person"
+              }
+              icon={IconSend}
               rise={2}
             />
             <Kpi
